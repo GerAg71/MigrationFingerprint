@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($f = \"C:\\\\Users\\\\aliha\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-aliha-OneDrive-Documents-GitHub-MigrationFingerprint\\\\64c2e428-cf1d-4f6c-aec8-7978f886b2c9\\\\scratchpad\\\\MAPTIVA_Fingerprint_Solution_Specification_v1.0.txt\"; \\(Get-Content $f | Measure-Object -Line\\).Lines)",
+      "PowerShell($j = Get-Content \"c:\\\\Users\\\\aliha\\\\OneDrive\\\\Documents\\\\GitHub\\\\MigrationFingerprint\\\\fingerprint_omni-zos-to-omni-linux_v1.0.0.json\" -Raw | ConvertFrom-Json; \"top-level keys: \" + \\($j.PSObject.Properties.Name -join ', '\\); \"version: $\\($j.version\\)  status: $\\($j.status\\)\"; \"failure modes: $\\($j.failure_modes.Count\\)\"; \"detection rules: $\\($j.detection_rules.Count\\)\"; \"FM IDs: \" + \\(\\($j.failure_modes | ForEach-Object id\\) -join ', '\\); \"rule types: \" + \\(\\($j.detection_rules | ForEach-Object type | Sort-Object -Unique\\) -join ', '\\); \"modes with sample_defect: \" + \\(\\($j.failure_modes | Where-Object { $_.sample_defect }\\).Count\\))",
+      "PowerShell(python --version)",
+      "PowerShell(python -c \"import pydantic; print\\('pydantic', pydantic.VERSION\\)\")",
+      "PowerShell(python -c \"import pytest; print\\('pytest', pytest.__version__\\)\")"
+    ]
+  }
+}
