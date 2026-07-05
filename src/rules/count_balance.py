@@ -95,6 +95,9 @@ def execute(rule: CountBalanceRule, datasets, context: ExecutionContext):
     source_rows = datasets.source[rule.source_dataset].to_dict("records")
     target_rows = datasets.target[rule.target_dataset].to_dict("records")
 
+    if not source_rows and not target_rows:
+        return [], None  # nothing in scope on either side reconciles trivially
+
     if rule.params.filter:
         filt = _resolve_filter(rule.params.filter, source_rows, target_rows)
         source_rows = _apply_filter(source_rows, filt)

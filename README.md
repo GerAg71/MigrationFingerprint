@@ -18,7 +18,8 @@ Session rules for Claude Code: `CLAUDE.md`.
 | MS-1.2 | Fingerprint loader + prioritization; CLI `validate` / `suite` | ✅ done |
 | MS-1.3 | CSV ingestion + dataset registration (Decimal boundary, reject quarantine, REQ-021 gate index) | ✅ done |
 | MS-1.4 | Rule engine: `field_compare`, `count_balance`, `referential` executors + uniform finding construction | ✅ done |
-| MS-1.5 … MS-3.3 | see spec Ch. 23 | open |
+| MS-1.5 | Runner: suite snapshot, REQ-021 gate, deterministic `findings.json`; CLI `run` / `findings` / `show` | ✅ done |
+| MS-1.6 … MS-3.3 | see spec Ch. 23 | open |
 
 ## Setup
 
@@ -34,7 +35,16 @@ CLI (CLI_SPEC.md; exit codes 0 ok / 1 runtime / 3 validation refusal):
 ```
 uv run fingerprint validate data/fingerprints/omni-zos-to-omni-linux/1.0.0/fingerprint.json
 uv run fingerprint suite --pair omni-zos-to-omni-linux [--version 1.0.0] [--json]
+uv run fingerprint run --pair omni-zos-to-omni-linux --source-dir <dir> --target-dir <dir> \
+    [--plans P1,P2] [--wave W1] [--fail-on-findings[=SEV]]
+uv run fingerprint findings <run_id> [--severity SEV] [--status STATUS]
+uv run fingerprint show <finding_id>
 ```
+
+A run writes `data/runs/<run_id>/`: `suite_snapshot.json` (persisted before
+execution, REQ-001), deterministic `findings.json` (REQ-009), per-finding
+drill-down CSVs under `findings/`, quarantined rows under `ingest/`, and
+`run.json` (the only place timestamps live).
 
 ## Layout
 
