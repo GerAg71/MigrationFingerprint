@@ -17,7 +17,8 @@ Session rules for Claude Code: `CLAUDE.md`.
 | MS-1.1 | Pydantic schemas (Fingerprint, FailureMode, DetectionRule, ConversionRun, Finding, LayoutSpec) + JSON Schema export | ✅ done |
 | MS-1.2 | Fingerprint loader + prioritization; CLI `validate` / `suite` | ✅ done |
 | MS-1.3 | CSV ingestion + dataset registration (Decimal boundary, reject quarantine, REQ-021 gate index) | ✅ done |
-| MS-1.4 … MS-3.3 | see spec Ch. 23 | open |
+| MS-1.4 | Rule engine: `field_compare`, `count_balance`, `referential` executors + uniform finding construction | ✅ done |
+| MS-1.5 … MS-3.3 | see spec Ch. 23 | open |
 
 ## Setup
 

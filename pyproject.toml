@@ -5,6 +5,7 @@ description = "MAPTIVA Migration Fingerprint POC — targeted plan-conversion va
 requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.7",
+    "pandas>=2.2",
 ]
 
 [project.scripts]

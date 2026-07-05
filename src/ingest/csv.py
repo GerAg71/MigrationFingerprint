@@ -58,6 +58,17 @@ class ParsedDataset:
     def row_count(self) -> int:
         return len(self.rows)
 
+    def to_dataframe(self):
+        """Rows as a pandas DataFrame, dtype=object throughout so Decimal
+        money and None nulls survive untouched (spec §11.1, REQ-017)."""
+        import pandas as pd
+
+        if not self.rows:
+            return pd.DataFrame(
+                {c: pd.Series(dtype=object) for c in self.spec.column_names()}
+            )
+        return pd.DataFrame(self.rows, dtype=object)
+
 
 def _normalize(name: str) -> str:
     return re.sub(r"[\s\-]+", "_", name.strip().lower())
