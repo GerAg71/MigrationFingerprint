@@ -1,0 +1,624 @@
+{
+  "fingerprint_id": "omni-zos-to-omni-linux",
+  "platform_pair": {
+    "source": "OMNI_MAINFRAME_ZOS",
+    "target": "OMNI_LINUX_RHEL"
+  },
+  "version": "1.0.0",
+  "status": "published",
+  "updated_at": "2026-07-05T00:00:00Z",
+  "updated_by": "seed",
+  "changelog": "Initial seed library: FM-001..FM-008 from conversion experience, FM-009..FM-018 from the methodology validation catalog (spec Ch. 6).",
+  "failure_modes": [
+    {
+      "id": "FM-001",
+      "name": "Loan outstanding-balance carry-over",
+      "category": "LOANS",
+      "description": "Converted loan balances diverge from source because payment-application order, accrual basis, and per-period rounding rules differ between platforms.",
+      "probability": 0.70,
+      "impact": 0.90,
+      "data_domains": ["LOAN"],
+      "detection_rules": ["RULE-LOAN-BAL-001", "RULE-LOAN-RECOMP-001"],
+      "sample_defect": "Loan L2 target outstanding balance 10398.55 vs source 10432.17 (delta -33.62) after a payment was applied out of order.",
+      "remediation": "Recompute amortization from origination; verify payment application order and accrual basis on the target.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:experience"
+    },
+    {
+      "id": "FM-002",
+      "name": "Participant-level vesting schedule mapping",
+      "category": "VESTING",
+      "description": "Vested percentages drift because service-counting method (elapsed time vs. hours) and schedule mapping differ; entry-date handling compounds the drift.",
+      "probability": 0.65,
+      "impact": 0.85,
+      "data_domains": ["VESTING", "PARTICIPANT"],
+      "detection_rules": ["RULE-VEST-PCT-001", "RULE-VEST-SCHED-001"],
+      "sample_defect": "Participant P0017 vested 60% in target while canonical schedule plus service recomputes to 80%.",
+      "remediation": "Reconcile schedule definitions and service-computation method before re-mapping participant service.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:experience"
+    },
+    {
+      "id": "FM-003",
+      "name": "Custom calculated-field dependencies",
+      "category": "PLAN",
+      "description": "Source-side scripted/derived fields (e.g., OmniScript logic) have no target equivalent; target values appear with no mapping-rule provenance.",
+      "probability": 0.55,
+      "impact": 0.75,
+      "data_domains": ["PLAN", "FORMAT"],
+      "detection_rules": ["RULE-DERIVED-TRACE-001"],
+      "sample_defect": "Target field svc_points populated with values traceable to no mapping rule in the workbook.",
+      "remediation": "Inventory source scripts; re-implement or retire each derived field explicitly.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:experience"
+    },
+    {
+      "id": "FM-004",
+      "name": "Plan-provision mismatches",
+      "category": "PLAN",
+      "description": "Provision configuration (safe harbor, catch-up eligibility, auto-enrollment/auto-increase parameters) maps imperfectly into the target's provision model.",
+      "probability": 0.50,
+      "impact": 0.80,
+      "data_domains": ["PLAN"],
+      "detection_rules": ["RULE-PROV-MATRIX-001"],
+      "sample_defect": "Safe-harbor flag dropped on one plan; catch-up eligibility inverted.",
+      "remediation": "Provision-by-provision review against the plan document; correct target plan setup, not the data.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:experience"
+    },
+    {
+      "id": "FM-005",
+      "name": "Sort order / encoding sensitivity (EBCDIC vs. ASCII)",
+      "category": "ENCODING",
+      "description": "EBCDIC-to-ASCII transitions garble extended characters (mojibake) and silently change collation: EBCDIC sorts digits after letters, ASCII the reverse.",
+      "probability": 0.60,
+      "impact": 0.55,
+      "data_domains": ["ENCODING", "PARTICIPANT"],
+      "detection_rules": ["RULE-ENC-001", "RULE-SORT-001"],
+      "sample_defect": "Target name renders 'JosÃ© RamÃ­rez'; an ordered extract diverges at the first digit-vs-letter boundary.",
+      "remediation": "Normalize collation explicitly in extract jobs; never rely on platform-default sort. Re-decode affected fields with the correct codepage.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:experience"
+    },
+    {
+      "id": "FM-006",
+      "name": "Packed/binary field handling",
+      "category": "ENCODING",
+      "description": "COMP-3 packed-decimal fields decoded with the wrong implied-decimal position or sign-nibble convention produce powers-of-ten errors and flipped signs.",
+      "probability": 0.55,
+      "impact": 0.85,
+      "data_domains": ["ENCODING", "FORMAT", "BALANCE", "LOAN"],
+      "detection_rules": ["RULE-PACKED-001"],
+      "sample_defect": "One packed amount decoded x100 (implied decimal lost); one sign nibble read F as D flipping the amount negative.",
+      "remediation": "Correct the copybook layout (decimals, sign convention) and re-ingest; cross-check the file control total.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:experience"
+    },
+    {
+      "id": "FM-007",
+      "name": "Balance / count-balance totals",
+      "category": "BALANCE",
+      "description": "Sums and counts fail to reconcile at plan, fund, or participant level. The master reconciliation mode; a coarse-level variance is always decomposable to finer levels.",
+      "probability": 0.75,
+      "impact": 0.95,
+      "data_domains": ["BALANCE"],
+      "detection_rules": ["RULE-BAL-TOTALS-001"],
+      "sample_defect": "Plan-level PRETAX total off by 0.01 across 120 participants.",
+      "remediation": "Drill from plan variance to money type to investment to participant to isolate the contributing records.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:experience"
+    },
+    {
+      "id": "FM-008",
+      "name": "Date and format drift",
+      "category": "FORMAT",
+      "description": "Century-window expansion errors, Julian-to-Gregorian conversion faults, and inconsistent zero/blank-date semantics shift or invent dates.",
+      "probability": 0.60,
+      "impact": 0.60,
+      "data_domains": ["FORMAT", "PARTICIPANT"],
+      "detection_rules": ["RULE-DATE-001"],
+      "sample_defect": "DOB 1897-03-12 produced by a wrong century window; a zero date mapped to 0001-01-01 instead of null.",
+      "remediation": "Define null-date semantics per field in the layout spec; correct windowing rules in extract or transform.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:experience"
+    },
+    {
+      "id": "FM-009",
+      "name": "Participant count mismatch by status",
+      "category": "PARTICIPANT",
+      "description": "Participant counts by canonical status differ between source and target, usually from status-code crosswalk gaps or dropped records.",
+      "probability": 0.55,
+      "impact": 0.90,
+      "data_domains": ["PARTICIPANT"],
+      "detection_rules": ["RULE-PCOUNT-001"],
+      "sample_defect": "One TERMINATED participant counted ACTIVE in target; ACTIVE 87 vs 88, TERMINATED 25 vs 24.",
+      "remediation": "Audit the status crosswalk; trace each variance to its participant via the referential orphan report.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:methodology"
+    },
+    {
+      "id": "FM-010",
+      "name": "Missing key fields",
+      "category": "PARTICIPANT",
+      "description": "Required identity fields (SSN, DOB, plan ID) arrive null or blank on the target, blocking downstream processing.",
+      "probability": 0.50,
+      "impact": 0.80,
+      "data_domains": ["PARTICIPANT"],
+      "detection_rules": ["RULE-KEYS-001"],
+      "sample_defect": "One target participant with blank SSN.",
+      "remediation": "Trace to source: distinguish genuinely missing source data (cleanup item) from values dropped in transform (mapping fix).",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:methodology"
+    },
+    {
+      "id": "FM-011",
+      "name": "Duplicate participant IDs / SSNs",
+      "category": "PARTICIPANT",
+      "description": "Duplicate participant IDs or SSNs within a plan on the target, typically from merge logic or rehire-history handling.",
+      "probability": 0.40,
+      "impact": 0.85,
+      "data_domains": ["PARTICIPANT"],
+      "detection_rules": ["RULE-DUP-001"],
+      "sample_defect": "Two target participants share SSN 900-44-1207 within the same plan.",
+      "remediation": "Resolve identity: merge true duplicates, re-key false ones; review rehire-history load logic.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:methodology"
+    },
+    {
+      "id": "FM-012",
+      "name": "Balance mismatch by money type",
+      "category": "BALANCE",
+      "description": "Money-type subtotals fail to reconcile, commonly from crosswalk gaps or source combinations mapped into the wrong target bucket.",
+      "probability": 0.65,
+      "impact": 0.95,
+      "data_domains": ["BALANCE"],
+      "detection_rules": ["RULE-BAL-MT-001"],
+      "sample_defect": "ROTH subtotal variance of 250.00 on one plan while the plan total reconciles (offsetting PRETAX variance).",
+      "remediation": "Audit the money-type crosswalk; drill the variance to participant level within the affected money type.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:methodology"
+    },
+    {
+      "id": "FM-013",
+      "name": "Balance mismatch by investment option",
+      "category": "BALANCE",
+      "description": "Investment-level subtotals fail to reconcile, commonly from fund-mapping gaps, share-class consolidation, or price-date misalignment.",
+      "probability": 0.65,
+      "impact": 0.95,
+      "data_domains": ["BALANCE"],
+      "detection_rules": ["RULE-BAL-INV-001"],
+      "sample_defect": "Fund F03 subtotal variance; units correct but valued at the wrong price date.",
+      "remediation": "Audit the investment crosswalk and pricing as-of dates; drill to participant positions in the affected fund.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:methodology"
+    },
+    {
+      "id": "FM-014",
+      "name": "Loan count / missing repayment terms",
+      "category": "LOANS",
+      "description": "Loan counts differ, or converted loans arrive without repayment schedule, payment amount, or maturity date.",
+      "probability": 0.45,
+      "impact": 0.75,
+      "data_domains": ["LOAN"],
+      "detection_rules": ["RULE-LOAN-CNT-001", "RULE-LOAN-TERMS-001"],
+      "sample_defect": "Loan count 5 vs 6 on one plan; one converted loan missing its maturity date.",
+      "remediation": "Reconcile the loan extract row-by-row; verify paid-off/deemed loans are filtered consistently on both sides.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:methodology"
+    },
+    {
+      "id": "FM-015",
+      "name": "Contribution & distribution totals",
+      "category": "CONTRIBUTION",
+      "description": "Employee/employer contribution totals for the last payroll cycle, or recent distribution totals, fail to reconcile.",
+      "probability": 0.45,
+      "impact": 0.80,
+      "data_domains": ["CONTRIBUTION"],
+      "detection_rules": ["RULE-CONTRIB-001"],
+      "sample_defect": "Employer match total for the final pre-conversion payroll cycle off by one participant's contribution.",
+      "remediation": "Verify cutover-period transaction inclusion rules (trade date vs. payroll date) on both extracts.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:methodology"
+    },
+    {
+      "id": "FM-016",
+      "name": "Field-length violations & invalid characters",
+      "category": "FORMAT",
+      "description": "Values exceed target field limits or contain characters the target rejects; truncation corrupts names and addresses silently.",
+      "probability": 0.50,
+      "impact": 0.50,
+      "data_domains": ["FORMAT", "PARTICIPANT"],
+      "detection_rules": ["RULE-LEN-001", "RULE-CHAR-001"],
+      "sample_defect": "41-character address loaded into a 35-character field; '#' present in a name field.",
+      "remediation": "Apply documented truncation/substitution rules in transform; never let the target platform truncate implicitly.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:methodology"
+    },
+    {
+      "id": "FM-017",
+      "name": "Invalid / future dates",
+      "category": "FORMAT",
+      "description": "Logically impossible dates: DOB in the future, termination before hire, dates outside plausible ranges.",
+      "probability": 0.45,
+      "impact": 0.55,
+      "data_domains": ["FORMAT", "PARTICIPANT"],
+      "detection_rules": ["RULE-DATEVAL-001"],
+      "sample_defect": "Termination date 2019-05-01 precedes hire date 2021-03-15 for one participant.",
+      "remediation": "Trace to source vs. transform origin; fix windowing or field-swap defects; route true source errors to cleanup.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:methodology"
+    },
+    {
+      "id": "FM-018",
+      "name": "Unexpected negative balances",
+      "category": "BALANCE",
+      "description": "Negative balances on the target with no explaining loan or adjustment context, often from sign-handling or reversal-ordering faults.",
+      "probability": 0.35,
+      "impact": 0.85,
+      "data_domains": ["BALANCE"],
+      "detection_rules": ["RULE-NEG-001"],
+      "sample_defect": "Negative MATCH balance of -412.06 for one participant with no offsetting adjustment.",
+      "remediation": "Trace the contributing transactions; check reversal ordering and sign handling in the load.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:methodology"
+    }
+  ],
+  "detection_rules": [
+    {
+      "rule_id": "RULE-LOAN-BAL-001",
+      "type": "field_compare",
+      "failure_mode": "FM-001",
+      "source_dataset": "loans",
+      "target_dataset": "loans",
+      "join_keys": ["plan_id", "participant_id", "loan_id"],
+      "params": {
+        "compare": [
+          { "field": "outstanding_balance", "kind": "money", "tolerance": "0.00" }
+        ]
+      },
+      "severity": "HIGH",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-LOAN-RECOMP-001",
+      "type": "derived_recompute",
+      "failure_mode": "FM-001",
+      "source_dataset": "loans",
+      "target_dataset": "loans",
+      "join_keys": ["plan_id", "participant_id", "loan_id"],
+      "params": {
+        "recompute": "loan_balance",
+        "inputs": {
+          "origination_amount": "loans.origination_amount",
+          "rate": "loans.rate",
+          "term_months": "loans.term_months",
+          "payments": "loan_payments"
+        },
+        "compare_field": "outstanding_balance",
+        "tolerance": "0.00"
+      },
+      "severity": "HIGH",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-VEST-PCT-001",
+      "type": "derived_recompute",
+      "failure_mode": "FM-002",
+      "source_dataset": "vesting",
+      "target_dataset": "vesting",
+      "join_keys": ["plan_id", "participant_id"],
+      "params": {
+        "recompute": "vested_pct",
+        "inputs": {
+          "schedule": "plan.provisions.vesting",
+          "service": "vesting.service_years"
+        },
+        "compare_field": "vested_pct",
+        "tolerance": "0.0000"
+      },
+      "severity": "HIGH",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-VEST-SCHED-001",
+      "type": "field_compare",
+      "failure_mode": "FM-002",
+      "source_dataset": "vesting",
+      "target_dataset": "vesting",
+      "join_keys": ["plan_id", "participant_id"],
+      "params": {
+        "compare": [
+          { "field": "schedule_id", "kind": "text" }
+        ]
+      },
+      "severity": "MEDIUM",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-DERIVED-TRACE-001",
+      "type": "referential",
+      "failure_mode": "FM-003",
+      "source_dataset": "participants",
+      "target_dataset": "participants",
+      "join_keys": ["plan_id", "participant_id"],
+      "params": {
+        "unmapped_target_fields": {
+          "fields": ["svc_points"],
+          "mapping_manifest": "data/mappings/field_mappings.json"
+        }
+      },
+      "severity": "MEDIUM",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-PROV-MATRIX-001",
+      "type": "field_compare",
+      "failure_mode": "FM-004",
+      "source_dataset": "plans",
+      "target_dataset": "plans",
+      "join_keys": ["plan_id"],
+      "params": {
+        "compare": [
+          { "field": "safe_harbor_flag", "kind": "text" },
+          { "field": "catch_up_eligible", "kind": "text" },
+          { "field": "auto_enroll_flag", "kind": "text" },
+          { "field": "auto_enroll_rate", "kind": "money", "tolerance": "0.0000" },
+          { "field": "auto_increase_rate", "kind": "money", "tolerance": "0.0000" }
+        ]
+      },
+      "severity": "HIGH",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-ENC-001",
+      "type": "encoding_check",
+      "failure_mode": "FM-005",
+      "target_dataset": "participants",
+      "params": {
+        "fields": ["first_name", "last_name", "address_1", "address_2", "city"],
+        "allowed": "ascii"
+      },
+      "severity": "MEDIUM",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-SORT-001",
+      "type": "sort_order_check",
+      "failure_mode": "FM-005",
+      "target_dataset": "participants",
+      "params": {
+        "order_by": ["last_name", "first_name"],
+        "collation": "ascii"
+      },
+      "severity": "LOW",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-PACKED-001",
+      "type": "derived_recompute",
+      "failure_mode": "FM-006",
+      "source_dataset": "loans",
+      "target_dataset": "loans",
+      "join_keys": ["plan_id", "participant_id", "loan_id"],
+      "params": {
+        "recompute": "packed_decode_control_total",
+        "inputs": {
+          "layout": "omni-loans-v1",
+          "control_field": "outstanding_balance"
+        },
+        "compare_field": "outstanding_balance",
+        "tolerance": "0.00"
+      },
+      "severity": "HIGH",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-BAL-TOTALS-001",
+      "type": "count_balance",
+      "failure_mode": "FM-007",
+      "source_dataset": "balances",
+      "target_dataset": "balances",
+      "params": {
+        "aggregations": [
+          { "measure": "balance", "op": "sum", "group_by": ["plan_id"] },
+          { "measure": "*", "op": "count", "group_by": ["plan_id"] },
+          { "measure": "balance", "op": "sum", "group_by": ["plan_id", "participant_id"] }
+        ]
+      },
+      "severity": "CRITICAL",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-DATE-001",
+      "type": "field_compare",
+      "failure_mode": "FM-008",
+      "source_dataset": "participants",
+      "target_dataset": "participants",
+      "join_keys": ["plan_id", "participant_id"],
+      "params": {
+        "compare": [
+          { "field": "dob", "kind": "date" },
+          { "field": "hire_date", "kind": "date" },
+          { "field": "term_date", "kind": "date" }
+        ],
+        "validity": [
+          { "field": "dob", "min": "1900-01-01" }
+        ]
+      },
+      "severity": "MEDIUM",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-PCOUNT-001",
+      "type": "count_balance",
+      "failure_mode": "FM-009",
+      "source_dataset": "participants",
+      "target_dataset": "participants",
+      "params": {
+        "aggregations": [
+          { "measure": "*", "op": "count", "group_by": ["plan_id", "status"] }
+        ]
+      },
+      "severity": "HIGH",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-KEYS-001",
+      "type": "field_compare",
+      "failure_mode": "FM-010",
+      "target_dataset": "participants",
+      "params": {
+        "validity": [
+          { "field": "ssn", "not_null": true, "pattern": "^[0-9]{9}$" },
+          { "field": "dob", "not_null": true },
+          { "field": "plan_id", "not_null": true }
+        ]
+      },
+      "severity": "HIGH",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-DUP-001",
+      "type": "referential",
+      "failure_mode": "FM-011",
+      "source_dataset": "participants",
+      "target_dataset": "participants",
+      "join_keys": ["plan_id", "participant_id"],
+      "params": {
+        "unique": ["plan_id", "ssn"]
+      },
+      "severity": "HIGH",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-BAL-MT-001",
+      "type": "count_balance",
+      "failure_mode": "FM-012",
+      "source_dataset": "balances",
+      "target_dataset": "balances",
+      "params": {
+        "aggregations": [
+          { "measure": "balance", "op": "sum", "group_by": ["plan_id", "money_type_code"] }
+        ]
+      },
+      "severity": "CRITICAL",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-BAL-INV-001",
+      "type": "count_balance",
+      "failure_mode": "FM-013",
+      "source_dataset": "balances",
+      "target_dataset": "balances",
+      "params": {
+        "aggregations": [
+          { "measure": "balance", "op": "sum", "group_by": ["plan_id", "investment_code"] }
+        ]
+      },
+      "severity": "CRITICAL",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-LOAN-CNT-001",
+      "type": "count_balance",
+      "failure_mode": "FM-014",
+      "source_dataset": "loans",
+      "target_dataset": "loans",
+      "params": {
+        "aggregations": [
+          { "measure": "*", "op": "count", "group_by": ["plan_id"] },
+          { "measure": "outstanding_balance", "op": "sum", "group_by": ["plan_id"] }
+        ]
+      },
+      "severity": "HIGH",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-LOAN-TERMS-001",
+      "type": "field_compare",
+      "failure_mode": "FM-014",
+      "target_dataset": "loans",
+      "params": {
+        "validity": [
+          { "field": "maturity_date", "not_null": true },
+          { "field": "payment_amount", "not_null": true },
+          { "field": "payment_frequency", "not_null": true }
+        ]
+      },
+      "severity": "MEDIUM",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-CONTRIB-001",
+      "type": "count_balance",
+      "failure_mode": "FM-015",
+      "source_dataset": "contributions",
+      "target_dataset": "contributions",
+      "params": {
+        "aggregations": [
+          { "measure": "amount", "op": "sum", "group_by": ["plan_id", "money_type_code"] }
+        ],
+        "filter": { "period": "last_payroll_cycle" }
+      },
+      "severity": "HIGH",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-LEN-001",
+      "type": "field_compare",
+      "failure_mode": "FM-016",
+      "target_dataset": "participants",
+      "params": {
+        "validity": [
+          { "field": "first_name", "max_length": 20 },
+          { "field": "last_name", "max_length": 25 },
+          { "field": "address_1", "max_length": 35 },
+          { "field": "address_2", "max_length": 35 },
+          { "field": "city", "max_length": 25 }
+        ]
+      },
+      "severity": "MEDIUM",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-CHAR-001",
+      "type": "encoding_check",
+      "failure_mode": "FM-016",
+      "target_dataset": "participants",
+      "params": {
+        "fields": ["first_name", "last_name"],
+        "allowed": "custom-set",
+        "custom_set": "A-Za-z '.,-"
+      },
+      "severity": "LOW",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-DATEVAL-001",
+      "type": "field_compare",
+      "failure_mode": "FM-017",
+      "target_dataset": "participants",
+      "params": {
+        "validity": [
+          { "field": "dob", "max": "today" },
+          { "field": "term_date", "gte_field": "hire_date" }
+        ]
+      },
+      "severity": "MEDIUM",
+      "enabled": true
+    },
+    {
+      "rule_id": "RULE-NEG-001",
+      "type": "field_compare",
+      "failure_mode": "FM-018",
+      "target_dataset": "balances",
+      "params": {
+        "validity": [
+          { "field": "balance", "min": "0.00" }
+        ]
+      },
+      "severity": "HIGH",
+      "enabled": true
+    }
+  ]
+}

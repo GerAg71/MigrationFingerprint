@@ -1,0 +1,13 @@
+{
+  "layout_id": "omni-loans-v1",
+  "record_length": 220,
+  "encoding": "cp037",
+  "fields": [
+    { "name": "plan_id",             "start": 1,   "length": 8,  "type": "char" },
+    { "name": "participant_id",      "start": 9,   "length": 12, "type": "char" },
+    { "name": "loan_id",             "start": 21,  "length": 4,  "type": "char" },
+    { "name": "outstanding_balance", "start": 25,  "length": 6,  "type": "packed", "decimals": 2 },
+    { "name": "origination_date",    "start": 31,  "length": 8,  "type": "char", "date_format": "YYYYMMDD", "zero_is_null": true },
+    { "name": "rate",                "start": 39,  "length": 5,  "type": "zoned", "decimals": 4 }
+  ]
+}

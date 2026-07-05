@@ -1,0 +1,36 @@
+{
+  "run": {
+    "run_id": "RUN-2026-07-05-0001",
+    "pair_id": "omni-zos-to-omni-linux",
+    "fingerprint_version": "1.0.0",
+    "dataset_hashes": {
+      "source/loans": "sha256:3f8a1c9be2d94c1b8f7e6a5d4c3b2a1908f7e6d5c4b3a29181716151413121109",
+      "target/loans": "sha256:9b2e4d6f8a0c1e3d5b7a9c8e6f4d2b0a1817161514131211100f0e0d0c0b0a09"
+    },
+    "summary": { "rules_run": 24, "passed": 19, "failed": 5,
+                 "records_affected": 137, "severity_mix": { "HIGH": 2, "MEDIUM": 3 } }
+  },
+  "suite": [
+    { "order": 1, "rule_id": "RULE-BAL-TOTALS-001", "fm_id": "FM-007",
+      "priority_score": 0.7125, "outcome": "fail", "records_affected": 3 }
+  ],
+  "findings": [
+    {
+      "finding_id": "RUN-2026-07-05-0001-F017",
+      "run_id": "RUN-2026-07-05-0001",
+      "failure_mode": "FM-001",
+      "rule_id": "RULE-LOAN-BAL-001",
+      "severity": "HIGH",
+      "status": "new",
+      "records_affected": 12,
+      "sample_records": [
+        { "keys": { "plan_id": "PLN001", "participant_id": "P0042", "loan_id": "L1" },
+          "source": { "outstanding_balance": "10432.17" },
+          "target": { "outstanding_balance": "10398.55" },
+          "delta": "-33.62" }
+      ],
+      "full_detail_uri": "data/runs/RUN-2026-07-05-0001/findings/F017.csv",
+      "remediation": "Recompute amortization from origination; verify payment application order and accrual basis."
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "fingerprint_id": "omni-zos-to-omni-linux",
+  "platform_pair": { "source": "OMNI_MAINFRAME_ZOS", "target": "OMNI_LINUX_RHEL" },
+  "version": "1.0.0",
+  "status": "published",
+  "failure_modes": [
+    { "id": "FM-007", "name": "Balance / count-balance totals", "category": "BALANCE",
+      "description": "Sums and counts fail to reconcile at plan, fund, or participant level.",
+      "probability": 0.75, "impact": 0.95, "data_domains": ["BALANCE"],
+      "detection_rules": ["RULE-BAL-TOTALS-001"],
+      "remediation": "Drill from plan variance to money type, investment, then participant.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:experience" },
+    { "id": "FM-001", "name": "Loan outstanding-balance carry-over", "category": "LOANS",
+      "description": "Converted loan balances diverge from source due to accrual and payment-application differences.",
+      "probability": 0.70, "impact": 0.90, "data_domains": ["LOAN"],
+      "detection_rules": ["RULE-LOAN-BAL-001", "RULE-LOAN-RECOMP-001"],
+      "remediation": "Recompute amortization from origination; verify payment application order.",
+      "history": { "times_detected": 0, "times_confirmed": 0, "false_positives": 0 },
+      "origin": "seed:experience" }
+  ]
+}

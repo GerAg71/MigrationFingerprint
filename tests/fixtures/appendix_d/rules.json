@@ -1,0 +1,36 @@
+[
+  { "rule_id": "RULE-LOAN-BAL-001", "type": "field_compare", "failure_mode": "FM-001",
+    "source_dataset": "loans", "target_dataset": "loans",
+    "join_keys": ["plan_id", "participant_id", "loan_id"],
+    "params": { "compare": [ { "field": "outstanding_balance", "kind": "money", "tolerance": "0.00" } ] },
+    "severity": "HIGH", "enabled": true },
+
+  { "rule_id": "RULE-BAL-MT-001", "type": "count_balance", "failure_mode": "FM-012",
+    "source_dataset": "balances", "target_dataset": "balances",
+    "params": { "aggregations": [ { "measure": "balance", "op": "sum",
+                 "group_by": ["plan_id", "money_type_code"] } ] },
+    "severity": "CRITICAL", "enabled": true },
+
+  { "rule_id": "RULE-DUP-001", "type": "referential", "failure_mode": "FM-011",
+    "source_dataset": "participants", "target_dataset": "participants",
+    "join_keys": ["plan_id", "participant_id"],
+    "params": { "unique": ["plan_id", "ssn"] }, "severity": "HIGH", "enabled": true },
+
+  { "rule_id": "RULE-VEST-PCT-001", "type": "derived_recompute", "failure_mode": "FM-002",
+    "source_dataset": "vesting", "target_dataset": "vesting",
+    "join_keys": ["plan_id", "participant_id"],
+    "params": { "recompute": "vested_pct",
+                "inputs": { "schedule": "plan.provisions.vesting", "service": "vesting.service_years" },
+                "compare_field": "vested_pct", "tolerance": "0.0000" },
+    "severity": "HIGH", "enabled": true },
+
+  { "rule_id": "RULE-ENC-001", "type": "encoding_check", "failure_mode": "FM-005",
+    "target_dataset": "participants",
+    "params": { "fields": ["first_name", "last_name", "address_1"], "allowed": "ascii" },
+    "severity": "MEDIUM", "enabled": true },
+
+  { "rule_id": "RULE-SORT-001", "type": "sort_order_check", "failure_mode": "FM-005",
+    "target_dataset": "participants",
+    "params": { "order_by": ["last_name", "first_name"], "collation": "ascii" },
+    "severity": "LOW", "enabled": true }
+]
