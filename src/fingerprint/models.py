@@ -478,6 +478,28 @@ class FindingsReport(StrictModel):
     findings: list[Finding] = []
 
 
+class DatasetRegistration(StrictModel):
+    """Registration of one ingested extract (spec §10.4).
+
+    Rules bind to datasets by canonical name; the (side, dataset_name) pair is
+    the key the REQ-021 execution gate checks. content_hash is sha256 over the
+    raw file bytes — identical bytes, identical hash (REQ-023). reject_count /
+    rejects_uri carry the §10.5 quarantine outcome into the run summary.
+    """
+
+    run_id: str = Field(pattern=RUN_ID_PATTERN)
+    side: Literal["source", "target"]
+    dataset_name: str
+    uri: str
+    row_count: int = Field(ge=0)
+    content_hash: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    layout_id: str | None = None
+    crosswalks_applied: list[str] = []
+    annotations: list[str] = []
+    reject_count: int = Field(default=0, ge=0)
+    rejects_uri: str | None = None
+
+
 # ---------------------------------------------------------------------------
 # LayoutSpec — copybook-style fixed-width layout (spec §10.2)
 # ---------------------------------------------------------------------------
@@ -533,6 +555,7 @@ _EXPORTED_MODELS: dict[str, type[BaseModel]] = {
     "Finding": Finding,
     "FindingsReport": FindingsReport,
     "LayoutSpec": LayoutSpec,
+    "DatasetRegistration": DatasetRegistration,
 }
 
 

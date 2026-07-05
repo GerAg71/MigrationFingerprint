@@ -7,7 +7,7 @@ from src.fingerprint.models import export_json_schemas, write_json_schemas
 EXPECTED = {
     "PlatformPair", "Fingerprint", "FailureMode", "DetectionRule",
     "ConversionRun", "SuiteItem", "PrioritizedSuiteEntry", "Finding",
-    "FindingsReport", "LayoutSpec",
+    "FindingsReport", "LayoutSpec", "DatasetRegistration",
 }
 
 
