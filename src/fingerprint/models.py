@@ -411,6 +411,24 @@ class SuiteItem(StrictModel):
     records_affected: int | None = Field(default=None, ge=0)
 
 
+class PrioritizedSuiteEntry(StrictModel):
+    """One row of the prioritized suite view (spec §12.2, CLI_SPEC `suite`).
+
+    Disabled rules stay in their priority position, marked skipped:disabled.
+    priority_score is exact Decimal arithmetic so the suite is reproducible
+    byte-for-byte (REQ-009).
+    """
+
+    order: int = Field(ge=1)
+    rule_id: str = Field(pattern=RULE_ID_PATTERN)
+    fm_id: str = Field(pattern=FM_ID_PATTERN)
+    priority_score: Decimal = Field(ge=0, le=1)
+    severity: Severity
+    source_dataset: str | None = None
+    target_dataset: str
+    status: Literal["pending", "skipped:disabled"] = "pending"
+
+
 class ConversionRun(StrictModel):
     run_id: str = Field(pattern=RUN_ID_PATTERN)
     pair_id: str
@@ -511,6 +529,7 @@ _EXPORTED_MODELS: dict[str, type[BaseModel]] = {
     "FailureMode": FailureMode,
     "ConversionRun": ConversionRun,
     "SuiteItem": SuiteItem,
+    "PrioritizedSuiteEntry": PrioritizedSuiteEntry,
     "Finding": Finding,
     "FindingsReport": FindingsReport,
     "LayoutSpec": LayoutSpec,

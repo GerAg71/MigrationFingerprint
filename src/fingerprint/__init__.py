@@ -1,5 +1,13 @@
-"""Fingerprint domain: schemas (MS-1.1); loader and prioritization arrive in MS-1.2."""
+"""Fingerprint domain: schemas (MS-1.1), loader + prioritization (MS-1.2)."""
 
+from src.fingerprint.loader import (
+    DEFAULT_FINGERPRINT_DIR,
+    FingerprintDirectoryError,
+    list_versions,
+    load,
+    load_file,
+)
+from src.fingerprint.prioritize import prioritized_suite, priority_score
 from src.fingerprint.models import (
     AffectedRecord,
     Aggregation,
@@ -23,6 +31,7 @@ from src.fingerprint.models import (
     LayoutField,
     LayoutSpec,
     PlatformPairRef,
+    PrioritizedSuiteEntry,
     ReferentialParams,
     ReferentialRule,
     ReportRun,
@@ -39,6 +48,14 @@ from src.fingerprint.models import (
 )
 
 __all__ = [
+    "DEFAULT_FINGERPRINT_DIR",
+    "FingerprintDirectoryError",
+    "PrioritizedSuiteEntry",
+    "list_versions",
+    "load",
+    "load_file",
+    "prioritized_suite",
+    "priority_score",
     "AffectedRecord",
     "Aggregation",
     "CompareField",

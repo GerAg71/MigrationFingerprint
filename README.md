@@ -15,7 +15,8 @@ Session rules for Claude Code: `CLAUDE.md`.
 | Milestone | Item | Status |
 |-----------|------|--------|
 | MS-1.1 | Pydantic schemas (Fingerprint, FailureMode, DetectionRule, ConversionRun, Finding, LayoutSpec) + JSON Schema export | ✅ done |
-| MS-1.2 … MS-3.3 | see spec Ch. 23 | open |
+| MS-1.2 | Fingerprint loader + prioritization; CLI `validate` / `suite` | ✅ done |
+| MS-1.3 … MS-3.3 | see spec Ch. 23 | open |
 
 ## Setup
 
@@ -24,6 +25,13 @@ Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 ```
 uv sync
 uv run pytest
+```
+
+CLI (CLI_SPEC.md; exit codes 0 ok / 1 runtime / 3 validation refusal):
+
+```
+uv run fingerprint validate data/fingerprints/omni-zos-to-omni-linux/1.0.0/fingerprint.json
+uv run fingerprint suite --pair omni-zos-to-omni-linux [--version 1.0.0] [--json]
 ```
 
 ## Layout
