@@ -19,7 +19,8 @@ Session rules for Claude Code: `CLAUDE.md`.
 | MS-1.3 | CSV ingestion + dataset registration (Decimal boundary, reject quarantine, REQ-021 gate index) | ✅ done |
 | MS-1.4 | Rule engine: `field_compare`, `count_balance`, `referential` executors + uniform finding construction | ✅ done |
 | MS-1.5 | Runner: suite snapshot, REQ-021 gate, deterministic `findings.json`; CLI `run` / `findings` / `show` | ✅ done |
-| MS-1.6 … MS-3.3 | see spec Ch. 23 | open |
+| MS-1.6 | Synthetic sample data: clean pair (zero noise) + seeded pair with exact REQ-032 manifest | ✅ done |
+| MS-1.7 … MS-3.3 | see spec Ch. 23 | open |
 
 ## Setup
 
@@ -35,7 +36,9 @@ CLI (CLI_SPEC.md; exit codes 0 ok / 1 runtime / 3 validation refusal):
 ```
 uv run fingerprint validate data/fingerprints/omni-zos-to-omni-linux/1.0.0/fingerprint.json
 uv run fingerprint suite --pair omni-zos-to-omni-linux [--version 1.0.0] [--json]
-uv run fingerprint run --pair omni-zos-to-omni-linux --source-dir <dir> --target-dir <dir> \
+uv run fingerprint run --pair omni-zos-to-omni-linux \
+    --source-dir data/samples/source/PLN-SEED-01 \
+    --target-dir data/samples/target/PLN-SEED-01 \
     [--plans P1,P2] [--wave W1] [--fail-on-findings[=SEV]]
 uv run fingerprint findings <run_id> [--severity SEV] [--status STATUS]
 uv run fingerprint show <finding_id>

@@ -1,0 +1,2 @@
+plan_id,plan_name,plan_type,status,safe_harbor_flag,catch_up_eligible,auto_enroll_flag,auto_enroll_rate,auto_increase_rate
+PLN-CLEAN-01,Maptiva Demo 401k,401K,ACTIVE,Y,Y,Y,0.0300,0.0100
