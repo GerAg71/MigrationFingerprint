@@ -29,7 +29,8 @@ Session rules for Claude Code: `CLAUDE.md`.
 | **Phase 2 complete** | | |
 | MS-3.1 | FastAPI endpoints (Ch. 18 subset) + OpenAPI companion (`docs/openapi.json`) | ✅ done |
 | MS-3.2 | Dashboard UI at `/ui`: library → fingerprint → suite → run wizard → findings/review → history/publish | ✅ done |
-| MS-3.3 | see spec Ch. 23 | open |
+| MS-3.3 | Second fingerprint (Omni→TRAC placeholder) + `pairs` CLI — demo step 5 | ✅ done |
+| **POC complete — all phases done, five-step demo verified** | | |
 
 ## Setup
 
@@ -104,5 +105,35 @@ src/fingerprint/models.py                                # all pydantic schemas 
 tests/                                                   # pytest suite + fixtures
 ```
 
-The POC is fully local (no AWS) through Phases 1–2 and is entirely separate from
-the AI-Mapper application.
+The POC is fully local (no AWS) and entirely separate from the AI-Mapper
+application.
+
+## The five-step demo (spec §23.5 — Definition of Done)
+
+```
+# 1. targeted, not generic: the prioritized suite
+uv run fingerprint suite --pair omni-zos-to-omni-linux
+
+# 2. clean pair -> green scoreboard
+uv run fingerprint run --pair omni-zos-to-omni-linux \
+    --source-dir data/samples/source/PLN-CLEAN-01 --target-dir data/samples/target/PLN-CLEAN-01
+
+# 3. seeded pair -> findings in priority order, record-level drill-down
+uv run fingerprint run --pair omni-zos-to-omni-linux \
+    --source-dir data/samples/source/PLN-SEED-01 --target-dir data/samples/target/PLN-SEED-01
+uv run fingerprint findings <run_id>
+uv run fingerprint show <finding_id>
+
+# 4. the learning loop: reviews update probabilities; publish a new version
+uv run fingerprint review <finding_id> --decision confirmed      # x2
+uv run fingerprint review <finding_id> --decision false_positive
+uv run fingerprint history --pair omni-zos-to-omni-linux
+uv run fingerprint publish --pair omni-zos-to-omni-linux --bump patch
+
+# 5. different pair -> different suite
+uv run fingerprint suite --pair omni-to-trac
+```
+
+Step 4 mutates `data/fingerprints/` (a draft, the learning-event log, and
+the published version) — demo against a copy if the store should stay
+pristine. The same flow is clickable in the dashboard (`/ui`).

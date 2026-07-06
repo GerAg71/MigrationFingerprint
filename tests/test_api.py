@@ -37,8 +37,10 @@ def start_seeded_run(client) -> str:
 
 def test_platform_pairs(client):
     payload = client.get("/platform-pairs").json()
-    assert payload == [{"pair_id": PAIR, "current_version": "1.0.0",
-                        "modes": 18, "rules": 23}]
+    by_pair = {p["pair_id"]: p for p in payload}
+    assert by_pair[PAIR] == {"pair_id": PAIR, "current_version": "1.0.0",
+                             "modes": 18, "rules": 23}
+    assert "omni-to-trac" in by_pair  # MS-3.3 second fingerprint
 
 
 def test_get_fingerprint_mirrors_domain_model(client):

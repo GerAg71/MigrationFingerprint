@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Set-Location \"c:\\\\Users\\\\aliha\\\\OneDrive\\\\Documents\\\\GitHub\\\\MigrationFingerprint\"; [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; $env:PYTHONPATH=\".\"; $demo=\"$env:TEMP\\\\fp-dod\"; Remove-Item -Recurse -Force $demo -ErrorAction SilentlyContinue; New-Item -ItemType Directory $demo | Out-Null; Copy-Item -Recurse data\\\\fingerprints \"$demo\\\\fp\"; $py = \".venv\\\\Scripts\\\\python.exe\"; \"=== STEP 1: prioritized suite \\(targeted, not generic\\) ===\"; & $py -m src.cli suite --pair omni-zos-to-omni-linux --fingerprint-dir \"$demo\\\\fp\" | Select-Object -First 4; \"=== STEP 2: clean pair -> green scoreboard ===\"; & $py -m src.cli run --pair omni-zos-to-omni-linux --source-dir data/samples/source/PLN-CLEAN-01 --target-dir data/samples/target/PLN-CLEAN-01 --fingerprint-dir \"$demo\\\\fp\" --runs-dir \"$demo\\\\runs\" | Select-Object -First 3)"
+    ]
+  }
+}

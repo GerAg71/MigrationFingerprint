@@ -85,6 +85,36 @@ def cmd_validate(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def cmd_pairs(args: argparse.Namespace) -> int:
+    """List platform pairs discovered under the fingerprint dir (CLI_SPEC)."""
+    fingerprint_dir = Path(args.fingerprint_dir)
+    pairs = []
+    if fingerprint_dir.is_dir():
+        for entry in sorted(fingerprint_dir.iterdir()):
+            if not entry.is_dir():
+                continue
+            try:
+                fp = load(entry.name, fingerprint_dir=fingerprint_dir)
+            except (FileNotFoundError, FingerprintDirectoryError):
+                continue
+            except ValidationError as exc:
+                _print_validation_failure(exc, entry.name, args.json)
+                return EXIT_REFUSED
+            pairs.append({
+                "pair_id": fp.fingerprint_id, "version": fp.version,
+                "status": fp.status, "modes": len(fp.failure_modes),
+                "rules": len(fp.detection_rules),
+            })
+    if args.json:
+        print(json.dumps(pairs, indent=2))
+        return EXIT_OK
+    print(f"{'PAIR':<28} {'VERSION':<9} {'STATUS':<10} {'MODES':>5} {'RULES':>5}")
+    for pair in pairs:
+        print(f"{pair['pair_id']:<28} {pair['version']:<9} "
+              f"{pair['status']:<10} {pair['modes']:>5} {pair['rules']:>5}")
+    return EXIT_OK
+
+
 def cmd_suite(args: argparse.Namespace) -> int:
     try:
         fingerprint = load(args.pair, args.version, args.fingerprint_dir)
@@ -472,6 +502,13 @@ def build_parser() -> argparse.ArgumentParser:
     p_validate.add_argument("file", help="path to a fingerprint.json")
     p_validate.add_argument("--json", action="store_true", help="JSON output")
     p_validate.set_defaults(func=cmd_validate)
+
+    p_pairs = sub.add_parser(
+        "pairs", help="List platform pairs in the fingerprint store"
+    )
+    p_pairs.add_argument("--fingerprint-dir", default=str(DEFAULT_FINGERPRINT_DIR))
+    p_pairs.add_argument("--json", action="store_true", help="JSON output")
+    p_pairs.set_defaults(func=cmd_pairs)
 
     p_suite = sub.add_parser(
         "suite", help="Print the prioritized suite without running (spec §12.2)"
