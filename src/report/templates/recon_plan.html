@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% import "_recon.html" as recon %}
+{% block content %}
+{{ recon.rollup(plans) }}
+<h2>Plan presence</h2>
+<table class="grid">
+<tr><th>Plans in source</th><th>Plans in target</th><th>Missing in target</th>
+    <th>Unexpected in target</th></tr>
+<tr><td class="num">{{ plan_presence.source_count }}</td>
+    <td class="num">{{ plan_presence.target_count }}</td>
+    <td>{{ plan_presence.missing_in_target | join(", ") or "—" }}</td>
+    <td>{{ plan_presence.unexpected_in_target | join(", ") or "—" }}</td></tr>
+</table>
+{% for plan in plans %}
+<h1>Plan {{ plan.plan_id }}</h1>
+{{ recon.pair_table("Plan total balance", plan.balance_total, "Measure") }}
+{{ recon.pair_table("Balances by money type", plan.by_money_type, "Money type") }}
+{{ recon.pair_table("Balances by investment", plan.by_investment, "Investment") }}
+{% endfor %}
+{% endblock %}

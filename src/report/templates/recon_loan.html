@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% import "_recon.html" as recon %}
+{% block content %}
+{{ recon.rollup(plans) }}
+{% for plan in plans %}
+<h1>Plan {{ plan.plan_id }}</h1>
+{{ recon.pair_table("Loan reconciliation", plan.counts, "Measure") }}
+<p>Loans missing repayment terms or maturity dates (target):
+{% if plan.missing_terms %}<span class="status-pill bad">{{ plan.missing_terms }}</span>
+{% else %}<span class="status-pill ok">0</span>{% endif %}</p>
+{% endfor %}
+{% endblock %}

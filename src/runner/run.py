@@ -44,6 +44,8 @@ from src.fingerprint.models import (
 from src.fingerprint.prioritize import prioritized_suite
 from src.ingest.canonical import CANONICAL_DATASETS
 from src.ingest.registration import RegistrationIndex, register_dataset
+from src.report.aggregates import compute_reconciliation
+from src.report.html import render_findings_html
 from src.rules import ExecutionContext, RuleDatasets, UnsupportedRuleTypeError
 from src.rules import build_finding, execute as execute_rule
 
@@ -204,7 +206,7 @@ def run(
                             scope, started_at, exc)
         raise
 
-    report, findings, manifest, index = result
+    report, findings, manifest, index, datasets = result
     conversion_run = ConversionRun(
         run_id=run_id,
         pair_id=pair_id,
@@ -226,6 +228,14 @@ def run(
     )
     (run_dir / "findings.json").write_bytes(
         _dump_json_bytes(report.model_dump(mode="json"))
+    )
+    # MS-2.3 report artifacts: the self-contained HTML findings report
+    # (REQ-025) and the reconciliation aggregates the §13.2 suite renders from
+    (run_dir / "findings.html").write_bytes(
+        render_findings_html(report, wave=scope.wave).encode("utf-8")
+    )
+    (run_dir / "reconciliation.json").write_bytes(
+        _dump_json_bytes(compute_reconciliation(datasets))
     )
     return RunResult(run=conversion_run, report=report, suite=suite,
                      findings=findings, run_dir=run_dir)
@@ -369,4 +379,4 @@ def _ingest_and_execute(fingerprint, suite, source_dir, target_dir, run_dir,
         suite=suite_results,
         findings=findings,
     )
-    return report, findings, manifest, index
+    return report, findings, manifest, index, datasets

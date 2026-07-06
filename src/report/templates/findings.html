@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="tiles">
+  <div class="tile"><div class="n">{{ summary.rules_run }}</div><div class="l">rules run</div></div>
+  <div class="tile ok"><div class="n">{{ summary.passed }}</div><div class="l">passed</div></div>
+  <div class="tile bad"><div class="n">{{ summary.failed }}</div><div class="l">failed</div></div>
+  <div class="tile"><div class="n">{{ summary.records_affected }}</div><div class="l">records affected</div></div>
+</div>
+{% if severity_mix %}
+<p>Severity mix:
+{% for item in severity_mix %}
+  <span class="sev" style="background: {{ severity_colors[item.severity] }}">{{ item.severity }} {{ item.count }}</span>
+{% endfor %}
+</p>
+{% endif %}
+
+<h2>Prioritized suite ("targeted, not generic")</h2>
+<table class="grid">
+<tr><th class="num">#</th><th>Rule</th><th>Failure mode</th><th class="num">Score</th>
+    <th>Outcome</th><th class="num">Records</th></tr>
+{% for item in suite %}
+<tr{% if item.outcome == "fail" %} class="variance"{% endif %}>
+  <td class="num">{{ item.order }}</td>
+  <td>{{ item.rule_id }}</td>
+  <td>{{ item.fm_id }}</td>
+  <td class="num">{{ item.priority_score }}</td>
+  <td>{{ item.outcome }}</td>
+  <td class="num">{{ item.records_affected if item.records_affected is not none }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2>Findings (priority order)</h2>
+{% for entry in findings %}
+{% set f = entry.finding %}
+<div class="card">
+  <strong>{{ f.finding_id }}</strong>
+  <span class="sev" style="background: {{ severity_colors[f.severity] }}">{{ f.severity }}</span>
+  {{ f.failure_mode }} / {{ f.rule_id }} — {{ f.records_affected }} record(s), status {{ f.status }}
+  <details>
+    <summary>Sample records ({{ entry.rows | length }} inline)</summary>
+    <table class="grid">
+    <tr>{% for c in entry.key_columns %}<th>{{ c }}</th>{% endfor %}
+        <th>source</th><th>target</th><th class="num">delta</th></tr>
+    {% for row in entry.rows %}
+    <tr>{% for k in row.key_values %}<td>{{ k }}</td>{% endfor %}
+        <td>{{ row.source }}</td><td>{{ row.target }}</td>
+        <td class="num delta">{{ row.delta }}</td></tr>
+    {% endfor %}
+    </table>
+  </details>
+  {% if f.full_detail_uri %}<div class="hash">Drill-down CSV: {{ f.full_detail_uri }}</div>{% endif %}
+  {% if f.remediation %}<div>Remediation: {{ f.remediation }}</div>{% endif %}
+</div>
+{% else %}
+<p><span class="status-pill ok">GREEN</span> No findings — every executed rule passed.</p>
+{% endfor %}
+
+<h2>Exception register (open items, spec §13.3)</h2>
+<table class="grid">
+<tr><th>Exception</th><th>Failure mode</th><th>Severity</th><th class="num">Records</th><th>Status</th></tr>
+{% for f in exceptions %}
+<tr><td>{{ f.finding_id }}</td><td>{{ f.failure_mode }}</td><td>{{ f.severity }}</td>
+    <td class="num">{{ f.records_affected }}</td><td>{{ f.status }}</td></tr>
+{% else %}
+<tr><td colspan="5">No open exceptions.</td></tr>
+{% endfor %}
+</table>
+{% endblock %}

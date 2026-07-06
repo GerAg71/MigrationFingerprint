@@ -24,7 +24,8 @@ Session rules for Claude Code: `CLAUDE.md`.
 | **Phase 1 complete** | | |
 | MS-2.1 | `derived_recompute` (vested %, loan amortization), `encoding_check`, `sort_order_check` | ✅ done |
 | MS-2.2 | Fixed-width/copybook ingest; EBCDIC + COMP-3 decode; FM-006 active; EBCDIC sample pairs | ✅ done |
-| MS-2.3 … MS-3.3 | see spec Ch. 23 | open |
+| MS-2.3 | Self-contained `findings.html` + five reconciliation reports; CLI `report` | ✅ done |
+| MS-2.4 … MS-3.3 | see spec Ch. 23 | open |
 
 ## Setup
 
@@ -46,6 +47,7 @@ uv run fingerprint run --pair omni-zos-to-omni-linux \
     [--plans P1,P2] [--wave W1] [--fail-on-findings[=SEV]]
 uv run fingerprint findings <run_id> [--severity SEV] [--status STATUS]
 uv run fingerprint show <finding_id>
+uv run fingerprint report <run_id> [--format json|html] [--recon plan|participant|loan|contribution|quality|all]
 ```
 
 A run writes `data/runs/<run_id>/`: `suite_snapshot.json` (persisted before

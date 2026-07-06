@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% import "_recon.html" as recon %}
+{% block content %}
+{{ recon.rollup(plans) }}
+{% for plan in plans %}
+<h1>Plan {{ plan.plan_id }}</h1>
+{{ recon.pair_table("Participant counts", plan.participant_count, "Measure") }}
+{{ recon.pair_table("Counts by status", plan.by_status, "Status") }}
+<h2>Per-participant balance mismatches</h2>
+<table class="grid">
+<tr><th>Participant</th><th class="num">Source</th><th class="num">Target</th>
+    <th class="num">Delta</th></tr>
+{% for m in plan.mismatches %}
+<tr class="variance"><td>{{ m.participant_id }}</td><td class="num">{{ m.source }}</td>
+    <td class="num">{{ m.target }}</td><td class="num delta">{{ m.delta }}</td></tr>
+{% else %}
+<tr><td colspan="4">All participant balances reconcile.</td></tr>
+{% endfor %}
+</table>
+{% endfor %}
+{% endblock %}

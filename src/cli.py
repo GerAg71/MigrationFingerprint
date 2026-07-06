@@ -252,6 +252,47 @@ def cmd_show(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def cmd_report(args: argparse.Namespace) -> int:
+    from src.report.html import RECON_KINDS, render_findings_html, \
+        render_reconciliation_html
+
+    run_dir = Path(args.runs_dir) / args.run_id
+    try:
+        report = _load_report(args.runs_dir, args.run_id)
+    except FileNotFoundError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_RUNTIME
+
+    written: list[Path] = []
+    if args.recon:
+        recon_path = run_dir / "reconciliation.json"
+        if not recon_path.is_file():
+            print(f"error: no reconciliation aggregates at {recon_path}",
+                  file=sys.stderr)
+            return EXIT_RUNTIME
+        recon = json.loads(recon_path.read_text(encoding="utf-8"))
+        kinds = list(RECON_KINDS) if args.recon == "all" else [args.recon]
+        for kind in kinds:
+            html = render_reconciliation_html(kind, recon, report)
+            path = run_dir / f"reconciliation_{kind}.html"
+            path.write_bytes(html.encode("utf-8"))
+            written.append(path)
+    elif args.format == "json":
+        print((run_dir / "findings.json").read_text(encoding="utf-8"))
+        return EXIT_OK
+    else:
+        path = run_dir / "findings.html"
+        path.write_bytes(render_findings_html(report).encode("utf-8"))
+        written.append(path)
+
+    if args.json:
+        print(json.dumps({"written": [str(p) for p in written]}, indent=2))
+    else:
+        for path in written:
+            print(f"rendered: {path}")
+    return EXIT_OK
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="fingerprint",
@@ -315,6 +356,20 @@ def build_parser() -> argparse.ArgumentParser:
     p_show.add_argument("--runs-dir", default=str(DEFAULT_RUNS_DIR))
     p_show.add_argument("--json", action="store_true", help="JSON output")
     p_show.set_defaults(func=cmd_show)
+
+    p_report = sub.add_parser(
+        "report", help="Re-render report artifacts for a run (MS-2.3)"
+    )
+    p_report.add_argument("run_id")
+    p_report.add_argument("--format", choices=["json", "html"], default="html")
+    p_report.add_argument(
+        "--recon",
+        choices=["plan", "participant", "loan", "contribution", "quality", "all"],
+        help="render the client-facing reconciliation suite (spec §13.2)",
+    )
+    p_report.add_argument("--runs-dir", default=str(DEFAULT_RUNS_DIR))
+    p_report.add_argument("--json", action="store_true", help="JSON output")
+    p_report.set_defaults(func=cmd_report)
 
     return parser
 

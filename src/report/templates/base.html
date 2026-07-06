@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{ header.title }} — {{ header.run_id }}</title>
+<style>
+  :root { --ink:#1e293b; --muted:#64748b; --line:#e2e8f0; --brand:#0f4c81;
+          --ok:#15803d; --bad:#b91c1c; --bg:#f8fafc; }
+  body { font-family: "Segoe UI", Arial, sans-serif; color: var(--ink);
+         margin: 0; background: var(--bg); }
+  header.brand { background: var(--brand); color: #fff; padding: 14px 28px; }
+  header.brand .logo { font-weight: 700; letter-spacing: .06em; }
+  header.brand .sub { opacity: .85; margin-left: .6em; }
+  main { max-width: 1080px; margin: 0 auto; padding: 20px 28px 48px; }
+  h1 { font-size: 1.35rem; margin: 18px 0 4px; }
+  h2 { font-size: 1.05rem; margin: 26px 0 8px; border-bottom: 1px solid var(--line);
+       padding-bottom: 4px; }
+  table.meta td { padding: 2px 14px 2px 0; color: var(--muted); }
+  table.meta td.v { color: var(--ink); font-family: Consolas, monospace; }
+  table.grid { border-collapse: collapse; width: 100%; margin: 8px 0 16px;
+               background: #fff; }
+  table.grid th, table.grid td { border: 1px solid var(--line); padding: 5px 9px;
+               text-align: left; font-size: .88rem; }
+  table.grid th { background: #eef2f7; }
+  td.num, th.num { text-align: right; font-family: Consolas, monospace; }
+  tr.variance td { background: #fef2f2; }
+  tr.variance td.delta { color: var(--bad); font-weight: 600; }
+  .tiles { display: flex; gap: 14px; margin: 14px 0; flex-wrap: wrap; }
+  .tile { background: #fff; border: 1px solid var(--line); border-radius: 8px;
+          padding: 10px 18px; min-width: 120px; }
+  .tile .n { font-size: 1.5rem; font-weight: 700; }
+  .tile.ok .n { color: var(--ok); } .tile.bad .n { color: var(--bad); }
+  .tile .l { color: var(--muted); font-size: .8rem; }
+  .sev { display: inline-block; padding: 1px 8px; border-radius: 10px;
+         color: #fff; font-size: .75rem; font-weight: 600; }
+  .status-pill { display: inline-block; padding: 1px 10px; border-radius: 10px;
+         font-size: .78rem; font-weight: 600; color: #fff; }
+  .status-pill.ok { background: var(--ok); } .status-pill.bad { background: var(--bad); }
+  details { margin: 6px 0 14px; }
+  details > summary { cursor: pointer; color: var(--brand); }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 8px;
+          padding: 12px 16px; margin: 10px 0; }
+  .hash { font-family: Consolas, monospace; font-size: .78rem; color: var(--muted); }
+  footer { color: var(--muted); font-size: .78rem; padding: 18px 28px;
+           border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<header class="brand"><span class="logo">MAPTIVA™</span>
+  <span class="sub">Migration Fingerprint™ — {{ header.title }}</span></header>
+<main>
+<h1>{{ header.title }}</h1>
+<table class="meta">
+  <tr><td>Run</td><td class="v">{{ header.run_id }}</td></tr>
+  <tr><td>Platform pair</td><td class="v">{{ header.pair_id }}</td></tr>
+  <tr><td>Fingerprint version</td><td class="v">{{ header.fingerprint_version }}</td></tr>
+  {% if header.wave %}<tr><td>Wave</td><td class="v">{{ header.wave }}</td></tr>{% endif %}
+</table>
+<details><summary>Dataset content hashes ({{ header.dataset_hashes | length }})</summary>
+  <table class="grid">
+  {% for name, digest in header.dataset_hashes.items() %}
+    <tr><td>{{ name }}</td><td class="hash">{{ digest }}</td></tr>
+  {% endfor %}
+  </table>
+</details>
+{% block content %}{% endblock %}
+</main>
+<footer>Convergent — MAPTIVA™ Migration Fingerprint™. Synthetic data only (REQ-031).
+Self-contained report: no external resources (REQ-025).</footer>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<p>Data-quality findings grouped from the run's rule checks (spec §13.2):
+field lengths, invalid characters, invalid/future dates, negative balances,
+missing key fields. Inline samples are capped at 25 per finding; the
+records column carries each finding's full count.</p>
+{% for section, entries in sections.items() %}
+<h2>{{ section }}</h2>
+<table class="grid">
+<tr><th>Finding</th><th>FM</th><th>Severity</th><th>Record</th><th>Value</th>
+    <th>Check</th><th class="num">Records</th></tr>
+{% for e in entries %}
+<tr class="variance"><td>{{ e.finding_id }}</td><td>{{ e.failure_mode }}</td>
+    <td>{{ e.severity }}</td><td>{{ e.record }}</td><td>{{ e.value }}</td>
+    <td>{{ e.check }}</td><td class="num">{{ e.records_affected }}</td></tr>
+{% else %}
+<tr><td colspan="7">Clean.</td></tr>
+{% endfor %}
+</table>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,26 @@
+{% macro pair_table(title, rows, label_header) %}
+<h2>{{ title }}</h2>
+<table class="grid">
+<tr><th>{{ label_header }}</th><th class="num">Source</th><th class="num">Target</th>
+    <th class="num">Delta</th></tr>
+{% for row in rows %}
+<tr{% if row.variance %} class="variance"{% endif %}>
+  <td>{{ row.label }}</td><td class="num">{{ row.source }}</td>
+  <td class="num">{{ row.target }}</td><td class="num delta">{{ row.delta }}</td></tr>
+{% else %}
+<tr><td colspan="4">No data registered.</td></tr>
+{% endfor %}
+</table>
+{% endmacro %}
+
+{% macro rollup(plans) %}
+<h2>Rollup</h2>
+<table class="grid">
+<tr><th>Plan</th><th>Status</th></tr>
+{% for plan in plans %}
+<tr><td>{{ plan.plan_id }}</td>
+    <td>{% if plan.reconciled %}<span class="status-pill ok">RECONCILED</span>
+        {% else %}<span class="status-pill bad">VARIANCE</span>{% endif %}</td></tr>
+{% endfor %}
+</table>
+{% endmacro %}

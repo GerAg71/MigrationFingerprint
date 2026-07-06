@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% import "_recon.html" as recon %}
+{% block content %}
+{{ recon.rollup(plans) }}
+<p>Last payroll cycle: <strong>{{ last_payroll_cycle or "n/a" }}</strong></p>
+{% for plan in plans %}
+<h1>Plan {{ plan.plan_id }}</h1>
+{{ recon.pair_table("Contributions by money type (last cycle)", plan.by_money_type, "Money type") }}
+{{ recon.pair_table("Employee vs employer split", plan.split, "Source") }}
+{% endfor %}
+{% endblock %}
