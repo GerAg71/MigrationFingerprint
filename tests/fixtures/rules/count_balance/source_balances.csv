@@ -1,0 +1,4 @@
+plan_id,participant_id,money_type_code,investment_code,balance
+PLN001,P0001,PRETAX,F01,100.00
+PLN001,P0002,PRETAX,F01,250.50
+PLN001,P0002,ROTH,F02,80.00

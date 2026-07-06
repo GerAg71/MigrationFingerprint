@@ -80,7 +80,12 @@ def _amount(rng: random.Random) -> str:
     return f"{rng.randint(50, 5000)}.{rng.randint(0, 99):02d}"
 
 
-def build_truth(plan_id: str) -> dict[str, list[dict[str, str]]]:
+def build_truth(plan_id: str, participants_n: int = 120) -> dict[str, list[dict[str, str]]]:
+    """Canonical truth for one plan. participants_n defaults to the shipped
+    120 (spec §25.2); the REQ-015 perf smoke generates 200. Anchored rows all
+    sit at participant numbers <= 120, so anchors hold for any n >= 120."""
+    if participants_n < 120:
+        raise ValueError("participants_n must be >= 120 to keep anchor rows valid")
     rng = random.Random(SEED)
 
     plans = [{
@@ -92,7 +97,7 @@ def build_truth(plan_id: str) -> dict[str, list[dict[str, str]]]:
     }]
 
     participants = []
-    for i in range(1, 121):
+    for i in range(1, participants_n + 1):
         status = _status(i)
         dob = date(1958 + i % 40, i % 12 + 1, i % 28 + 1)
         hire = date(2000 + i % 20, (i * 3) % 12 + 1, (i * 7) % 28 + 1)
@@ -119,7 +124,7 @@ def build_truth(plan_id: str) -> dict[str, list[dict[str, str]]]:
     by_pid["P0044"]["last_name"] = "Ramirez"
 
     balances = []
-    for i in range(1, 121):
+    for i in range(1, participants_n + 1):
         cells = [("PRETAX", INVESTMENTS[(i - 1) % 5]),
                  ("MATCH", INVESTMENTS[(i + 1) % 5])]
         if i % 3 == 0:
@@ -140,7 +145,7 @@ def build_truth(plan_id: str) -> dict[str, list[dict[str, str]]]:
         row["balance"] = amount
 
     contributions = []
-    for i in range(1, 121):
+    for i in range(1, participants_n + 1):
         if _status(i) != "ACTIVE":
             continue
         for period in PERIODS:
@@ -166,7 +171,7 @@ def build_truth(plan_id: str) -> dict[str, list[dict[str, str]]]:
         maturity, outstanding in LOANS]
 
     vesting = []
-    for i in range(1, 121):
+    for i in range(1, participants_n + 1):
         service = 5.5 if i == 17 else ((i * 5) % 9) + 0.5  # P0017: 80% vested
         vesting.append({
             "plan_id": plan_id, "participant_id": _pid(i),

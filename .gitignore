@@ -2,5 +2,6 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+.coverage
 data/runs/*
 !data/runs/.gitkeep

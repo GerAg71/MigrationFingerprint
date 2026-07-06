@@ -20,7 +20,9 @@ Session rules for Claude Code: `CLAUDE.md`.
 | MS-1.4 | Rule engine: `field_compare`, `count_balance`, `referential` executors + uniform finding construction | ✅ done |
 | MS-1.5 | Runner: suite snapshot, REQ-021 gate, deterministic `findings.json`; CLI `run` / `findings` / `show` | ✅ done |
 | MS-1.6 | Synthetic sample data: clean pair (zero noise) + seeded pair with exact REQ-032 manifest | ✅ done |
-| MS-1.7 … MS-3.3 | see spec Ch. 23 | open |
+| MS-1.7 | Coverage audit: golden fixtures per rule type, REQ-015 perf smoke, CI workflow (95% line coverage) | ✅ done |
+| **Phase 1 complete** | | |
+| MS-2.1 … MS-3.3 | see spec Ch. 23 | open |
 
 ## Setup
 

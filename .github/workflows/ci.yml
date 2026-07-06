@@ -1,0 +1,20 @@
+# CI (spec Ch. 22.3, Phase-1 subset): pytest gate on every push/PR.
+# The suite includes the REQ-032 seeded-pair manifest assertion
+# (e2e_seeded_pair) and the REQ-015 perf smoke.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install dependencies
+        run: uv sync
+      - name: Run tests
+        run: uv run pytest -q
