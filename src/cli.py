@@ -293,6 +293,172 @@ def cmd_report(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def cmd_review(args: argparse.Namespace) -> int:
+    from src.learning.writeback import ReviewError, apply_review
+
+    try:
+        outcome = apply_review(
+            args.finding_id, args.decision,
+            reviewer=args.reviewer, comment=args.comment,
+            runs_dir=args.runs_dir, fingerprint_dir=args.fingerprint_dir,
+        )
+    except ReviewError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_RUNTIME
+    except FileNotFoundError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_RUNTIME
+
+    event = outcome.event
+    if args.json:
+        print(json.dumps(event.model_dump(mode="json"), indent=2, default=str))
+        return EXIT_OK
+    before, after = event.counters_before, event.counters_after
+    print(f"{event.finding_id}: {event.decision} by {event.reviewer}")
+    print(f"{event.fm_id} counters: detected {before.times_detected} -> "
+          f"{after.times_detected}, confirmed {before.times_confirmed} -> "
+          f"{after.times_confirmed}, false positives "
+          f"{before.false_positives} -> {after.false_positives}")
+    print(f"{event.fm_id} probability: {event.probability_before} -> "
+          f"{event.probability_after} "
+          f"(p_seed={event.formula_inputs['p_seed']}, k={event.formula_inputs['k']})")
+    print(f"draft {event.draft_version} pending — run `fingerprint publish "
+          f"--pair {event.pair_id} --bump patch` to finalize")
+    return EXIT_OK
+
+
+def cmd_publish(args: argparse.Namespace) -> int:
+    from src.learning.versioning import PublishError, publish_draft
+
+    try:
+        result = publish_draft(
+            args.pair, args.bump, changelog=args.changelog,
+            fingerprint_dir=args.fingerprint_dir,
+        )
+    except (PublishError, FileNotFoundError, FingerprintDirectoryError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_RUNTIME
+    except ValidationError as exc:
+        _print_validation_failure(exc, f"{args.pair}@draft", args.json)
+        return EXIT_REFUSED
+
+    if args.json:
+        print(json.dumps({
+            "pair": args.pair, "old_version": result.old_version,
+            "new_version": result.new_version, "diff": result.diff,
+        }, indent=2))
+        return EXIT_OK
+    print(f"published {args.pair}: {result.old_version} -> {result.new_version}")
+    _print_diff(result.diff)
+    return EXIT_OK
+
+
+def _print_diff(diff: dict) -> None:
+    for key in ("modes_added", "modes_removed", "rules_added", "rules_removed"):
+        if diff.get(key):
+            print(f"{key.replace('_', ' ')}: {', '.join(diff[key])}")
+    for entry in diff.get("modes_changed", []):
+        parts = []
+        if "probability" in entry:
+            p = entry["probability"]
+            parts.append(f"probability {p['before']} -> {p['after']} "
+                         f"({p['delta']:+})")
+        if "counters" in entry:
+            after = entry["counters"]["after"]
+            parts.append(f"counters detected={after['times_detected']} "
+                         f"confirmed={after['times_confirmed']} "
+                         f"fp={after['false_positives']}")
+        if entry.get("rules_added"):
+            parts.append(f"rules added: {', '.join(entry['rules_added'])}")
+        if entry.get("remediation_changed"):
+            parts.append("remediation changed")
+        print(f"  {entry['fm_id']}: {'; '.join(parts)}")
+
+
+def cmd_diff(args: argparse.Namespace) -> int:
+    from src.learning.versioning import diff_versions
+
+    try:
+        diff = diff_versions(args.pair, getattr(args, "from"), args.to,
+                             args.fingerprint_dir)
+    except FileNotFoundError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_RUNTIME
+    except ValidationError as exc:
+        _print_validation_failure(exc, args.pair, args.json)
+        return EXIT_REFUSED
+    if args.json:
+        print(json.dumps(diff, indent=2))
+    else:
+        print(f"{args.pair}: {getattr(args, 'from')} -> {args.to}")
+        _print_diff(diff)
+        if not any(diff.values()):
+            print("  no differences")
+    return EXIT_OK
+
+
+def cmd_history(args: argparse.Namespace) -> int:
+    from src.learning.writeback import read_events
+
+    events = read_events(args.pair, args.fingerprint_dir)
+    if args.fm:
+        events = [e for e in events if e.fm_id == args.fm]
+    if args.json:
+        print(json.dumps([e.model_dump(mode="json") for e in events],
+                         indent=2, default=str))
+        return EXIT_OK
+    print(f"Learning history — {args.pair} ({len(events)} event(s))")
+    for event in events:
+        print(f"{event.fm_id}  {event.decision:<14} {event.probability_before}"
+              f" -> {event.probability_after}  [{event.finding_id}] "
+              f"by {event.reviewer}")
+    return EXIT_OK
+
+
+def cmd_author_mode(args: argparse.Namespace) -> int:
+    from src.learning.versioning import author_failure_mode
+
+    def ask(flag_value, prompt):
+        if flag_value is not None:
+            return flag_value
+        if not sys.stdin.isatty():
+            print(f"error: --{prompt} required in non-interactive use",
+                  file=sys.stderr)
+            raise SystemExit(EXIT_RUNTIME)
+        return input(f"{prompt}: ")
+
+    try:
+        name = ask(args.name, "name")
+        category = ask(args.category, "category")
+        description = ask(args.description, "description")
+        domains = ask(args.domains, "domains").split(",")
+        impact = float(ask(args.impact, "impact"))
+        remediation = ask(args.remediation, "remediation")
+        rule_raw = ask(args.rule_json, "rule-json")
+        rule_payload = json.loads(Path(rule_raw).read_text(encoding="utf-8")
+                                  if Path(rule_raw).is_file() else rule_raw)
+        mode = author_failure_mode(
+            args.pair, name=name, category=category, description=description,
+            data_domains=[d.strip() for d in domains], impact=impact,
+            remediation=remediation, rule_payload=rule_payload,
+            probability=args.probability,
+            fingerprint_dir=args.fingerprint_dir,
+        )
+    except SystemExit as exc:
+        return int(exc.code)
+    except ValidationError as exc:
+        _print_validation_failure(exc, f"{args.pair}@draft", args.json)
+        return EXIT_REFUSED
+    except (FileNotFoundError, json.JSONDecodeError, ValueError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_RUNTIME
+
+    print(f"added {mode.id} '{mode.name}' (probability {mode.probability}, "
+          f"impact {mode.impact}) to the {args.pair} draft — publish with "
+          f"--bump minor")
+    return EXIT_OK
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="fingerprint",
@@ -370,6 +536,67 @@ def build_parser() -> argparse.ArgumentParser:
     p_report.add_argument("--runs-dir", default=str(DEFAULT_RUNS_DIR))
     p_report.add_argument("--json", action="store_true", help="JSON output")
     p_report.set_defaults(func=cmd_report)
+
+    p_review = sub.add_parser(
+        "review", help="Record a review and apply the probability write-back "
+                       "(spec §14.1–14.2; MS-2.4)"
+    )
+    p_review.add_argument("finding_id")
+    p_review.add_argument("--decision", required=True,
+                          choices=["confirmed", "false_positive"])
+    p_review.add_argument("--comment")
+    p_review.add_argument("--reviewer", default="analyst")
+    p_review.add_argument("--runs-dir", default=str(DEFAULT_RUNS_DIR))
+    p_review.add_argument("--fingerprint-dir", default=str(DEFAULT_FINGERPRINT_DIR))
+    p_review.add_argument("--json", action="store_true", help="JSON output")
+    p_review.set_defaults(func=cmd_review)
+
+    p_publish = sub.add_parser(
+        "publish", help="Finalize the draft fingerprint version (spec §14.5–14.6)"
+    )
+    p_publish.add_argument("--pair", required=True)
+    p_publish.add_argument("--bump", required=True,
+                           choices=["patch", "minor", "major"])
+    p_publish.add_argument("--changelog")
+    p_publish.add_argument("--fingerprint-dir", default=str(DEFAULT_FINGERPRINT_DIR))
+    p_publish.add_argument("--json", action="store_true", help="JSON output")
+    p_publish.set_defaults(func=cmd_publish)
+
+    p_diff = sub.add_parser("diff", help="Version diff (spec §14.5)")
+    p_diff.add_argument("--pair", required=True)
+    p_diff.add_argument("--from", required=True, help="from version")
+    p_diff.add_argument("--to", required=True, help="to version")
+    p_diff.add_argument("--fingerprint-dir", default=str(DEFAULT_FINGERPRINT_DIR))
+    p_diff.add_argument("--json", action="store_true", help="JSON output")
+    p_diff.set_defaults(func=cmd_diff)
+
+    p_history = sub.add_parser(
+        "history", help="Learning history: probability timeline per failure mode"
+    )
+    p_history.add_argument("--pair", required=True)
+    p_history.add_argument("--fm", help="filter to one failure mode id")
+    p_history.add_argument("--fingerprint-dir", default=str(DEFAULT_FINGERPRINT_DIR))
+    p_history.add_argument("--json", action="store_true", help="JSON output")
+    p_history.set_defaults(func=cmd_history)
+
+    p_author = sub.add_parser(
+        "author-mode", help="Draft a new failure mode + rule (spec §14.4); "
+                            "interactive when flags are omitted"
+    )
+    p_author.add_argument("--pair", required=True)
+    p_author.add_argument("--name")
+    p_author.add_argument("--category")
+    p_author.add_argument("--description")
+    p_author.add_argument("--domains", help="comma-separated data domains")
+    p_author.add_argument("--impact")
+    p_author.add_argument("--probability", type=float, default=0.30,
+                          help="initial probability (default 0.30)")
+    p_author.add_argument("--remediation")
+    p_author.add_argument("--rule-json",
+                          help="rule JSON, inline or a file path")
+    p_author.add_argument("--fingerprint-dir", default=str(DEFAULT_FINGERPRINT_DIR))
+    p_author.add_argument("--json", action="store_true", help="JSON output")
+    p_author.set_defaults(func=cmd_author_mode)
 
     return parser
 

@@ -1,0 +1,51 @@
+"""Learning loop (MS-2.4): reviews, probability write-back, versioning."""
+
+from src.learning.writeback import (
+    CLAMP_HIGH,
+    CLAMP_LOW,
+    K,
+    ReviewError,
+    ReviewOutcome,
+    apply_review,
+    bump_version,
+    compute_probability,
+    draft_path,
+    events_path,
+    load_or_create_draft,
+    read_events,
+    replay_events,
+    save_draft,
+)
+from src.learning.versioning import (
+    PublishError,
+    PublishResult,
+    author_failure_mode,
+    diff_fingerprints,
+    diff_versions,
+    next_fm_id,
+    publish_draft,
+)
+
+__all__ = [
+    "CLAMP_HIGH",
+    "CLAMP_LOW",
+    "K",
+    "PublishError",
+    "PublishResult",
+    "ReviewError",
+    "ReviewOutcome",
+    "apply_review",
+    "author_failure_mode",
+    "bump_version",
+    "compute_probability",
+    "diff_fingerprints",
+    "diff_versions",
+    "draft_path",
+    "events_path",
+    "load_or_create_draft",
+    "next_fm_id",
+    "publish_draft",
+    "read_events",
+    "replay_events",
+    "save_draft",
+]

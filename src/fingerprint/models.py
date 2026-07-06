@@ -314,6 +314,10 @@ class FailureMode(StrictModel):
     remediation: str
     history: FailureModeHistory = Field(default_factory=FailureModeHistory)
     origin: Origin
+    # The Beta-prior anchor for the §14.2 write-back: pinned to the mode's
+    # probability when it first enters a draft; None means the mode has never
+    # been written back (its current probability IS the prior).
+    seed_probability: float | None = Field(default=None, ge=0.05, le=0.99)
 
     @field_validator("detection_rules")
     @classmethod
@@ -462,6 +466,38 @@ class Finding(StrictModel):
     remediation: str | None = None
 
 
+class FindingReview(StrictModel):
+    """One analyst decision on one finding (spec §14.1). Reviews are
+    per-finding, attributed, and immutable once recorded."""
+
+    finding_id: str
+    run_id: str = Field(pattern=RUN_ID_PATTERN)
+    decision: Literal["confirmed", "false_positive"]
+    reviewer: str = "analyst"
+    comment: str | None = None
+    created_at: datetime | None = None
+
+
+class LearningEvent(StrictModel):
+    """The fingerprint mutation a review produced (spec §5.7, §14.2).
+    Append-only; formula inputs are recorded exactly (as strings) so the
+    write-back is reproducible from the event log alone (REQ-027)."""
+
+    pair_id: str
+    fm_id: str = Field(pattern=FM_ID_PATTERN)
+    finding_id: str
+    run_id: str = Field(pattern=RUN_ID_PATTERN)
+    decision: Literal["confirmed", "false_positive"]
+    reviewer: str
+    counters_before: FailureModeHistory
+    counters_after: FailureModeHistory
+    probability_before: float
+    probability_after: float
+    formula_inputs: dict[str, str]  # p_seed, k, confirmed_total, false_positive_total
+    draft_version: str = Field(pattern=SEMVER_PATTERN)
+    created_at: datetime | None = None
+
+
 class ReportRun(StrictModel):
     """Run header of findings.json (Appendix D.3)."""
 
@@ -556,6 +592,8 @@ _EXPORTED_MODELS: dict[str, type[BaseModel]] = {
     "FindingsReport": FindingsReport,
     "LayoutSpec": LayoutSpec,
     "DatasetRegistration": DatasetRegistration,
+    "FindingReview": FindingReview,
+    "LearningEvent": LearningEvent,
 }
 
 

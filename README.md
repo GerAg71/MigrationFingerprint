@@ -25,7 +25,9 @@ Session rules for Claude Code: `CLAUDE.md`.
 | MS-2.1 | `derived_recompute` (vested %, loan amortization), `encoding_check`, `sort_order_check` | ✅ done |
 | MS-2.2 | Fixed-width/copybook ingest; EBCDIC + COMP-3 decode; FM-006 active; EBCDIC sample pairs | ✅ done |
 | MS-2.3 | Self-contained `findings.html` + five reconciliation reports; CLI `report` | ✅ done |
-| MS-2.4 … MS-3.3 | see spec Ch. 23 | open |
+| MS-2.4 | Learning loop: review write-back (§14.2), draft/publish versioning, `diff`/`history`/`author-mode` | ✅ done |
+| **Phase 2 complete** | | |
+| MS-3.1 … MS-3.3 | see spec Ch. 23 | open |
 
 ## Setup
 
@@ -48,7 +50,18 @@ uv run fingerprint run --pair omni-zos-to-omni-linux \
 uv run fingerprint findings <run_id> [--severity SEV] [--status STATUS]
 uv run fingerprint show <finding_id>
 uv run fingerprint report <run_id> [--format json|html] [--recon plan|participant|loan|contribution|quality|all]
+uv run fingerprint review <finding_id> --decision confirmed|false_positive [--comment ...] [--reviewer ...]
+uv run fingerprint history --pair <pair_id> [--fm FM-001]
+uv run fingerprint publish --pair <pair_id> --bump patch|minor|major [--changelog ...]
+uv run fingerprint diff --pair <pair_id> --from 1.0.0 --to 1.0.1
+uv run fingerprint author-mode --pair <pair_id> [flags or interactive]
 ```
+
+Reviews apply the §14.2 Beta write-back (k=10, clamp [0.05, 0.99]) to a
+draft under `data/fingerprints/<pair>/draft/`; `publish` finalizes it as a
+new immutable version. Learning events append to
+`data/fingerprints/<pair>/learning_events.jsonl` and are replayable
+(REQ-027).
 
 A run writes `data/runs/<run_id>/`: `suite_snapshot.json` (persisted before
 execution, REQ-001), deterministic `findings.json` (REQ-009), per-finding

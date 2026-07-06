@@ -24,6 +24,16 @@ def make_datasets(dataset_name: str, source_rows: list[dict],
     )
 
 
+def copy_fingerprint_store(tmp_path: Path) -> Path:
+    """A private copy of data/fingerprints — learning-loop tests mutate the
+    store (drafts, events, new versions) and must never touch the repo's."""
+    import shutil
+
+    store = tmp_path / "fingerprints"
+    shutil.copytree(REPO / "data" / "fingerprints", store)
+    return store
+
+
 def load_seed_rules() -> dict:
     fp = Fingerprint.model_validate(json.loads(SEED_FILE.read_text(encoding="utf-8")))
     return {r.rule_id: r for r in fp.detection_rules}
