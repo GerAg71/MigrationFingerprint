@@ -58,12 +58,17 @@ CLEAN_CSVS: dict[str, str] = {
         "PLN001,P0001,PRETAX,2026-06,100.00,2026-06-15\n"
         "PLN001,P0002,MATCH,2026-06,50.00,2026-06-15\n"
     ),
+    # freshly originated loan (no payments yet): outstanding == origination,
+    # so the FM-001 recompute passes on the clean pair
     "loans": (
         "plan_id,participant_id,loan_id,origination_date,origination_amount,"
         "rate,term_months,payment_amount,payment_frequency,maturity_date,"
         "outstanding_balance,status\n"
-        "PLN001,P0001,L1,2024-01-15,12000.00,0.0525,60,228.00,MONTHLY,"
-        "2029-01-15,10432.17,ACTIVE\n"
+        "PLN001,P0001,L1,2026-06-15,10432.17,0.0525,60,228.00,MONTHLY,"
+        "2031-06-15,10432.17,ACTIVE\n"
+    ),
+    "loan_payments": (
+        "plan_id,participant_id,loan_id,payment_date,principal,interest\n"
     ),
     "vesting": (
         "plan_id,participant_id,schedule_id,service_years,vested_pct\n"

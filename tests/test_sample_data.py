@@ -24,8 +24,10 @@ RUN_ID = "RUN-2026-07-05-0001"
 EXPECTED_MANIFEST: dict[str, int] = {
     "RULE-BAL-TOTALS-001": 4,    # plan sum + P0007/P0013/P0018 participant sums
     "RULE-LOAN-BAL-001": 1,      # FM-001: L2 delta -33.62
+    "RULE-LOAN-RECOMP-001": 1,   # FM-001: L2 diverges from re-amortization (MS-2.1)
     "RULE-BAL-MT-001": 3,        # PRETAX +250.01, ROTH -250.00, MATCH net
     "RULE-BAL-INV-001": 4,       # F01, F02, F03, F04 subtotals
+    "RULE-VEST-PCT-001": 1,      # FM-002: P0017 stored 60% vs recomputed 80% (MS-2.1)
     "RULE-PCOUNT-001": 2,        # FM-009: ACTIVE +1, TERMINATED -1
     "RULE-DERIVED-TRACE-001": 1, # FM-003: svc_points on P0042
     "RULE-PROV-MATRIX-001": 2,   # FM-004: safe_harbor dropped + catch_up inverted
@@ -35,14 +37,14 @@ EXPECTED_MANIFEST: dict[str, int] = {
     "RULE-DUP-001": 2,           # FM-011: both duplicate-SSN rows
     "RULE-LOAN-CNT-001": 2,      # FM-014: count 6->5 + outstanding sum variance
     "RULE-LOAN-TERMS-001": 1,    # FM-014: L3 missing maturity
+    "RULE-ENC-001": 2,           # FM-005: mojibake first+last name P0044 (MS-2.1)
+    "RULE-SORT-001": 2,          # FM-005 digit-name boundary + FM-016 Ha#nk shift
     "RULE-NEG-001": 1,           # FM-018: MATCH -412.06
     "RULE-LEN-001": 1,           # FM-016: 41-char address
+    "RULE-CHAR-001": 4,          # FM-016 '#' + P0044 mojibake x2 + P0115 digit name
     "RULE-DATEVAL-001": 2,       # FM-017 term<hire + P0009 epoch term<hire
 }
-PHASE2_SKIPPED = {
-    "RULE-VEST-PCT-001", "RULE-LOAN-RECOMP-001", "RULE-PACKED-001",
-    "RULE-ENC-001", "RULE-CHAR-001", "RULE-SORT-001",
-}
+PHASE2_SKIPPED = {"RULE-PACKED-001"}  # EBCDIC decode lands in MS-2.2
 
 
 def run_pair(plan: str, tmp_path: Path):
@@ -59,7 +61,7 @@ def test_clean_pair_zero_findings(tmp_path):
     result = run_pair("PLN-CLEAN-01", tmp_path)
     assert result.findings == []
     summary = result.report.run.summary
-    assert (summary.rules_run, summary.passed, summary.failed) == (17, 17, 0)
+    assert (summary.rules_run, summary.passed, summary.failed) == (22, 22, 0)
 
 
 def test_seeded_pair_matches_manifest_exactly(tmp_path):
@@ -81,8 +83,9 @@ def test_seeded_pair_matches_manifest_exactly(tmp_path):
     assert skipped == PHASE2_SKIPPED
 
     summary = result.report.run.summary
-    assert summary.records_affected == 32
-    assert summary.severity_mix == {"CRITICAL": 3, "HIGH": 8, "MEDIUM": 5}
+    assert summary.records_affected == 42
+    assert summary.severity_mix == {"CRITICAL": 3, "HIGH": 10, "MEDIUM": 6,
+                                    "LOW": 2}
 
 
 def test_seeded_defect_details(tmp_path):
@@ -116,6 +119,21 @@ def test_seeded_defect_details(tmp_path):
     century = next(r for r in by_rule["RULE-DATE-001"].sample_records
                    if r.target and r.target.get("dob") == "1897-03-12")
     assert century.keys["participant_id"] == "P0008"
+
+    # MS-2.1 detections
+    vest = by_rule["RULE-VEST-PCT-001"].sample_records[0]
+    assert vest.keys["participant_id"] == "P0017"
+    assert vest.delta == Decimal("-0.2000")
+
+    recomp = by_rule["RULE-LOAN-RECOMP-001"].sample_records[0]
+    assert recomp.keys["loan_id"] == "L2"
+    assert recomp.delta == Decimal("-33.62")
+
+    enc_fields = {list(r.target)[0] for r in by_rule["RULE-ENC-001"].sample_records}
+    assert enc_fields == {"first_name", "last_name"}  # JosÃ© + RamÃ­rez
+
+    sort_checks = by_rule["RULE-SORT-001"].sample_records
+    assert any("0degaard" in r.target["value"] for r in sort_checks)
 
 
 def test_regeneration_is_byte_identical(tmp_path):

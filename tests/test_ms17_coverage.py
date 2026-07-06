@@ -30,6 +30,9 @@ TYPE_FIXTURES = [
     ("field_compare", "RULE-LOAN-BAL-001", "loans"),
     ("count_balance", "RULE-BAL-MT-001", "balances"),
     ("referential", "RULE-DUP-001", "participants"),
+    ("derived_recompute", "RULE-VEST-PCT-001", "vesting"),
+    ("encoding_check", "RULE-ENC-001", "participants"),
+    ("sort_order_check", "RULE-SORT-001", "participants"),
 ]
 
 
@@ -59,11 +62,15 @@ def test_fixture_coverage_matches_implemented_executors():
 def test_every_executor_docstring_names_its_failure_modes():
     """Ch. 24.5: docstring names the failure mode(s) the rule type serves."""
     import src.rules.count_balance
+    import src.rules.derived_recompute
+    import src.rules.encoding_check
     import src.rules.field_compare
     import src.rules.referential
+    import src.rules.sort_order_check
 
     for module in (src.rules.field_compare, src.rules.count_balance,
-                   src.rules.referential):
+                   src.rules.referential, src.rules.derived_recompute,
+                   src.rules.encoding_check, src.rules.sort_order_check):
         assert module.__doc__ and "FM-0" in module.__doc__, module.__name__
 
 
@@ -88,6 +95,6 @@ def test_perf_smoke_200_participants_under_60s(tmp_path):
     )
     elapsed = time.perf_counter() - started
 
-    assert result.report.run.summary.rules_run == 17
-    assert len(result.findings) == 16  # same manifest shape at 200 participants
+    assert result.report.run.summary.rules_run == 22
+    assert len(result.findings) == 21  # same manifest shape at 200 participants
     assert elapsed < 60, f"REQ-015 envelope exceeded: {elapsed:.1f}s"

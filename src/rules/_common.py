@@ -14,6 +14,11 @@ from decimal import Decimal, InvalidOperation
 NULL_DISPLAY = "(null)"
 
 
+class UnsupportedRuleTypeError(NotImplementedError):
+    """No executor (or recomputer) implemented for this rule yet — the
+    runner records the rule as skipped rather than failing the run."""
+
+
 @dataclass(frozen=True)
 class ExecutionContext:
     """Deterministic run-level inputs to executors.

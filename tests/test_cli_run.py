@@ -26,20 +26,21 @@ def test_run_clean_prints_green_scoreboard(tmp_path, capsys):
     rc = main(run_args(source_dir, target_dir, tmp_path / "runs"))
     out = capsys.readouterr().out
     assert rc == 0
-    assert "17 run, 17 passed, 0 failed, 6 skipped" in out
+    assert "22 run, 22 passed, 0 failed, 1 skipped" in out
     assert "Records affected: 0" in out
     assert "Severity mix: none" in out
 
 
 def test_run_with_findings_still_exits_0(tmp_path, capsys):
     """CLI_SPEC: a run that produced findings still exits 0 — the run succeeded.
-    The loan mutation trips both the field compare and the plan-level sum."""
+    The loan mutation trips the field compare, the re-amortization recompute
+    (MS-2.1), and the plan-level sum."""
     source_dir, target_dir = write_extract_dirs(tmp_path, seeded_mutations())
     rc = main(run_args(source_dir, target_dir, tmp_path / "runs"))
     out = capsys.readouterr().out
     assert rc == 0
-    assert "2 failed" in out
-    assert "Severity mix: HIGH=2" in out
+    assert "3 failed" in out
+    assert "Severity mix: HIGH=3" in out
 
 
 def test_fail_on_findings_gates_exit_2(tmp_path, capsys):
@@ -75,8 +76,8 @@ def test_run_json_output(tmp_path, capsys):
     rc = main(run_args(source_dir, target_dir, tmp_path / "runs", "--json"))
     payload = json.loads(capsys.readouterr().out)
     assert rc == 0
-    assert payload["findings"] == 2
-    assert payload["summary"]["failed"] == 2
+    assert payload["findings"] == 3
+    assert payload["summary"]["failed"] == 3
     assert payload["run_id"].startswith("RUN-")
 
 
@@ -102,7 +103,7 @@ def test_findings_severity_filter(tmp_path, capsys):
                "--runs-dir", str(tmp_path / "runs")])
     out = capsys.readouterr().out
     assert rc == 0
-    assert "0 of 2 shown" in out
+    assert "0 of 3 shown" in out
 
 
 def test_show_prints_sample_records_and_remediation(tmp_path, capsys):

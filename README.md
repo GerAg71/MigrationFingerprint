@@ -22,7 +22,8 @@ Session rules for Claude Code: `CLAUDE.md`.
 | MS-1.6 | Synthetic sample data: clean pair (zero noise) + seeded pair with exact REQ-032 manifest | ✅ done |
 | MS-1.7 | Coverage audit: golden fixtures per rule type, REQ-015 perf smoke, CI workflow (95% line coverage) | ✅ done |
 | **Phase 1 complete** | | |
-| MS-2.1 … MS-3.3 | see spec Ch. 23 | open |
+| MS-2.1 | `derived_recompute` (vested %, loan amortization), `encoding_check`, `sort_order_check` | ✅ done |
+| MS-2.2 … MS-3.3 | see spec Ch. 23 | open |
 
 ## Setup
 

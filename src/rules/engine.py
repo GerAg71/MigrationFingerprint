@@ -23,8 +23,15 @@ from src.fingerprint.models import (
     Finding,
 )
 from src.ingest.registration import RegistrationIndex
-from src.rules import count_balance, field_compare, referential
-from src.rules._common import ExecutionContext
+from src.rules import (
+    count_balance,
+    derived_recompute,
+    encoding_check,
+    field_compare,
+    referential,
+    sort_order_check,
+)
+from src.rules._common import ExecutionContext, UnsupportedRuleTypeError
 
 MAX_INLINE_SAMPLES = 25
 
@@ -32,12 +39,10 @@ EXECUTORS = {
     "field_compare": field_compare.execute,
     "count_balance": count_balance.execute,
     "referential": referential.execute,
-    # derived_recompute, encoding_check, sort_order_check arrive in MS-2.1
+    "derived_recompute": derived_recompute.execute,
+    "encoding_check": encoding_check.execute,
+    "sort_order_check": sort_order_check.execute,
 }
-
-
-class UnsupportedRuleTypeError(NotImplementedError):
-    pass
 
 
 @dataclass
@@ -85,9 +90,7 @@ def execute(
     executor = EXECUTORS.get(rule.type)
     if executor is None:
         raise UnsupportedRuleTypeError(
-            f"no executor for rule type {rule.type!r} "
-            f"(rule {rule.rule_id}; derived_recompute/encoding_check/"
-            f"sort_order_check land in MS-2.1)"
+            f"no executor for rule type {rule.type!r} (rule {rule.rule_id})"
         )
     affected, detail = executor(rule, datasets, context or ExecutionContext())
     return RuleOutcome(rule=rule, affected=list(affected), detail=detail)

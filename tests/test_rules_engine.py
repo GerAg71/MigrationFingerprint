@@ -28,11 +28,11 @@ def keys_rule():
     })
 
 
-def test_unsupported_type_raises_with_milestone_pointer():
+def test_unsupported_recomputer_raises_with_milestone_pointer():
     rules = load_seed_rules()
-    with pytest.raises(UnsupportedRuleTypeError, match="MS-2.1"):
-        execute(rules["RULE-VEST-PCT-001"],  # derived_recompute
-                make_datasets("vesting", [], []))
+    with pytest.raises(UnsupportedRuleTypeError, match="MS-2.2"):
+        execute(rules["RULE-PACKED-001"],  # packed_decode_control_total
+                make_datasets("loans", [], []))
 
 
 def test_pass_produces_no_finding_but_reportable_outcome():

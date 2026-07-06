@@ -14,6 +14,9 @@ from __future__ import annotations
 
 import random
 from datetime import date, timedelta
+from decimal import Decimal
+
+from src.rules.derived_recompute import simulate_level_payments, vested_pct
 
 SEED = 20260705
 
@@ -43,15 +46,23 @@ BALANCE_ANCHORS = [
     (18, "MATCH", "F04", "1200.00"),   # FM-018 negative balance
 ]
 
+# Loan truth is amortization-consistent: outstanding balances and the
+# loan_payments history are produced by the same amortizer the FM-001
+# recompute rule uses (interest-first), so the clean pair recomputes clean.
 LOANS = [
-    # participant, loan, orig date, orig amt, rate, months, payment, maturity, outstanding
-    (3, "L1", "2023-02-15", "8000.00", "0.0450", "48", "182.50", "2027-02-15", "4321.09"),
-    (21, "L2", "2024-01-15", "12000.00", "0.0525", "60", "228.00", "2029-01-15", "10432.17"),
-    (33, "L3", "2022-07-01", "5000.00", "0.0400", "36", "147.60", "2025-07-01", "1890.44"),
-    (47, "L4", "2025-03-10", "15000.00", "0.0575", "60", "288.10", "2030-03-10", "13775.62"),
-    (71, "L5", "2023-11-20", "6500.00", "0.0500", "48", "149.70", "2027-11-20", "4102.33"),
-    (99, "L6", "2024-06-05", "7000.00", "0.0475", "48", "160.55", "2028-06-05", "5000.00"),
+    # participant, loan, orig date, orig amt, rate, months, payment, maturity, payments made
+    (3, "L1", "2023-02-15", "8000.00", "0.0450", "48", "182.50", "2027-02-15", 24),
+    (21, "L2", "2024-01-15", "12000.00", "0.0525", "60", "228.00", "2029-01-15", 18),
+    (33, "L3", "2022-07-01", "5000.00", "0.0400", "36", "147.60", "2025-07-01", 30),
+    (47, "L4", "2025-03-10", "15000.00", "0.0575", "60", "288.10", "2030-03-10", 12),
+    (71, "L5", "2023-11-20", "6500.00", "0.0500", "48", "149.70", "2027-11-20", 20),
+    (99, "L6", "2024-06-05", "7000.00", "0.0475", "48", "160.55", "2028-06-05", 15),
 ]
+
+
+def _add_months(start: date, months: int) -> date:
+    month_index = start.month - 1 + months
+    return date(start.year + month_index // 12, month_index % 12 + 1, start.day)
 
 PERIODS = ("2026-05", "2026-06")  # 2026-06 is the last payroll cycle
 
@@ -69,11 +80,9 @@ def _status(i: int) -> str:
 
 
 def _vested_pct(service_years: float) -> str:
-    """Graded 6-year schedule: 0% before 2 years of service, then 20% per
-    completed year to 100% at 6 (spec §25.2)."""
-    if service_years < 2:
-        return "0.0000"
-    return f"{min((int(service_years) - 1) * 0.2, 1.0):.4f}"
+    """GRADED6 per the rule engine's own schedule (src/rules/
+    derived_recompute.py), so the clean pair recomputes clean."""
+    return f"{vested_pct('GRADED6', Decimal(str(service_years))):.4f}"
 
 
 def _amount(rng: random.Random) -> str:
@@ -122,6 +131,9 @@ def build_truth(plan_id: str, participants_n: int = 120) -> dict[str, list[dict[
     by_pid["P0020"]["term_date"] = "2023-08-01"
     by_pid["P0044"]["first_name"] = "Jose"
     by_pid["P0044"]["last_name"] = "Ramirez"
+    # the participants extract is ordering-sensitive (RULE-SORT-001): emitted
+    # sorted by (last_name, first_name), stable on participant number
+    participants.sort(key=lambda r: (r["last_name"], r["first_name"]))
 
     balances = []
     for i in range(1, participants_n + 1):
@@ -161,14 +173,27 @@ def build_truth(plan_id: str, participants_n: int = 120) -> dict[str, list[dict[
                   and r["money_type_code"] == "MATCH" and r["period"] == "2026-06")
     anchor["amount"] = "150.00"  # FM-015 target
 
-    loans = [{
-        "plan_id": plan_id, "participant_id": _pid(pnum), "loan_id": loan_id,
-        "origination_date": orig_date, "origination_amount": orig_amt,
-        "rate": rate, "term_months": months, "payment_amount": payment,
-        "payment_frequency": "MONTHLY", "maturity_date": maturity,
-        "outstanding_balance": outstanding, "status": "ACTIVE",
-    } for pnum, loan_id, orig_date, orig_amt, rate, months, payment,
-        maturity, outstanding in LOANS]
+    loans = []
+    loan_payments = []
+    for pnum, loan_id, orig_date, orig_amt, rate, months, payment, maturity, \
+            payments_made in LOANS:
+        schedule, balance = simulate_level_payments(
+            Decimal(orig_amt), Decimal(rate), Decimal(payment), payments_made)
+        origination = date.fromisoformat(orig_date)
+        for k, (principal, interest) in enumerate(schedule, start=1):
+            loan_payments.append({
+                "plan_id": plan_id, "participant_id": _pid(pnum),
+                "loan_id": loan_id,
+                "payment_date": _add_months(origination, k).isoformat(),
+                "principal": f"{principal:.2f}", "interest": f"{interest:.2f}",
+            })
+        loans.append({
+            "plan_id": plan_id, "participant_id": _pid(pnum), "loan_id": loan_id,
+            "origination_date": orig_date, "origination_amount": orig_amt,
+            "rate": rate, "term_months": months, "payment_amount": payment,
+            "payment_frequency": "MONTHLY", "maturity_date": maturity,
+            "outstanding_balance": f"{balance:.2f}", "status": "ACTIVE",
+        })
 
     vesting = []
     for i in range(1, participants_n + 1):
@@ -181,5 +206,6 @@ def build_truth(plan_id: str, participants_n: int = 120) -> dict[str, list[dict[
 
     return {
         "plans": plans, "participants": participants, "balances": balances,
-        "contributions": contributions, "loans": loans, "vesting": vesting,
+        "contributions": contributions, "loans": loans,
+        "loan_payments": loan_payments, "vesting": vesting,
     }

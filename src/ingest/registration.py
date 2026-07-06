@@ -130,12 +130,25 @@ class RegistrationIndex:
 
     def missing_for_rule(self, rule: DetectionRule) -> list[str]:
         """Datasets the rule declares that are not registered, as
-        'side/dataset' strings; empty means the rule may execute (REQ-021)."""
+        'side/dataset' strings; empty means the rule may execute (REQ-021).
+
+        derived_recompute inputs may name additional canonical datasets
+        (undotted values, e.g. "loan_payments"); those are source-side
+        dependencies and gate the rule too."""
+        from src.ingest.canonical import CANONICAL_DATASETS
+
         missing = []
         if rule.source_dataset and not self.is_registered("source", rule.source_dataset):
             missing.append(f"source/{rule.source_dataset}")
         if not self.is_registered("target", rule.target_dataset):
             missing.append(f"target/{rule.target_dataset}")
+        if rule.type == "derived_recompute":
+            for ref in rule.params.inputs.values():
+                if "." in ref or ref not in CANONICAL_DATASETS:
+                    continue
+                gap = f"source/{ref}"
+                if not self.is_registered("source", ref) and gap not in missing:
+                    missing.append(gap)
         return missing
 
     def missing_for_rules(self, rules: Iterable[DetectionRule]) -> dict[str, list[str]]:

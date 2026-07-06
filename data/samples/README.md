@@ -16,22 +16,23 @@ range, all names are fake, plans are 120 participants.
   `tests/datagen/mutators.py` (the manifest is code, spec §25.4).
 
 Shape per spec §25.2: 120 participants, money types PRETAX/ROTH/MATCH,
-investments F01–F05, 6 loans, graded 6-year vesting.
+investments F01–F05, 6 loans with amortization-consistent payment histories
+(`loan_payments`), graded 6-year vesting. The participants extract is
+ordering-sensitive: emitted sorted by (last_name, first_name).
 
 ## Seeded defects (PLN-SEED-01 target)
 
-Phase 1 rules run today; phase 2 rules (`derived_recompute`,
-`encoding_check`, `sort_order_check`) execute from MS-2.1, and the
-fixed-width/EBCDIC variant carrying FM-006 is emitted from MS-2.2.
+All rule types execute since MS-2.1 except `packed_decode_control_total`
+(FM-006), which needs the fixed-width/EBCDIC variant emitted from MS-2.2.
 
 | FM | Defect | Where | Detected by | Phase |
 |----|--------|-------|-------------|-------|
-| FM-001 | Loan L2 balance short by 33.62 | loans P0021/L2 | RULE-LOAN-BAL-001 (+ sum in RULE-LOAN-CNT-001) | 1 |
-| FM-002 | Vested 60% vs recomputed 80% | vesting P0017 | RULE-VEST-PCT-001 | 2 |
+| FM-001 | Loan L2 balance short by 33.62 | loans P0021/L2 | RULE-LOAN-BAL-001, RULE-LOAN-RECOMP-001 (+ sum in RULE-LOAN-CNT-001) | 1 |
+| FM-002 | Vested 60% vs recomputed 80% | vesting P0017 | RULE-VEST-PCT-001 | 2 (MS-2.1) |
 | FM-003 | `svc_points` value with no mapping provenance | participants P0042 | RULE-DERIVED-TRACE-001 | 1 |
 | FM-004 | Safe-harbor flag dropped; catch-up inverted | plans | RULE-PROV-MATRIX-001 | 1 |
-| FM-005 | Mojibake name `JosÃ© RamÃ­rez`; collation divergence | participants P0044 | RULE-ENC-001 / RULE-SORT-001 | 2 |
-| FM-006 | Packed decode ×100; sign nibble flipped | EBCDIC variant (MS-2.2) | RULE-PACKED-001 | 2 |
+| FM-005 | Mojibake `JosÃ© RamÃ­rez` (P0044); digit-leading surname `0degaard` at the EBCDIC position (P0115) | participants | RULE-ENC-001, RULE-CHAR-001, RULE-SORT-001 | 2 (MS-2.1) |
+| FM-006 | Packed decode ×100; sign nibble flipped | EBCDIC variant (MS-2.2) | RULE-PACKED-001 | 2 (MS-2.2) |
 | FM-007 | Plan PRETAX total off by 0.01 | balances P0007 | RULE-BAL-TOTALS-001 (drill-down) | 1 |
 | FM-008 | DOB 1897 (century window); zero date as 0001-01-01 | participants P0008, P0009 | RULE-DATE-001 | 1 |
 | FM-009 | TERMINATED counted ACTIVE | participants P0010 | RULE-PCOUNT-001 | 1 |
@@ -41,13 +42,13 @@ fixed-width/EBCDIC variant carrying FM-006 is emitted from MS-2.2.
 | FM-013 | Fund F03 subtotal +75.25 | balances P0013 | RULE-BAL-INV-001 | 1 |
 | FM-014 | Loan L6 dropped; L3 missing maturity | loans | RULE-LOAN-CNT-001, RULE-LOAN-TERMS-001 | 1 |
 | FM-015 | Employer MATCH +50.00, last payroll cycle | contributions P0002 | RULE-CONTRIB-001 | 1 |
-| FM-016 | 41-char address; `#` in a name | participants P0060, P0061 | RULE-LEN-001 (1) / RULE-CHAR-001 (2) | 1+2 |
+| FM-016 | 41-char address; `#` in a name | participants P0060, P0061 | RULE-LEN-001, RULE-CHAR-001 (also shifts one RULE-SORT-001 boundary) | 1 + 2 (MS-2.1) |
 | FM-017 | Termination 2019-05-01 precedes hire 2021-03-15 | participants P0020 | RULE-DATEVAL-001 (also RULE-DATE-001 compare) | 1 |
 | FM-018 | Negative MATCH balance −412.06 | balances P0018 | RULE-NEG-001 (+ totals rules) | 1 |
 
-## Expected Phase-1 run over PLN-SEED-01 (REQ-032)
+## Expected run over PLN-SEED-01 (REQ-032, as of MS-2.1)
 
 One defect can fire several rules — the totals rules intentionally backstop
-the subtotal modes. The exact rule-level manifest (16 findings, 32 affected
-records, 1 pass, 6 skipped) is asserted by
+the subtotal modes. The exact rule-level manifest (21 findings, 42 affected
+records, 1 pass, 1 skipped) is asserted by
 `tests/test_sample_data.py::test_seeded_pair_matches_manifest_exactly`.

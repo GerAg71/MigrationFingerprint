@@ -45,10 +45,10 @@ def test_clean_pair_green_scoreboard(tmp_path):
     assert summary.failed == 0
     assert summary.records_affected == 0
     assert summary.severity_mix == {}
-    assert summary.rules_run == 17  # 23 seed rules - 6 awaiting MS-2.1 executors
-    assert summary.passed == 17
+    assert summary.rules_run == 22  # 23 seed rules - RULE-PACKED-001 (MS-2.2)
+    assert summary.passed == 22
     skipped = [i for i in result.report.suite if i.outcome == "skipped"]
-    assert len(skipped) == 6
+    assert len(skipped) == 1
     assert result.run.status == "review"
 
 
@@ -58,33 +58,36 @@ def test_passes_reported_not_silent(tmp_path):
     outcomes = {i.rule_id: i.outcome for i in result.report.suite}
     assert len(result.report.suite) == 23
     assert outcomes["RULE-BAL-TOTALS-001"] == "pass"
-    assert outcomes["RULE-VEST-PCT-001"] == "skipped"  # derived_recompute, MS-2.1
+    assert outcomes["RULE-VEST-PCT-001"] == "pass"     # executes since MS-2.1
+    assert outcomes["RULE-PACKED-001"] == "skipped"    # EBCDIC decode, MS-2.2
 
 
 # --- seeded defects: findings in priority order ---------------------------------
 
 
 def test_seeded_defects_surface_in_priority_order(tmp_path):
-    """The loan-balance mutation legitimately trips two rules: the field
-    compare AND the plan-level outstanding-balance sum (RULE-LOAN-CNT-001)."""
+    """The loan-balance mutation legitimately trips three rules since
+    MS-2.1: the field compare, the re-amortization recompute, and the
+    plan-level outstanding-balance sum."""
     result = clean_run(tmp_path, target_mutations=seeded_mutations())
     assert [f.rule_id for f in result.findings] == [
-        "RULE-LOAN-BAL-001",  # FM-001, score 0.63,   suite order 2
-        "RULE-DUP-001",       # FM-011, score 0.34,   suite order 15
-        "RULE-LOAN-CNT-001",  # FM-014, score 0.3375, suite order 16
+        "RULE-LOAN-BAL-001",     # FM-001, score 0.63,   suite order 2
+        "RULE-LOAN-RECOMP-001",  # FM-001, score 0.63,   suite order 3
+        "RULE-DUP-001",          # FM-011, score 0.34,   suite order 15
+        "RULE-LOAN-CNT-001",     # FM-014, score 0.3375, suite order 16
     ]
     assert [f.finding_id for f in result.findings] == [
-        f"{RUN_ID}-F001", f"{RUN_ID}-F002", f"{RUN_ID}-F003",
+        f"{RUN_ID}-F001", f"{RUN_ID}-F002", f"{RUN_ID}-F003", f"{RUN_ID}-F004",
     ]
     loan = result.findings[0]
     assert loan.sample_records[0].delta == Decimal("-33.62")
     assert loan.remediation.startswith("Recompute amortization")
-    dup = result.findings[1]
+    dup = result.findings[2]
     assert dup.records_affected == 2  # both rows of the duplicate group
     summary = result.report.run.summary
-    assert summary.failed == 3
-    assert summary.severity_mix == {"HIGH": 3}
-    assert summary.records_affected == 4
+    assert summary.failed == 4
+    assert summary.severity_mix == {"HIGH": 4}
+    assert summary.records_affected == 5
 
 
 def test_drilldown_csv_written_per_finding(tmp_path):
@@ -156,7 +159,7 @@ def test_report_records_version_and_dataset_hashes(tmp_path):
     assert set(header.dataset_hashes) == {
         f"{side}/{name}" for side in ("source", "target")
         for name in ("plans", "participants", "balances", "contributions",
-                     "loans", "vesting")
+                     "loans", "loan_payments", "vesting")
     }
     assert all(h.startswith("sha256:") for h in header.dataset_hashes.values())
     # identical clean files on both sides -> identical hashes per dataset

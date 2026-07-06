@@ -13,6 +13,7 @@ tests/test_sample_data.py.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import Callable
 
 Truth = dict[str, list[dict[str, str]]]
@@ -34,7 +35,9 @@ class SeededDefect:
 
 
 def _fm001(t: Truth) -> None:  # loan balance short by 33.62
-    _row(t, "loans", loan_id="L2")["outstanding_balance"] = "10398.55"
+    row = _row(t, "loans", loan_id="L2")
+    row["outstanding_balance"] = str(
+        Decimal(row["outstanding_balance"]) - Decimal("33.62"))
 
 
 def _fm002(t: Truth) -> None:  # vested 60% vs recomputed 80% (phase 2 rule)
@@ -52,10 +55,15 @@ def _fm004(t: Truth) -> None:  # safe harbor dropped; catch-up inverted
     plan["catch_up_eligible"] = "N"
 
 
-def _fm005(t: Truth) -> None:  # mojibake name (phase 2 rule)
+def _fm005(t: Truth) -> None:
+    """Mojibake name, plus the digit-vs-letter collation defect: the last
+    participant of the name-sorted extract gets a digit-leading surname —
+    correct under EBCDIC collation (digits after letters), out of order
+    under ASCII at exactly that boundary."""
     row = _row(t, "participants", participant_id="P0044")
     row["first_name"] = "JosÃ©"
     row["last_name"] = "RamÃ­rez"
+    _row(t, "participants", participant_id="P0115")["last_name"] = "0degaard"
 
 
 def _fm006(t: Truth) -> None:  # packed-decimal decode faults: EBCDIC variant
@@ -128,7 +136,7 @@ SEEDED_DEFECTS: list[SeededDefect] = [
     SeededDefect("FM-002", 2, "P0017 vested 60% vs recomputed 80%", _fm002),
     SeededDefect("FM-003", 1, "svc_points populated with no mapping provenance (P0042)", _fm003),
     SeededDefect("FM-004", 1, "Safe-harbor flag dropped; catch-up eligibility inverted", _fm004),
-    SeededDefect("FM-005", 2, "Mojibake name for P0044; collation divergence", _fm005),
+    SeededDefect("FM-005", 2, "Mojibake name (P0044); digit-vs-letter collation divergence (P0115)", _fm005),
     SeededDefect("FM-006", 2, "Packed decode x100 + sign flip (EBCDIC variant, MS-2.2)", _fm006),
     SeededDefect("FM-007", 1, "Plan-level PRETAX total off by 0.01 (P0007)", _fm007),
     SeededDefect("FM-008", 1, "DOB century-window 1897; zero date as 0001-01-01", _fm008),
