@@ -157,3 +157,13 @@ def apply_mutations(truth: Truth) -> None:
     """Apply every seeded defect to a (target-side) truth, in FM order."""
     for defect in SEEDED_DEFECTS:
         defect.mutate(truth)
+
+
+def apply_ebcdic_mutations(truth: Truth) -> None:
+    """FM-006 defects for the EBCDIC variant (spec §25.3, MS-2.2): the
+    converted system decoded one packed amount with the implied decimal lost
+    (value x100) and read one positive sign nibble F as D (value negated)."""
+    l4 = _row(truth, "loans", loan_id="L4")
+    l4["outstanding_balance"] = str(Decimal(l4["outstanding_balance"]) * 100)
+    l5 = _row(truth, "loans", loan_id="L5")
+    l5["outstanding_balance"] = str(-Decimal(l5["outstanding_balance"]))

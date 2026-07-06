@@ -26,7 +26,7 @@ def test_run_clean_prints_green_scoreboard(tmp_path, capsys):
     rc = main(run_args(source_dir, target_dir, tmp_path / "runs"))
     out = capsys.readouterr().out
     assert rc == 0
-    assert "22 run, 22 passed, 0 failed, 1 skipped" in out
+    assert "23 run, 23 passed, 0 failed, 0 skipped" in out
     assert "Records affected: 0" in out
     assert "Severity mix: none" in out
 

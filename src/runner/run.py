@@ -90,13 +90,41 @@ def _dump_json_bytes(payload: object) -> bytes:
 
 
 def _discover_datasets(directory: Path) -> dict[str, Path]:
-    """Every <canonical>.csv present in the directory (CLI_SPEC run step 2)."""
+    """Every <canonical>.csv or <canonical>.dat in the directory (CLI_SPEC
+    run step 2). Both formats for one dataset is ambiguous — refuse."""
     found = {}
     for name in sorted(CANONICAL_DATASETS):
-        candidate = directory / f"{name}.csv"
-        if candidate.is_file():
-            found[name] = candidate
+        csv_path = directory / f"{name}.csv"
+        dat_path = directory / f"{name}.dat"
+        if csv_path.is_file() and dat_path.is_file():
+            raise ValueError(
+                f"ambiguous dataset {name!r}: both {csv_path.name} and "
+                f"{dat_path.name} present in {directory}"
+            )
+        if csv_path.is_file():
+            found[name] = csv_path
+        elif dat_path.is_file():
+            found[name] = dat_path
     return found
+
+
+def _load_layout(layout_dir: Path | None, dataset_name: str, dat_path: Path):
+    """LayoutSpec for a fixed-width extract: <layout_dir>/<dataset>.json."""
+    from src.fingerprint.models import LayoutSpec
+
+    if layout_dir is None:
+        raise FileNotFoundError(
+            f"{dat_path.name} is fixed-width and needs a LayoutSpec: pass "
+            f"--layout-dir containing {dataset_name}.json (spec §10.2)"
+        )
+    layout_path = Path(layout_dir) / f"{dataset_name}.json"
+    if not layout_path.is_file():
+        raise FileNotFoundError(
+            f"no LayoutSpec for {dat_path.name}: expected {layout_path}"
+        )
+    return LayoutSpec.model_validate(
+        json.loads(layout_path.read_text(encoding="utf-8"))
+    )
 
 
 def _load_mapping_manifests(fingerprint: Fingerprint, base_dir: Path) -> frozenset[str]:
@@ -141,6 +169,7 @@ def run(
     runs_dir: Path | str = DEFAULT_RUNS_DIR,
     run_id: str | None = None,
     base_dir: Path | str = Path("."),
+    layout_dir: Path | str | None = None,
 ) -> RunResult:
     """Execute one conversion run (spec §12.1). Raises pydantic
     ValidationError / FingerprintDirectoryError (bad fingerprint, exit 3),
@@ -168,6 +197,7 @@ def run(
         result = _ingest_and_execute(
             fingerprint, suite, source_dir, target_dir, run_dir, run_id,
             scope, base_dir,
+            Path(layout_dir) if layout_dir is not None else None,
         )
     except Exception as exc:
         _persist_failed_run(run_dir, run_id, pair_id, fingerprint.version,
@@ -217,7 +247,7 @@ def _persist_failed_run(run_dir, run_id, pair_id, version, scope,
 
 
 def _ingest_and_execute(fingerprint, suite, source_dir, target_dir, run_dir,
-                        run_id, scope, base_dir):
+                        run_id, scope, base_dir, layout_dir=None):
     # --- ingest + register (§10.4); rejects quarantine under ingest/
     index = RegistrationIndex()
     manifest = RunDatasetManifest()
@@ -225,12 +255,15 @@ def _ingest_and_execute(fingerprint, suite, source_dir, target_dir, run_dir,
         discovered = _discover_datasets(directory)
         if not discovered:
             raise FileNotFoundError(
-                f"no canonical datasets (<name>.csv) found in {side} dir {directory}"
+                f"no canonical datasets (<name>.csv or <name>.dat) found in "
+                f"{side} dir {directory}"
             )
         for name, path in discovered.items():
+            layout = (_load_layout(layout_dir, name, path)
+                      if path.suffix == ".dat" else None)
             ingested = register_dataset(
                 path, run_id=run_id, side=side, dataset_name=name,
-                rejects_dir=run_dir / "ingest",
+                rejects_dir=run_dir / "ingest", layout=layout,
             )
             index.add(ingested)
             getattr(manifest, side)[name] = str(path)

@@ -45,10 +45,10 @@ def test_clean_pair_green_scoreboard(tmp_path):
     assert summary.failed == 0
     assert summary.records_affected == 0
     assert summary.severity_mix == {}
-    assert summary.rules_run == 22  # 23 seed rules - RULE-PACKED-001 (MS-2.2)
-    assert summary.passed == 22
+    assert summary.rules_run == 23  # every seed rule executes since MS-2.2
+    assert summary.passed == 23
     skipped = [i for i in result.report.suite if i.outcome == "skipped"]
-    assert len(skipped) == 1
+    assert len(skipped) == 0
     assert result.run.status == "review"
 
 
@@ -58,8 +58,8 @@ def test_passes_reported_not_silent(tmp_path):
     outcomes = {i.rule_id: i.outcome for i in result.report.suite}
     assert len(result.report.suite) == 23
     assert outcomes["RULE-BAL-TOTALS-001"] == "pass"
-    assert outcomes["RULE-VEST-PCT-001"] == "pass"     # executes since MS-2.1
-    assert outcomes["RULE-PACKED-001"] == "skipped"    # EBCDIC decode, MS-2.2
+    assert outcomes["RULE-VEST-PCT-001"] == "pass"  # executes since MS-2.1
+    assert outcomes["RULE-PACKED-001"] == "pass"    # executes since MS-2.2
 
 
 # --- seeded defects: findings in priority order ---------------------------------

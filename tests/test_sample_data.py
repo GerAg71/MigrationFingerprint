@@ -44,15 +44,24 @@ EXPECTED_MANIFEST: dict[str, int] = {
     "RULE-CHAR-001": 4,          # FM-016 '#' + P0044 mojibake x2 + P0115 digit name
     "RULE-DATEVAL-001": 2,       # FM-017 term<hire + P0009 epoch term<hire
 }
-PHASE2_SKIPPED = {"RULE-PACKED-001"}  # EBCDIC decode lands in MS-2.2
+# The EBCDIC variant additionally carries FM-006: RULE-PACKED-001 fires with
+# its two decode signatures, and the faulty amounts also trip the loan
+# compare + recompute rules (true positives of the same defects).
+EXPECTED_EBCDIC_MANIFEST = dict(EXPECTED_MANIFEST)
+EXPECTED_EBCDIC_MANIFEST.update({
+    "RULE-PACKED-001": 2,        # FM-006: L4 x100 shift + L5 sign flip
+    "RULE-LOAN-BAL-001": 3,      # L2 delta, plus L4/L5 decode faults
+    "RULE-LOAN-RECOMP-001": 3,
+})
 
 
-def run_pair(plan: str, tmp_path: Path):
+def run_pair(plan: str, tmp_path: Path, layouts: bool = False):
     return run(
         PAIR,
         SAMPLES / "source" / plan,
         SAMPLES / "target" / plan,
         fingerprint_dir=STORE, runs_dir=tmp_path / "runs", run_id=RUN_ID,
+        layout_dir=SAMPLES / "layouts" if layouts else None,
     )
 
 
@@ -61,7 +70,7 @@ def test_clean_pair_zero_findings(tmp_path):
     result = run_pair("PLN-CLEAN-01", tmp_path)
     assert result.findings == []
     summary = result.report.run.summary
-    assert (summary.rules_run, summary.passed, summary.failed) == (22, 22, 0)
+    assert (summary.rules_run, summary.passed, summary.failed) == (23, 23, 0)
 
 
 def test_seeded_pair_matches_manifest_exactly(tmp_path):
@@ -75,12 +84,13 @@ def test_seeded_pair_matches_manifest_exactly(tmp_path):
     orders = [suite_order[f.rule_id] for f in result.findings]
     assert orders == sorted(orders)
 
-    # the only executable rule the defects leave untouched
+    # the rules the CSV defects leave untouched: schedule ids match, and
+    # RULE-PACKED-001 only fires on decode signatures (EBCDIC variant)
     passes = {i.rule_id for i in result.report.suite if i.outcome == "pass"}
-    assert passes == {"RULE-VEST-SCHED-001"}
+    assert passes == {"RULE-VEST-SCHED-001", "RULE-PACKED-001"}
 
     skipped = {i.rule_id for i in result.report.suite if i.outcome == "skipped"}
-    assert skipped == PHASE2_SKIPPED
+    assert skipped == set()  # every seed rule executes since MS-2.2
 
     summary = result.report.run.summary
     assert summary.records_affected == 42
@@ -136,12 +146,41 @@ def test_seeded_defect_details(tmp_path):
     assert any("0degaard" in r.target["value"] for r in sort_checks)
 
 
+def test_ebcdic_clean_pair_zero_findings(tmp_path):
+    """Spec §25.4 ingestion equivalence, end to end: the EBCDIC variant of
+    the clean truth runs green through the mixed CSV + .dat pipeline."""
+    result = run_pair("PLN-CLEAN-EB", tmp_path, layouts=True)
+    assert result.findings == []
+    summary = result.report.run.summary
+    assert (summary.rules_run, summary.passed) == (23, 23)
+
+
+def test_ebcdic_seeded_pair_matches_manifest_exactly(tmp_path):
+    """REQ-032 over the EBCDIC variant: the FM-006 decode defects surface in
+    RULE-PACKED-001 with classified signatures."""
+    result = run_pair("PLN-SEED-EB", tmp_path, layouts=True)
+    got = {f.rule_id: f.records_affected for f in result.findings}
+    assert got == EXPECTED_EBCDIC_MANIFEST
+
+    packed = next(f for f in result.findings if f.rule_id == "RULE-PACKED-001")
+    checks = {r.keys["loan_id"]: r.target["_check"] for r in packed.sample_records}
+    assert checks == {"L4": "implied_decimal_shift:x100", "L5": "sign_flip"}
+
+    summary = result.report.run.summary
+    assert summary.records_affected == 48
+    assert summary.severity_mix == {"CRITICAL": 3, "HIGH": 11, "MEDIUM": 6,
+                                    "LOW": 2}
+
+
 def test_regeneration_is_byte_identical(tmp_path):
     """Spec §25.4: deterministic generator — regeneration reproduces the
-    committed sample files exactly."""
+    committed sample files exactly, CSV and EBCDIC alike."""
     write_samples(tmp_path / "samples")
-    committed = sorted(SAMPLES.rglob("*.csv"))
-    assert committed, "no committed sample CSVs found"
+    committed = sorted(
+        p for pattern in ("*.csv", "*.dat", "*.json")
+        for p in SAMPLES.rglob(pattern)
+    )
+    assert committed, "no committed sample files found"
     for committed_file in committed:
         relative = committed_file.relative_to(SAMPLES)
         regenerated = tmp_path / "samples" / relative

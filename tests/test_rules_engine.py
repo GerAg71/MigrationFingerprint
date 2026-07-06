@@ -28,11 +28,12 @@ def keys_rule():
     })
 
 
-def test_unsupported_recomputer_raises_with_milestone_pointer():
+def test_all_seed_rules_have_executors():
+    """Since MS-2.2 every seed rule executes — no unsupported types remain."""
+    from src.rules import EXECUTORS
+
     rules = load_seed_rules()
-    with pytest.raises(UnsupportedRuleTypeError, match="MS-2.2"):
-        execute(rules["RULE-PACKED-001"],  # packed_decode_control_total
-                make_datasets("loans", [], []))
+    assert {r.type for r in rules.values()} <= set(EXECUTORS)
 
 
 def test_pass_produces_no_finding_but_reportable_outcome():

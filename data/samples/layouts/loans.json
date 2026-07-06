@@ -1,0 +1,115 @@
+{
+  "encoding": "cp037",
+  "fields": [
+    {
+      "date_format": null,
+      "decimals": null,
+      "length": 12,
+      "name": "plan_id",
+      "start": 1,
+      "type": "char",
+      "zero_is_null": false
+    },
+    {
+      "date_format": null,
+      "decimals": null,
+      "length": 12,
+      "name": "participant_id",
+      "start": 13,
+      "type": "char",
+      "zero_is_null": false
+    },
+    {
+      "date_format": null,
+      "decimals": null,
+      "length": 4,
+      "name": "loan_id",
+      "start": 25,
+      "type": "char",
+      "zero_is_null": false
+    },
+    {
+      "date_format": "YYYYMMDD",
+      "decimals": null,
+      "length": 8,
+      "name": "origination_date",
+      "start": 29,
+      "type": "char",
+      "zero_is_null": true
+    },
+    {
+      "date_format": null,
+      "decimals": 2,
+      "length": 6,
+      "name": "origination_amount",
+      "start": 37,
+      "type": "packed",
+      "zero_is_null": false
+    },
+    {
+      "date_format": null,
+      "decimals": 4,
+      "length": 6,
+      "name": "rate",
+      "start": 43,
+      "type": "zoned",
+      "zero_is_null": false
+    },
+    {
+      "date_format": null,
+      "decimals": 0,
+      "length": 3,
+      "name": "term_months",
+      "start": 49,
+      "type": "zoned",
+      "zero_is_null": false
+    },
+    {
+      "date_format": null,
+      "decimals": 2,
+      "length": 5,
+      "name": "payment_amount",
+      "start": 52,
+      "type": "packed",
+      "zero_is_null": false
+    },
+    {
+      "date_format": null,
+      "decimals": null,
+      "length": 8,
+      "name": "payment_frequency",
+      "start": 57,
+      "type": "char",
+      "zero_is_null": false
+    },
+    {
+      "date_format": "YYYYMMDD",
+      "decimals": null,
+      "length": 8,
+      "name": "maturity_date",
+      "start": 65,
+      "type": "char",
+      "zero_is_null": true
+    },
+    {
+      "date_format": null,
+      "decimals": 2,
+      "length": 6,
+      "name": "outstanding_balance",
+      "start": 73,
+      "type": "packed",
+      "zero_is_null": false
+    },
+    {
+      "date_format": null,
+      "decimals": null,
+      "length": 10,
+      "name": "status",
+      "start": 79,
+      "type": "char",
+      "zero_is_null": false
+    }
+  ],
+  "layout_id": "omni-loans-full-v1",
+  "record_length": 88
+}

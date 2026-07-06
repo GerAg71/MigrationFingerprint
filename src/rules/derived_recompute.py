@@ -172,13 +172,54 @@ def _loan(rule, datasets, context):
     return sort_records(affected), None
 
 
+def _packed_control(rule, datasets):
+    """packed_decode_control_total (FM-006, MS-2.2): flag only the decode
+    signatures of a bad packed/zoned read — power-of-ten shifts from a lost
+    implied decimal, and sign flips. Generic variances belong to
+    field_compare; this rule names the decode fault class. Detail carries the
+    cross-checked control totals."""
+    field = rule.params.inputs.get("control_field", rule.params.compare_field)
+    join_keys, merged = _merged(rule, datasets)
+    affected = []
+    source_total = target_total = Decimal("0")
+    for row in merged.to_dict("records"):
+        source = row.get(f"{field}__src", row.get(field))
+        target = row.get(f"{field}__tgt", row.get(field))
+        if is_null(source) or is_null(target):
+            continue
+        source_total += source
+        target_total += target
+        if source == target or source == 0:
+            continue
+        signature = None
+        for shift in (Decimal("100"), Decimal("10000")):
+            if target == source * shift:
+                signature = f"implied_decimal_shift:x{shift}"
+            elif source == target * shift:
+                signature = f"implied_decimal_shift:/{shift}"
+        if signature is None and target == -source:
+            signature = "sign_flip"
+        if signature:
+            affected.append(AffectedRecord(
+                keys=key_dict(join_keys, row),
+                source={field: stringify(source)},
+                target={field: stringify(target), "_check": signature},
+                delta=target - source,
+            ))
+    detail = None
+    if affected:
+        detail = {"control_total": {"field": field,
+                                    "source": str(source_total),
+                                    "target": str(target_total)}}
+    return sort_records(affected), detail
+
+
 def execute(rule: DerivedRecomputeRule, datasets, context: ExecutionContext):
     recompute = rule.params.recompute
     if recompute == "vested_pct":
         return _vested(rule, datasets)
     if recompute == "loan_balance":
         return _loan(rule, datasets, context)
-    raise UnsupportedRuleTypeError(
-        f"recomputer {recompute!r} not implemented "
-        f"(packed_decode_control_total lands with the EBCDIC layer in MS-2.2)"
-    )
+    if recompute == "packed_decode_control_total":
+        return _packed_control(rule, datasets)
+    raise UnsupportedRuleTypeError(f"recomputer {recompute!r} not implemented")

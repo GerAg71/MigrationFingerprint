@@ -23,7 +23,8 @@ Session rules for Claude Code: `CLAUDE.md`.
 | MS-1.7 | Coverage audit: golden fixtures per rule type, REQ-015 perf smoke, CI workflow (95% line coverage) | ✅ done |
 | **Phase 1 complete** | | |
 | MS-2.1 | `derived_recompute` (vested %, loan amortization), `encoding_check`, `sort_order_check` | ✅ done |
-| MS-2.2 … MS-3.3 | see spec Ch. 23 | open |
+| MS-2.2 | Fixed-width/copybook ingest; EBCDIC + COMP-3 decode; FM-006 active; EBCDIC sample pairs | ✅ done |
+| MS-2.3 … MS-3.3 | see spec Ch. 23 | open |
 
 ## Setup
 

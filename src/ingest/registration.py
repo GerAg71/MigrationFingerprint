@@ -15,8 +15,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Literal
 
-from src.fingerprint.models import DatasetRegistration, DetectionRule
+from src.fingerprint.models import DatasetRegistration, DetectionRule, LayoutSpec
 from src.ingest.csv import ParsedDataset, ingest_csv
+from src.ingest.fixedwidth import ingest_fixed_width
 
 
 class PartialFileError(Exception):
@@ -60,16 +61,22 @@ def register_dataset(
     encoding: str | None = None,
     expected_min_rows: int | None = None,
     rejects_dir: Path | str | None = None,
+    layout: LayoutSpec | None = None,
     layout_id: str | None = None,
     crosswalks_applied: Iterable[str] = (),
 ) -> IngestedDataset:
-    """Ingest and register one extract (spec §10.4).
+    """Ingest and register one extract (spec §10.4). With a LayoutSpec the
+    file parses as fixed-width (incl. EBCDIC/COMP-3, MS-2.2); otherwise CSV.
 
     Raises PartialFileError when the accepted row count falls below
     expected_min_rows (REQ-022) — the caller must halt the run at ingesting.
     """
     path = Path(path)
-    parsed = ingest_csv(path, dataset_name, delimiter=delimiter, encoding=encoding)
+    if layout is not None:
+        parsed = ingest_fixed_width(path, dataset_name, layout)
+        layout_id = layout.layout_id
+    else:
+        parsed = ingest_csv(path, dataset_name, delimiter=delimiter, encoding=encoding)
 
     rejects_uri: str | None = None
     if parsed.rejects and rejects_dir is not None:

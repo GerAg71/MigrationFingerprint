@@ -95,6 +95,6 @@ def test_perf_smoke_200_participants_under_60s(tmp_path):
     )
     elapsed = time.perf_counter() - started
 
-    assert result.report.run.summary.rules_run == 22
+    assert result.report.run.summary.rules_run == 23
     assert len(result.findings) == 21  # same manifest shape at 200 participants
     assert elapsed < 60, f"REQ-015 envelope exceeded: {elapsed:.1f}s"

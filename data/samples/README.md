@@ -14,6 +14,12 @@ range, all names are fake, plans are 120 participants.
 - **PLN-SEED-01** — same truth; the **target** side carries exactly one
   deliberate defect per seed failure mode, injected by the named mutators in
   `tests/datagen/mutators.py` (the manifest is code, spec §25.4).
+- **PLN-CLEAN-EB / PLN-SEED-EB** — the EBCDIC variants (spec §25.4): loans
+  emits as a cp037 fixed-width `loans.dat` (layout in `layouts/loans.json`;
+  run with `--layout-dir data/samples/layouts`). The clean variant proves
+  ingestion equivalence; the seeded variant additionally carries the FM-006
+  decode defects (L4 amount ×100 from a lost implied decimal, L5 sign
+  nibble flipped negative).
 
 Shape per spec §25.2: 120 participants, money types PRETAX/ROTH/MATCH,
 investments F01–F05, 6 loans with amortization-consistent payment histories
@@ -46,9 +52,14 @@ All rule types execute since MS-2.1 except `packed_decode_control_total`
 | FM-017 | Termination 2019-05-01 precedes hire 2021-03-15 | participants P0020 | RULE-DATEVAL-001 (also RULE-DATE-001 compare) | 1 |
 | FM-018 | Negative MATCH balance −412.06 | balances P0018 | RULE-NEG-001 (+ totals rules) | 1 |
 
-## Expected run over PLN-SEED-01 (REQ-032, as of MS-2.1)
+## Expected runs (REQ-032, as of MS-2.2)
 
 One defect can fire several rules — the totals rules intentionally backstop
-the subtotal modes. The exact rule-level manifest (21 findings, 42 affected
-records, 1 pass, 1 skipped) is asserted by
-`tests/test_sample_data.py::test_seeded_pair_matches_manifest_exactly`.
+the subtotal modes. Asserted by `tests/test_sample_data.py`:
+
+- **PLN-SEED-01** (CSV): 21 findings, 42 affected records, 2 passes
+  (schedule ids match; RULE-PACKED-001 only fires on decode signatures),
+  0 skipped.
+- **PLN-SEED-EB** (EBCDIC): 22 findings, 48 records — RULE-PACKED-001 fires
+  with `implied_decimal_shift:x100` (L4) and `sign_flip` (L5), which also
+  trip the loan compare/recompute rules as true positives.

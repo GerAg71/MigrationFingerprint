@@ -146,6 +146,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             wave=args.wave,
             fingerprint_dir=args.fingerprint_dir,
             runs_dir=args.runs_dir,
+            layout_dir=args.layout_dir,
         )
     except FileNotFoundError as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -286,6 +287,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_run.add_argument("--version", help="fingerprint version (default: highest published)")
     p_run.add_argument("--plans", help="comma-separated plan ids to scope the run")
     p_run.add_argument("--wave", help="wave label recorded in run scope")
+    p_run.add_argument(
+        "--layout-dir", default=None,
+        help="directory of <dataset>.json LayoutSpecs for fixed-width .dat extracts",
+    )
     p_run.add_argument(
         "--fail-on-findings", nargs="?", const="ANY", default=None,
         metavar="SEV",

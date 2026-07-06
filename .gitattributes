@@ -1,4 +1,7 @@
 # Generated sample data and fingerprints are byte-compared by tests
 # (deterministic regeneration, REQ-009/REQ-032) — never CRLF-translate them.
 data/samples/**/*.csv text eol=lf
+data/samples/**/*.json text eol=lf
 data/fingerprints/**/*.json text eol=lf
+# EBCDIC fixed-width records are binary — no text translation ever.
+*.dat binary

@@ -178,6 +178,23 @@ def test_missing_payments_dataset_raises():
 
 def test_unknown_recomputer_is_skippable():
     rule = make_rule({
+        "rule_id": "RULE-FUTURE-001", "type": "derived_recompute",
+        "failure_mode": "FM-006",
+        "source_dataset": "loans", "target_dataset": "loans",
+        "join_keys": ["plan_id", "participant_id", "loan_id"],
+        "params": {"recompute": "quantum_flux_total", "inputs": {},
+                   "compare_field": "outstanding_balance", "tolerance": "0.00"},
+        "severity": "HIGH",
+    })
+    with pytest.raises(UnsupportedRuleTypeError, match="quantum_flux_total"):
+        execute(rule, loan_datasets("727.29"))
+
+
+# --- packed_decode_control_total (FM-006, MS-2.2) --------------------------------
+
+
+def packed_rule():
+    return make_rule({
         "rule_id": "RULE-PACKED-001", "type": "derived_recompute",
         "failure_mode": "FM-006",
         "source_dataset": "loans", "target_dataset": "loans",
@@ -188,5 +205,46 @@ def test_unknown_recomputer_is_skippable():
                    "compare_field": "outstanding_balance", "tolerance": "0.00"},
         "severity": "HIGH",
     })
-    with pytest.raises(UnsupportedRuleTypeError, match="MS-2.2"):
-        execute(rule, loan_datasets("727.29"))
+
+
+def packed_datasets(source_balances, target_balances):
+    def rows(balances):
+        return [{"plan_id": "PLN001", "participant_id": f"P{i:04d}",
+                 "loan_id": f"L{i}", "outstanding_balance": Decimal(b)}
+                for i, b in enumerate(balances, start=1)]
+    return make_datasets("loans", rows(source_balances), rows(target_balances))
+
+
+def test_packed_flags_implied_decimal_shift_x100():
+    outcome = execute(packed_rule(),
+                      packed_datasets(["13775.62"], ["1377562.00"]))
+    record = outcome.affected[0]
+    assert record.target["_check"] == "implied_decimal_shift:x100"
+    assert record.delta == Decimal("1363786.38")
+    assert outcome.detail["control_total"]["source"] == "13775.62"
+    assert outcome.detail["control_total"]["target"] == "1377562.00"
+
+
+def test_packed_flags_shrink_and_x10000():
+    shrunk = execute(packed_rule(), packed_datasets(["13775.62"], ["137.7562"]))
+    assert shrunk.affected[0].target["_check"] == "implied_decimal_shift:/100"
+    wide = execute(packed_rule(),
+                   packed_datasets(["137.7562"], ["1377562.0000"]))
+    assert wide.affected[0].target["_check"] == "implied_decimal_shift:x10000"
+
+
+def test_packed_flags_sign_flip():
+    outcome = execute(packed_rule(), packed_datasets(["4102.33"], ["-4102.33"]))
+    assert outcome.affected[0].target["_check"] == "sign_flip"
+
+
+def test_packed_ignores_ordinary_variance():
+    """Generic deltas are field_compare's finding, not a decode signature."""
+    outcome = execute(packed_rule(), packed_datasets(["10432.17"], ["10398.55"]))
+    assert outcome.passed
+
+
+def test_packed_passes_on_equal_values():
+    outcome = execute(packed_rule(), packed_datasets(["10432.17"], ["10432.17"]))
+    assert outcome.passed
+    assert outcome.detail is None
