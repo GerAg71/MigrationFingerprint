@@ -25,12 +25,28 @@ def make_datasets(dataset_name: str, source_rows: list[dict],
 
 
 def copy_fingerprint_store(tmp_path: Path) -> Path:
-    """A private copy of data/fingerprints — learning-loop tests mutate the
-    store (drafts, events, new versions) and must never touch the repo's."""
-    import shutil
+    """A PRISTINE private copy of data/fingerprints: published version
+    directories only. Learning-loop tests mutate their copy, and the repo
+    store may itself carry live demo residue (drafts, learning_events.jsonl
+    from dashboard use, stray user files) — none of that is copied, so tests
+    are immune to it."""
+    import re
 
     store = tmp_path / "fingerprints"
-    shutil.copytree(REPO / "data" / "fingerprints", store)
+    source = REPO / "data" / "fingerprints"
+    for pair_dir in source.iterdir():
+        if not pair_dir.is_dir():
+            continue
+        for version_dir in pair_dir.iterdir():
+            if not version_dir.is_dir() or \
+                    not re.fullmatch(r"\d+\.\d+\.\d+", version_dir.name):
+                continue
+            fingerprint = version_dir / "fingerprint.json"
+            if fingerprint.is_file():
+                target = store / pair_dir.name / version_dir.name
+                target.mkdir(parents=True, exist_ok=True)
+                (target / "fingerprint.json").write_bytes(
+                    fingerprint.read_bytes())
     return store
 
 

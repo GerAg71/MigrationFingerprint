@@ -70,6 +70,31 @@ def test_dashboard_covers_the_demo_script(client):
         assert token in html
 
 
+def test_hover_help_mode(client):
+    """Hover-help: a persisted on/off toggle plus data-help descriptions on
+    objects across every view, rendered by the tooltip engine."""
+    html = dashboard_html(client)
+    # the toggle and its persistence key
+    assert 'id="helpToggle"' in html
+    assert "Hover help: OFF" in html
+    assert "fp_help_mode" in html  # localStorage key
+    # the tooltip engine and help-on styling
+    assert 'id="tooltip"' in html
+    assert "help-on" in html
+    assert "data-help" in html
+    # broad coverage: descriptions across the views. They live inside the
+    # JS view templates as hlp(...) calls, rendered to data-help at runtime.
+    assert html.count("hlp(") >= 25
+    for fragment in (
+        "probability x impact",            # suite/score explanations
+        "RAISES its probability",          # confirm button
+        "LOWERS the mode's probability",   # false-positive button
+        "IMMUTABLE fingerprint version",   # publish button
+        "codified failure signature",      # pair card
+    ):
+        assert fragment in html, fragment
+
+
 def test_dashboard_calls_only_existing_endpoints(client):
     """Every API path template referenced by the page's JS exists in the app
     (fetch calls use template literals over these bases)."""

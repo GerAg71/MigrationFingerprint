@@ -75,6 +75,14 @@
   .mono { font-family:Consolas,monospace; font-size:.82rem; }
   .spark { vertical-align:middle; }
   details > summary { cursor:pointer; color:var(--brand); font-size:.86rem; }
+  /* hover-help (explain) mode */
+  nav a.help-toggle { margin-top:16px; border-top:1px solid rgba(255,255,255,.25);
+                      padding-top:12px; }
+  #tooltip { position:fixed; z-index:50; max-width:330px; background:#1e293b;
+             color:#f8fafc; padding:8px 12px; border-radius:8px; font-size:.8rem;
+             line-height:1.4; box-shadow:0 4px 14px rgba(0,0,0,.3);
+             pointer-events:none; display:none; }
+  body.help-on [data-help] { outline:1px dashed #60a5fa; outline-offset:2px; }
 </style>
 </head>
 <body>
@@ -84,8 +92,11 @@
   <a href="#/" data-nav="library">Fingerprint Library</a>
   <a href="#/runs" data-nav="runs">Runs</a>
   <a href="#/history" data-nav="history">Learning History</a>
+  <a href="javascript:void(0)" id="helpToggle" class="help-toggle"
+     title="Toggle hover explanations for on-screen objects">💡 Hover help: OFF</a>
 </nav>
 <main id="main">Loading…</main>
+<div id="tooltip"></div>
 
 <script>
 "use strict";
@@ -95,6 +106,46 @@ const esc = (v) => String(v ?? "").replace(/[&<>"']/g,
   (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const sev = (s) => `<span class="sev" style="background:${SEV[s]||"#64748b"}">${esc(s)}</span>`;
 const state = { runs: [] };  // run ids created this session (POC has no run-list endpoint)
+
+// ---- hover-help mode: data-help tooltips with an on/off toggle -----------------
+const HELP_KEY = "fp_help_mode";
+const hlp = (text) => ` data-help="${esc(text)}"`;
+const helpEnabled = () => localStorage.getItem(HELP_KEY) === "on";
+function applyHelpMode() {
+  document.body.classList.toggle("help-on", helpEnabled());
+  const toggle = $("#helpToggle");
+  if (toggle) toggle.textContent = `💡 Hover help: ${helpEnabled() ? "ON" : "OFF"}`;
+  if (!helpEnabled()) $("#tooltip").style.display = "none";
+}
+function positionTooltip(event) {
+  const tip = $("#tooltip");
+  const pad = 14;
+  let x = event.clientX + pad, y = event.clientY + pad;
+  const rect = tip.getBoundingClientRect();
+  if (x + rect.width + 8 > innerWidth) x = event.clientX - rect.width - pad;
+  if (y + rect.height + 8 > innerHeight) y = event.clientY - rect.height - pad;
+  tip.style.left = Math.max(4, x) + "px";
+  tip.style.top = Math.max(4, y) + "px";
+}
+document.addEventListener("mouseover", (event) => {
+  if (!helpEnabled()) return;
+  const source = event.target.closest("[data-help]");
+  const tip = $("#tooltip");
+  if (!source) { tip.style.display = "none"; return; }
+  tip.textContent = source.dataset.help;
+  tip.style.display = "block";
+  positionTooltip(event);
+});
+document.addEventListener("mousemove", (event) => {
+  if ($("#tooltip").style.display === "block") positionTooltip(event);
+});
+document.addEventListener("DOMContentLoaded", () => {
+  $("#helpToggle").addEventListener("click", () => {
+    localStorage.setItem(HELP_KEY, helpEnabled() ? "off" : "on");
+    applyHelpMode();
+  });
+  applyHelpMode();
+});
 
 async function api(path, options) {
   const response = await fetch(path, options);
@@ -114,15 +165,15 @@ const flash = (kind, text) =>
 async function viewLibrary() {
   const pairs = await api("/platform-pairs");
   const cards = pairs.map((p) => `
-    <div class="card">
+    <div class="card"${hlp("A platform pair: one directional source-to-target combination. Each pair carries its own fingerprint — the codified failure signature learned from past conversions.")}>
       <h3>${esc(p.pair_id)}</h3>
       <div class="note">fingerprint v${esc(p.current_version)} —
         ${p.modes} failure modes, ${p.rules} rules</div>
       <p>
-        <a class="btn" href="#/fp/${esc(p.pair_id)}">Fingerprint</a>
-        <a class="btn" href="#/suite/${esc(p.pair_id)}">Suite</a>
-        <a class="btn" href="#/run-new/${esc(p.pair_id)}">New run</a>
-        <a class="btn" href="#/history/${esc(p.pair_id)}">History</a>
+        <a class="btn" href="#/fp/${esc(p.pair_id)}"${hlp("Open this pair's failure-mode library: probabilities, impacts, review-history counters, and the detection rules bound to each mode.")}>Fingerprint</a>
+        <a class="btn" href="#/suite/${esc(p.pair_id)}"${hlp("The prioritized validation suite: every rule ordered by probability x impact — effort goes where this migration is most likely to fail.")}>Suite</a>
+        <a class="btn" href="#/run-new/${esc(p.pair_id)}"${hlp("Execute a conversion run: ingest source and target extracts, then run the whole suite in priority order.")}>New run</a>
+        <a class="btn" href="#/history/${esc(p.pair_id)}"${hlp("The learning loop's record: every analyst review and the probability change it caused, plus draft publishing.")}>History</a>
       </p>
     </div>`).join("");
   return `<h1>Fingerprint Library</h1>
@@ -150,9 +201,9 @@ async function viewFingerprint(pairId) {
     <p><a class="btn" href="#/suite/${esc(pairId)}">Prioritized suite</a>
        <a class="btn" href="#/run-new/${esc(pairId)}">New run</a>
        <a class="btn" href="#/history/${esc(pairId)}">Learning history</a></p>
-    <table><tr><th>FM</th><th>Failure mode</th><th>Category</th>
-      <th class="num">Probability</th><th class="num">Impact</th>
-      <th class="num">Score</th><th class="num">Det/Conf/FP</th><th>Rules</th></tr>
+    <table><tr><th${hlp("The failure mode's stable id (FM-001..): one named, codified defect pattern for this platform pair.")}>FM</th><th>Failure mode</th><th>Category</th>
+      <th class="num"${hlp("How likely this failure mode is for this pair (0.05-0.99). Confirmed findings raise it; false positives lower it — the learning loop's Beta write-back.")}>Probability</th><th class="num"${hlp("Business severity if it occurs — modes that touch participant money score high. A human judgment, never auto-adjusted.")}>Impact</th>
+      <th class="num"${hlp("probability x impact — the suite executes in descending score order.")}>Score</th><th class="num"${hlp("History counters: times detected / times confirmed / false positives, accumulated from analyst reviews.")}>Det/Conf/FP</th><th${hlp("The executable detection rules bound to this failure mode. Rule logic lives in the fingerprint JSON, not in code.")}>Rules</th></tr>
       ${rows}</table>`;
 }
 
@@ -176,10 +227,10 @@ async function viewSuite(pairId) {
       <span class="pill mut">v${esc(view.version)}</span></h1>
     <p class="note">Ordered by probability × impact (spec §12.2), so validation
       effort lands where this migration is statistically most likely to fail.
-      <label style="display:inline"><input type="checkbox" id="genericToggle"
+      <label style="display:inline"${hlp("The differentiator, side by side: flip between the fingerprint-targeted ordering and a naive alphabetical checklist to see how much effort a generic suite wastes.")}><input type="checkbox" id="genericToggle"
         style="width:auto"> compare against a generic (alphabetical) ordering</label></p>
-    <div id="suiteTargeted"><table><tr><th class="num">#</th><th>Rule</th><th>FM</th>
-      <th>Score (probability × impact)</th><th>Severity</th><th>Datasets</th></tr>
+    <div id="suiteTargeted"><table><tr><th class="num"${hlp("Execution order: rules run highest score first; ties break by severity, then failure-mode id — fully deterministic.")}>#</th><th>Rule</th><th>FM</th>
+      <th${hlp("The score bar visualizes probability x impact — the length shows how much of the validation budget this rule deserves.")}>Score (probability × impact)</th><th${hlp("The severity a finding from this rule will carry: CRITICAL, HIGH, MEDIUM, or LOW.")}>Severity</th><th${hlp("The canonical datasets the rule reads (source -> target). Rules never see platform-specific field names.")}>Datasets</th></tr>
       ${render(view.suite)}</table></div>
     <div id="suiteGeneric" style="display:none"><table><tr><th class="num">#</th>
       <th>Rule</th><th>FM</th><th>Score</th><th>Severity</th><th>Datasets</th></tr>
@@ -208,7 +259,8 @@ const PRESETS = [
 
 async function viewRunNew(pairId) {
   const presets = PRESETS.map((p, i) =>
-    `<button class="secondary" type="button" data-preset="${i}">${esc(p.label)}</button>`
+    `<button class="secondary" type="button" data-preset="${i}"${hlp(
+      "Quick pick: fills the form with a shipped synthetic sample pair. Clean pairs prove zero false noise; seeded pairs carry one deliberate defect per failure mode; EBCDIC variants exercise mainframe fixed-width decode.")}>${esc(p.label)}</button>`
   ).join(" ");
   return `<div class="crumbs"><a href="#/">Library</a> ›
       <a href="#/fp/${esc(pairId)}">${esc(pairId)}</a> › new run</div>
@@ -217,19 +269,19 @@ async function viewRunNew(pairId) {
       (spec §7.4). Quick picks fill the shipped synthetic sample pairs:</p>
     <p>${presets}</p>
     <div class="grid2">
-      <div><label>Source extract directory</label>
+      <div${hlp("Folder holding the source platform's extracts — one <dataset>.csv (or .dat) per canonical dataset: plans, participants, balances, loans, and so on.")}><label>Source extract directory</label>
         <input id="srcDir" value="${esc(PRESETS[1].s)}"></div>
-      <div><label>Target extract directory</label>
+      <div${hlp("Folder holding the CONVERTED extracts from the target platform — this is the data being validated against the source truth.")}><label>Target extract directory</label>
         <input id="tgtDir" value="${esc(PRESETS[1].t)}"></div>
-      <div><label>Layout directory (fixed-width .dat extracts)</label>
+      <div${hlp("Only needed for fixed-width EBCDIC extracts (.dat files): a folder of <dataset>.json copybook-style layout specs describing offsets, packed fields, and implied decimals.")}><label>Layout directory (fixed-width .dat extracts)</label>
         <input id="layoutDir" value=""></div>
-      <div><label>Fingerprint version (blank = latest published)</label>
+      <div${hlp("Pin an exact fingerprint version for reproducibility, or leave blank to use the latest published version.")}><label>Fingerprint version (blank = latest published)</label>
         <input id="fpVersion" value=""></div>
-      <div><label>Plans (comma-separated, blank = all)</label>
+      <div${hlp("Scope the run to specific plan ids; other plans' rows are ignored.")}><label>Plans (comma-separated, blank = all)</label>
         <input id="plans" value=""></div>
-      <div><label>Wave label</label><input id="wave" value=""></div>
+      <div${hlp("Free-text label recorded in run metadata — large conversions run in waves of 50-100 plans.")}><label>Wave label</label><input id="wave" value=""></div>
     </div>
-    <p><button id="startRun">Execute run</button></p>
+    <p><button id="startRun"${hlp("Runs the pipeline: ingest + register each extract (with content hashes), refuse if any rule's datasets are missing, then execute every enabled rule in priority order and write the findings report.")}>Execute run</button></p>
     <div id="runResult"></div>`;
 }
 function wireRunNew(pairId) {
@@ -317,16 +369,16 @@ async function viewRun(runId) {
     <h1>Run ${esc(runId)}
       <span class="pill mut">${esc(run.pair_id)} v${esc(run.fingerprint_version)}</span></h1>
     <div class="tiles">
-      <div class="tile"><div class="n">${summary.rules_run}</div><div class="l">rules run</div></div>
-      <div class="tile ok"><div class="n">${summary.passed}</div><div class="l">passed</div></div>
-      <div class="tile bad"><div class="n">${summary.failed}</div><div class="l">failed</div></div>
-      <div class="tile"><div class="n">${summary.records_affected}</div><div class="l">records affected</div></div>
+      <div class="tile"${hlp("How many detection rules actually executed this run. Passing rules are reported too — never silent.")}><div class="n">${summary.rules_run}</div><div class="l">rules run</div></div>
+      <div class="tile ok"${hlp("Rules that found nothing wrong.")}><div class="n">${summary.passed}</div><div class="l">passed</div></div>
+      <div class="tile bad"${hlp("Rules that produced findings — each finding lists the exact affected records.")}><div class="n">${summary.failed}</div><div class="l">failed</div></div>
+      <div class="tile"${hlp("Total records across all findings — the drill-down CSVs carry every one.")}><div class="n">${summary.records_affected}</div><div class="l">records affected</div></div>
     </div>
-    <p>Severity mix: ${mix}</p>
-    <p><a class="btn" target="_blank" href="/runs/${esc(runId)}/report?format=html">Findings report (HTML)</a>
-       <a class="btn" href="#/exceptions/${esc(runId)}">Exception register</a>
-       <button class="secondary" id="btnSignoff">Build sign-off package</button>
-       reconciliation: ${recon}</p>
+    <p${hlp("Findings by severity: CRITICAL red, HIGH orange, MEDIUM amber, LOW slate.")}>Severity mix: ${mix}</p>
+    <p><a class="btn" target="_blank" href="/runs/${esc(runId)}/report?format=html"${hlp("The self-contained HTML findings report: scoreboard, prioritized suite, findings with sample records. Inline CSS, no external links — safe to email and archive.")}>Findings report (HTML)</a>
+       <a class="btn" href="#/exceptions/${esc(runId)}"${hlp("Every finding not marked false positive, tracked to closure with owner, dates, and resolution evidence.")}>Exception register</a>
+       <button class="secondary" id="btnSignoff"${hlp("Assemble the client deliverable: certification page with success metrics vs targets, executive narrative, all reports, the exception register, and the audit extract — zipped with a hash manifest.")}>Build sign-off package</button>
+       <span${hlp("The five client-facing reconciliation reports: plan, participant, loan, contribution, and data-quality — full source-vs-target totals, not just variances.")}>reconciliation: ${recon}</span></p>
     <div id="signoffResult"></div>
     <h2>Findings (priority order)</h2>
     <table><tr><th>Finding</th><th>FM</th><th>Rule</th><th>Severity</th>
@@ -363,7 +415,7 @@ async function viewFinding(findingId) {
     <table><tr>${keyColumns.map((c) => `<th>${esc(c)}</th>`).join("")}
       <th>source</th><th>target</th><th class="num">delta</th></tr>${rows}</table>
     <h2>AI-assisted explanation</h2>
-    <p><button class="secondary" id="btnExplain">Explain this variance</button>
+    <p><button class="secondary" id="btnExplain"${hlp("Asks the AI layer to explain this variance in plain language using the finding's ACTUAL values — a guard rejects any output that invents numbers. Runs on a local stub provider; the product swaps in Claude via Bedrock behind the same interface.")}>Explain this variance</button>
        <span class="note">stub provider — fully local (spec §8.1)</span></p>
     <div id="explainResult"></div>
     <h2>Review (the Learning Loop)</h2>
@@ -372,8 +424,8 @@ async function viewFinding(findingId) {
         <div><label>Reviewer</label><input id="reviewer" value="analyst"></div>
         <div><label>Comment</label><input id="comment" value=""></div>
       </div>
-      <p><button id="btnConfirm">Confirm defect</button>
-         <button id="btnFalsePositive" class="danger">False positive</button></p>`
+      <p><button id="btnConfirm"${hlp("Confirms a real defect: increments the failure mode's counters and RAISES its probability via the Beta write-back — the next run of this pair ranks it higher.")}>Confirm defect</button>
+         <button id="btnFalsePositive" class="danger"${hlp("Marks this finding as noise: LOWERS the mode's probability so noisy checks sink in priority instead of being deleted. Reviews are immutable once recorded.")}>False positive</button></p>`
       : `<p class="note">Already adjudicated — reviews are immutable (spec §14.1).</p>`}
     <div id="reviewResult"></div>
     <h2>Exception workflow (spec §15)</h2>
@@ -384,12 +436,12 @@ async function viewFinding(findingId) {
       <div><label>Comment / note / evidence</label><input id="wfText" value=""></div>
     </div>
     <p>
-      <button class="secondary" id="btnAssign">Assign</button>
-      <button class="secondary" id="btnComment">Comment</button>
+      <button class="secondary" id="btnAssign"${hlp("Set an owner for this exception; a first assignment moves it from new to in_review.")}>Assign</button>
+      <button class="secondary" id="btnComment"${hlp("Add a note to the finding's audit history without changing its state.")}>Comment</button>
       ${finding.status === "confirmed"
-        ? `<button id="btnResolve">Mark remediated</button>` : ""}
+        ? `<button id="btnResolve"${hlp("Move confirmed -> remediated. The remediation note (left field) is required and becomes closure evidence in the sign-off package.")}>Mark remediated</button>` : ""}
       ${finding.status === "remediated"
-        ? `<button id="btnClose">Close with evidence</button>` : ""}
+        ? `<button id="btnClose"${hlp("Move remediated -> closed. Evidence is required — typically a clean re-run id or a resolution note.")}>Close with evidence</button>` : ""}
     </p>
     <div id="workflowResult"></div>
     <h2>History</h2>
@@ -544,7 +596,7 @@ async function viewHistory(pairId) {
     <p class="note">Every review writes back into the fingerprint: each
       conversion makes the next one smarter.</p>
     <h2>Probability timelines</h2>
-    <table><tr><th>FM</th><th>Timeline</th><th class="num">Probability</th>
+    <table><tr><th>FM</th><th${hlp("The sparkline shows the mode's probability moving as reviews land — the fingerprint measurably learning across waves.")}>Timeline</th><th class="num">Probability</th>
       <th class="num">Events</th></tr>
       ${sparkRows || "<tr><td colspan='4'>No learning events yet.</td></tr>"}</table>
     <h2>Events</h2>
@@ -559,7 +611,7 @@ async function viewHistory(pairId) {
         <option value="major">major — incompatible changes</option></select></div>
       <div><label>Changelog</label><input id="changelog" value=""></div>
     </div>
-    <p><button id="btnPublish">Publish</button></p>
+    <p><button id="btnPublish"${hlp("Finalizes the accumulated draft as a new IMMUTABLE fingerprint version: patch for probability write-backs, minor for new modes or rules. Past runs stay pinned to the versions they executed against.")}>Publish</button></p>
     <div id="publishResult"></div>`;
 }
 function wirePublish(pairId) {
