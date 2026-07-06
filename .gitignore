@@ -3,5 +3,6 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .coverage
+.claude/settings.local.json
 data/runs/*
 !data/runs/.gitkeep
