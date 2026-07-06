@@ -28,11 +28,13 @@ $env:PYTHONPATH = "."
 Write-Host "MAPTIVA Migration Fingerprint - dashboard starting..." -ForegroundColor Cyan
 Write-Host "Open http://127.0.0.1:8000/  (Ctrl+C here to stop)" -ForegroundColor Green
 
+# --reload restarts the server automatically when source files change,
+# so pulling new code never leaves a stale process serving old endpoints.
 if (Test-Path $venvPython) {
-    & $venvPython -m uvicorn src.api.app:app --port 8000
+    & $venvPython -m uvicorn src.api.app:app --port 8000 --reload
 } else {
     Write-Host "No .venv found - running 'uv sync' first..." -ForegroundColor Yellow
     $env:UV_LINK_MODE = "copy"
     uv sync
-    uv run uvicorn src.api.app:app --port 8000
+    uv run uvicorn src.api.app:app --port 8000 --reload
 }
