@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Certification of data accuracy</h2>
+<p>This package certifies the conversion validation results for platform
+pair <strong>{{ header.pair_id }}</strong>, run
+<strong>{{ header.run_id }}</strong>, executed against fingerprint version
+<strong>{{ header.fingerprint_version }}</strong>.</p>
+
+<div class="tiles">
+  <div class="tile"><div class="n">{{ summary.rules_run }}</div><div class="l">rules run</div></div>
+  <div class="tile ok"><div class="n">{{ summary.passed }}</div><div class="l">passed</div></div>
+  <div class="tile bad"><div class="n">{{ summary.failed }}</div><div class="l">failed</div></div>
+  <div class="tile"><div class="n">{{ open_exceptions }}</div><div class="l">open exceptions (of {{ total_exceptions }})</div></div>
+</div>
+
+<h2>Success metrics vs targets (spec §2.6)</h2>
+<table class="grid">
+<tr><th>Metric</th><th>Target</th><th>Actual</th><th>Status</th></tr>
+{% for m in metrics %}
+<tr{% if m.status != "MET" %} class="variance"{% endif %}>
+  <td>{{ m.metric }}</td><td>{{ m.target }}</td><td>{{ m.actual }}</td>
+  <td>{% if m.status == "MET" %}<span class="status-pill ok">MET</span>
+      {% else %}<span class="status-pill bad">NOT MET</span>{% endif %}</td></tr>
+{% endfor %}
+</table>
+
+<h2>Executive summary</h2>
+<p class="note">Source: {{ narrative.source }}{% if narrative.needs_review %}
+ — <strong>requires human review before distribution (spec §8.4)</strong>{% endif %}.
+{% if narrative.approved_by %}Approved by: {{ narrative.approved_by }}.{% else %}
+Approval: ______________________{% endif %}</p>
+<p>{{ narrative.text }}</p>
+{% if narrative.key_risks %}
+<p><strong>Key risks:</strong></p>
+<ul>{% for risk in narrative.key_risks %}<li>{{ risk }}</li>{% endfor %}</ul>
+{% endif %}
+{% if narrative.recommendation %}
+<p><strong>Recommendation:</strong> {{ narrative.recommendation }}</p>
+{% endif %}
+
+<h2>Sign-off (dual, spec §15.3)</h2>
+<table class="grid">
+<tr><th>Role</th><th>Name</th><th>Signature</th><th>Date</th></tr>
+<tr><td>IT — conversion lead</td><td>______________________</td>
+    <td>______________________</td><td>____________</td></tr>
+<tr><td>Business — plan operations</td><td>______________________</td>
+    <td>______________________</td><td>____________</td></tr>
+</table>
+<p class="note">Package contents and hashes are listed in manifest.json.
+Synthetic data only (REQ-031).</p>
+{% endblock %}

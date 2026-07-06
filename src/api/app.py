@@ -440,6 +440,26 @@ def create_app(
             return report
         return HTMLResponse(render_findings_html(report))
 
+    @app.post("/reports/sign-off-package", tags=["reports"])
+    def post_signoff(body: dict, request: Request):
+        """Assemble the §13.4 sign-off package for a run. Body:
+        {run_id, narrative?, approved_by?}."""
+        from src.report.signoff import build_signoff_package
+
+        fingerprint_dir, runs_dir = _dirs(request)
+        run_id = body.get("run_id")
+        if not run_id:
+            raise RequestValidationError([{"loc": ("body", "run_id"),
+                                           "msg": "field required",
+                                           "type": "missing"}])
+        result = build_signoff_package(
+            run_id, runs_dir=runs_dir, fingerprint_dir=fingerprint_dir,
+            narrative=body.get("narrative"),
+            approved_by=body.get("approved_by"),
+        )
+        return {"package": str(result.package_path),
+                "manifest": result.manifest}
+
     @app.get("/runs/{run_id}/reconciliation/{kind}", response_class=HTMLResponse,
              tags=["reports"])
     def get_reconciliation(run_id: str, kind: str, request: Request):

@@ -519,6 +519,30 @@ def cmd_exceptions(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def cmd_signoff(args: argparse.Namespace) -> int:
+    from src.report.signoff import build_signoff_package
+
+    try:
+        result = build_signoff_package(
+            args.run_id, runs_dir=args.runs_dir,
+            fingerprint_dir=args.fingerprint_dir,
+            narrative=args.narrative, approved_by=args.approved_by,
+        )
+    except FileNotFoundError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_RUNTIME
+    if args.json:
+        print(json.dumps({"package": str(result.package_path),
+                          "manifest": result.manifest}, indent=2))
+        return EXIT_OK
+    print(f"sign-off package: {result.package_path}")
+    print(f"narrative: {result.manifest['narrative_source']}")
+    for metric in result.manifest["metrics"]:
+        print(f"  [{metric['status']:<7}] {metric['metric']} — "
+              f"target {metric['target']}, actual {metric['actual']}")
+    return EXIT_OK
+
+
 def cmd_explain(args: argparse.Namespace) -> int:
     """AI-assisted variance explanation (spec §8.2) — stub provider, fully
     local; output is a suggestion, visibly labeled AI-generated."""
@@ -770,6 +794,19 @@ def build_parser() -> argparse.ArgumentParser:
     p_history.add_argument("--fingerprint-dir", default=str(DEFAULT_FINGERPRINT_DIR))
     p_history.add_argument("--json", action="store_true", help="JSON output")
     p_history.set_defaults(func=cmd_history)
+
+    p_signoff = sub.add_parser(
+        "signoff", help="Assemble the sign-off package for a run (spec §13.4)")
+    p_signoff.add_argument("run_id")
+    p_signoff.add_argument("--narrative",
+                           help="analyst-provided executive narrative "
+                                "(default: AI-generated, needing approval)")
+    p_signoff.add_argument("--approved-by", help="narrative approver")
+    p_signoff.add_argument("--runs-dir", default=str(DEFAULT_RUNS_DIR))
+    p_signoff.add_argument("--fingerprint-dir",
+                           default=str(DEFAULT_FINGERPRINT_DIR))
+    p_signoff.add_argument("--json", action="store_true", help="JSON output")
+    p_signoff.set_defaults(func=cmd_signoff)
 
     p_explain = sub.add_parser(
         "explain", help="AI-assisted variance explanation (spec §8.2; "

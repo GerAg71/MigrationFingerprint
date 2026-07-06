@@ -325,7 +325,9 @@ async function viewRun(runId) {
     <p>Severity mix: ${mix}</p>
     <p><a class="btn" target="_blank" href="/runs/${esc(runId)}/report?format=html">Findings report (HTML)</a>
        <a class="btn" href="#/exceptions/${esc(runId)}">Exception register</a>
+       <button class="secondary" id="btnSignoff">Build sign-off package</button>
        reconciliation: ${recon}</p>
+    <div id="signoffResult"></div>
     <h2>Findings (priority order)</h2>
     <table><tr><th>Finding</th><th>FM</th><th>Rule</th><th>Severity</th>
       <th class="num">Records</th><th>Status</th></tr>
@@ -463,6 +465,25 @@ function wireFindingReview(findingId) {
     falsePositive.addEventListener("click", () => post("false_positive"));
 }
 
+function wireSignoff(runId) {
+  const button = $("#btnSignoff");
+  if (!button) return;
+  button.addEventListener("click", async () => {
+    try {
+      const result = await api("/reports/sign-off-package", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ run_id: runId }),
+      });
+      const metrics = result.manifest.metrics
+        .map((m) => `${m.status}: ${m.metric}`).join("; ");
+      $("#signoffResult").innerHTML = flash("ok",
+        `package written: ${result.package} — ${metrics}`);
+    } catch (error) {
+      $("#signoffResult").innerHTML = flash("err", error.message);
+    }
+  });
+}
+
 async function viewExceptions(runId) {
   const register = await api(`/runs/${runId}/exceptions`);
   const rows = register.map((r) => `
@@ -572,7 +593,8 @@ const ROUTES = [
   [/^#\/run-new\/(.+)$/,    (m) => viewRunNew(m[1]),
      (m) => wireRunNew(m[1]), "runs"],
   [/^#\/runs$/,             () => viewRuns(),               null, "runs"],
-  [/^#\/run\/(.+)$/,        (m) => viewRun(m[1]),           null, "runs"],
+  [/^#\/run\/(.+)$/,        (m) => viewRun(m[1]),
+     (m) => wireSignoff(m[1]), "runs"],
   [/^#\/finding\/(.+)$/,    (m) => viewFinding(m[1]),
      (m) => { wireFindingReview(m[1]); wireWorkflow(m[1]); }, "runs"],
   [/^#\/exceptions\/(.+)$/, (m) => viewExceptions(m[1]),     null, "runs"],

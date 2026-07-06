@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="note">Every finding not marked false positive, tracked to closure
+with owner, dates, and resolution evidence (spec §13.3).</p>
+<table class="grid">
+<tr><th>Exception</th><th>Plan</th><th>FM</th><th>Severity</th><th>Owner</th>
+    <th>Status</th><th>Opened</th><th>Closed</th><th>Resolution / evidence</th></tr>
+{% for row in register %}
+<tr{% if row.status != "closed" %} class="variance"{% endif %}>
+  <td>{{ row.exception }}</td><td>{{ row.plan }}</td>
+  <td>{{ row.failure_mode }}</td><td>{{ row.severity }}</td>
+  <td>{{ row.owner or "—" }}</td><td>{{ row.status }}</td>
+  <td>{{ row.opened }}</td><td>{{ row.closed or "—" }}</td>
+  <td>{{ row.resolution }}</td></tr>
+{% else %}
+<tr><td colspan="9">No exceptions — green board.</td></tr>
+{% endfor %}
+</table>
+{% endblock %}

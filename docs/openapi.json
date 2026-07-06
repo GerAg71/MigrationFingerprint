@@ -2993,6 +2993,48 @@
         ]
       }
     },
+    "/reports/sign-off-package": {
+      "post": {
+        "description": "Assemble the \u00a713.4 sign-off package for a run. Body:\n{run_id, narrative?, approved_by?}.",
+        "operationId": "post_signoff_reports_sign_off_package_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Signoff",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
     "/runs": {
       "post": {
         "operationId": "post_run_runs_post",

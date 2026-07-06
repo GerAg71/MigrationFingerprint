@@ -31,6 +31,9 @@ Session rules for Claude Code: `CLAUDE.md`.
 | MS-3.2 | Dashboard UI at `/ui`: library → fingerprint → suite → run wizard → findings/review → history/publish | ✅ done |
 | MS-3.3 | Second fingerprint (Omni→TRAC placeholder) + `pairs` CLI — demo step 5 | ✅ done |
 | **POC complete — all phases done, five-step demo verified** | | |
+| Phase 4.1 | Exception workflow (Ch. 15): assign/comment/resolve/close, audit trail, exception register | ✅ done |
+| Phase 4.2 | AI Orchestration Layer (Ch. 8/27) with local stub provider; `explain` CLI/API/UI | ✅ done |
+| Phase 4.3 | Sign-off package (§13.4): certification + metrics vs §2.6 targets + closure evidence, zip + manifest | ✅ done |
 
 ## Setup
 

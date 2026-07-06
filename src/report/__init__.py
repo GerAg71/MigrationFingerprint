@@ -8,6 +8,10 @@ from src.report.html import (
     render_reconciliation_html,
 )
 
+# NB: src.report.signoff is imported directly by its callers, never from this
+# package init — it depends on src.learning, which depends on src.runner,
+# which imports this package (a re-export here closes the import cycle).
+
 __all__ = [
     "RECON_KINDS",
     "compute_reconciliation",

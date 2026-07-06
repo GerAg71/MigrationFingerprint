@@ -226,6 +226,7 @@ EXPECTED_PATHS = {
     "/runs/{run_id}/exceptions",
     "/runs/{run_id}/report",
     "/runs/{run_id}/reconciliation/{kind}",
+    "/reports/sign-off-package",
 }
 
 
