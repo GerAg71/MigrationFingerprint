@@ -1,0 +1,2817 @@
+{
+  "components": {
+    "schemas": {
+      "AffectedRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "delta": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta"
+          },
+          "keys": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Keys",
+            "type": "object"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "target": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target"
+          }
+        },
+        "required": [
+          "keys"
+        ],
+        "title": "AffectedRecord",
+        "type": "object"
+      },
+      "Aggregation": {
+        "additionalProperties": false,
+        "properties": {
+          "dataset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset"
+          },
+          "group_by": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Group By",
+            "type": "array"
+          },
+          "measure": {
+            "title": "Measure",
+            "type": "string"
+          },
+          "op": {
+            "enum": [
+              "sum",
+              "count"
+            ],
+            "title": "Op",
+            "type": "string"
+          }
+        },
+        "required": [
+          "measure",
+          "op",
+          "group_by"
+        ],
+        "title": "Aggregation",
+        "type": "object"
+      },
+      "CompareField": {
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "title": "Field",
+            "type": "string"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "money",
+                  "text",
+                  "date"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "tolerance": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolerance"
+          }
+        },
+        "required": [
+          "field"
+        ],
+        "title": "CompareField",
+        "type": "object"
+      },
+      "ConversionRun": {
+        "additionalProperties": false,
+        "properties": {
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "datasets": {
+            "$ref": "#/components/schemas/RunDatasets"
+          },
+          "fingerprint_version": {
+            "pattern": "^\\d+\\.\\d+\\.\\d+$",
+            "title": "Fingerprint Version",
+            "type": "string"
+          },
+          "pair_id": {
+            "title": "Pair Id",
+            "type": "string"
+          },
+          "run_id": {
+            "pattern": "^RUN-\\d{4}-\\d{2}-\\d{2}-\\d{4}$",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/RunScope"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "default": "created",
+            "enum": [
+              "created",
+              "ingesting",
+              "running",
+              "review",
+              "completed",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "suite_snapshot": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/SuiteItem"
+            },
+            "title": "Suite Snapshot",
+            "type": "array"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "run_id",
+          "pair_id",
+          "fingerprint_version"
+        ],
+        "title": "ConversionRun",
+        "type": "object"
+      },
+      "CountBalanceParams": {
+        "additionalProperties": false,
+        "properties": {
+          "aggregations": {
+            "items": {
+              "$ref": "#/components/schemas/Aggregation"
+            },
+            "minItems": 1,
+            "title": "Aggregations",
+            "type": "array"
+          },
+          "filter": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filter"
+          }
+        },
+        "required": [
+          "aggregations"
+        ],
+        "title": "CountBalanceParams",
+        "type": "object"
+      },
+      "CountBalanceRule": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "failure_mode": {
+            "pattern": "^FM-\\d{3}$",
+            "title": "Failure Mode",
+            "type": "string"
+          },
+          "join_keys": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Join Keys"
+          },
+          "params": {
+            "$ref": "#/components/schemas/CountBalanceParams"
+          },
+          "rule_id": {
+            "pattern": "^RULE-[A-Z0-9]+(-[A-Z0-9]+)*$",
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "CRITICAL",
+              "HIGH",
+              "MEDIUM",
+              "LOW"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "source_dataset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Dataset"
+          },
+          "target_dataset": {
+            "title": "Target Dataset",
+            "type": "string"
+          },
+          "type": {
+            "const": "count_balance",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_id",
+          "failure_mode",
+          "target_dataset",
+          "severity",
+          "type",
+          "params"
+        ],
+        "title": "CountBalanceRule",
+        "type": "object"
+      },
+      "DerivedRecomputeParams": {
+        "additionalProperties": false,
+        "properties": {
+          "compare_field": {
+            "title": "Compare Field",
+            "type": "string"
+          },
+          "inputs": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Inputs",
+            "type": "object"
+          },
+          "recompute": {
+            "title": "Recompute",
+            "type": "string"
+          },
+          "tolerance": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolerance"
+          }
+        },
+        "required": [
+          "recompute",
+          "inputs",
+          "compare_field"
+        ],
+        "title": "DerivedRecomputeParams",
+        "type": "object"
+      },
+      "DerivedRecomputeRule": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "failure_mode": {
+            "pattern": "^FM-\\d{3}$",
+            "title": "Failure Mode",
+            "type": "string"
+          },
+          "join_keys": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Join Keys"
+          },
+          "params": {
+            "$ref": "#/components/schemas/DerivedRecomputeParams"
+          },
+          "rule_id": {
+            "pattern": "^RULE-[A-Z0-9]+(-[A-Z0-9]+)*$",
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "CRITICAL",
+              "HIGH",
+              "MEDIUM",
+              "LOW"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "source_dataset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Dataset"
+          },
+          "target_dataset": {
+            "title": "Target Dataset",
+            "type": "string"
+          },
+          "type": {
+            "const": "derived_recompute",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_id",
+          "failure_mode",
+          "target_dataset",
+          "severity",
+          "type",
+          "params"
+        ],
+        "title": "DerivedRecomputeRule",
+        "type": "object"
+      },
+      "EncodingCheckParams": {
+        "additionalProperties": false,
+        "properties": {
+          "allowed": {
+            "enum": [
+              "ascii",
+              "latin1",
+              "custom-set"
+            ],
+            "title": "Allowed",
+            "type": "string"
+          },
+          "custom_set": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Set"
+          },
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Fields",
+            "type": "array"
+          }
+        },
+        "required": [
+          "fields",
+          "allowed"
+        ],
+        "title": "EncodingCheckParams",
+        "type": "object"
+      },
+      "EncodingCheckRule": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "failure_mode": {
+            "pattern": "^FM-\\d{3}$",
+            "title": "Failure Mode",
+            "type": "string"
+          },
+          "join_keys": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Join Keys"
+          },
+          "params": {
+            "$ref": "#/components/schemas/EncodingCheckParams"
+          },
+          "rule_id": {
+            "pattern": "^RULE-[A-Z0-9]+(-[A-Z0-9]+)*$",
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "CRITICAL",
+              "HIGH",
+              "MEDIUM",
+              "LOW"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "source_dataset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Dataset"
+          },
+          "target_dataset": {
+            "title": "Target Dataset",
+            "type": "string"
+          },
+          "type": {
+            "const": "encoding_check",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_id",
+          "failure_mode",
+          "target_dataset",
+          "severity",
+          "type",
+          "params"
+        ],
+        "title": "EncodingCheckRule",
+        "type": "object"
+      },
+      "FailureMode": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "data_domains": {
+            "items": {
+              "enum": [
+                "PLAN",
+                "PARTICIPANT",
+                "BALANCE",
+                "CONTRIBUTION",
+                "LOAN",
+                "VESTING",
+                "TRANSACTION",
+                "ENCODING",
+                "FORMAT"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Data Domains",
+            "type": "array"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "detection_rules": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Detection Rules",
+            "type": "array"
+          },
+          "history": {
+            "$ref": "#/components/schemas/FailureModeHistory"
+          },
+          "id": {
+            "pattern": "^FM-\\d{3}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "impact": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 1.0,
+            "title": "Impact",
+            "type": "number"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "origin": {
+            "enum": [
+              "seed:experience",
+              "seed:methodology",
+              "learned"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "probability": {
+            "maximum": 0.99,
+            "minimum": 0.05,
+            "title": "Probability",
+            "type": "number"
+          },
+          "remediation": {
+            "title": "Remediation",
+            "type": "string"
+          },
+          "sample_defect": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sample Defect"
+          },
+          "seed_probability": {
+            "anyOf": [
+              {
+                "maximum": 0.99,
+                "minimum": 0.05,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed Probability"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "category",
+          "description",
+          "probability",
+          "impact",
+          "data_domains",
+          "detection_rules",
+          "remediation",
+          "origin"
+        ],
+        "title": "FailureMode",
+        "type": "object"
+      },
+      "FailureModeHistory": {
+        "additionalProperties": false,
+        "properties": {
+          "false_positives": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "False Positives",
+            "type": "integer"
+          },
+          "times_confirmed": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Times Confirmed",
+            "type": "integer"
+          },
+          "times_detected": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Times Detected",
+            "type": "integer"
+          }
+        },
+        "title": "FailureModeHistory",
+        "type": "object"
+      },
+      "FieldCompareParams": {
+        "additionalProperties": false,
+        "properties": {
+          "compare": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CompareField"
+            },
+            "title": "Compare",
+            "type": "array"
+          },
+          "validity": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ValidityCheck"
+            },
+            "title": "Validity",
+            "type": "array"
+          }
+        },
+        "title": "FieldCompareParams",
+        "type": "object"
+      },
+      "FieldCompareRule": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "failure_mode": {
+            "pattern": "^FM-\\d{3}$",
+            "title": "Failure Mode",
+            "type": "string"
+          },
+          "join_keys": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Join Keys"
+          },
+          "params": {
+            "$ref": "#/components/schemas/FieldCompareParams"
+          },
+          "rule_id": {
+            "pattern": "^RULE-[A-Z0-9]+(-[A-Z0-9]+)*$",
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "CRITICAL",
+              "HIGH",
+              "MEDIUM",
+              "LOW"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "source_dataset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Dataset"
+          },
+          "target_dataset": {
+            "title": "Target Dataset",
+            "type": "string"
+          },
+          "type": {
+            "const": "field_compare",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_id",
+          "failure_mode",
+          "target_dataset",
+          "severity",
+          "type",
+          "params"
+        ],
+        "title": "FieldCompareRule",
+        "type": "object"
+      },
+      "Finding": {
+        "additionalProperties": false,
+        "properties": {
+          "failure_mode": {
+            "pattern": "^FM-\\d{3}$",
+            "title": "Failure Mode",
+            "type": "string"
+          },
+          "finding_id": {
+            "title": "Finding Id",
+            "type": "string"
+          },
+          "full_detail_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Detail Uri"
+          },
+          "records_affected": {
+            "minimum": 0.0,
+            "title": "Records Affected",
+            "type": "integer"
+          },
+          "remediation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remediation"
+          },
+          "rule_id": {
+            "pattern": "^RULE-[A-Z0-9]+(-[A-Z0-9]+)*$",
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "run_id": {
+            "pattern": "^RUN-\\d{4}-\\d{2}-\\d{2}-\\d{4}$",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "sample_records": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AffectedRecord"
+            },
+            "maxItems": 25,
+            "title": "Sample Records",
+            "type": "array"
+          },
+          "severity": {
+            "enum": [
+              "CRITICAL",
+              "HIGH",
+              "MEDIUM",
+              "LOW"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "status": {
+            "default": "new",
+            "enum": [
+              "new",
+              "in_review",
+              "confirmed",
+              "false_positive",
+              "remediated",
+              "closed"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "finding_id",
+          "run_id",
+          "failure_mode",
+          "rule_id",
+          "severity",
+          "records_affected"
+        ],
+        "title": "Finding",
+        "type": "object"
+      },
+      "Fingerprint": {
+        "additionalProperties": false,
+        "properties": {
+          "changelog": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Changelog"
+          },
+          "detection_rules": {
+            "default": [],
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "count_balance": "#/components/schemas/CountBalanceRule",
+                  "derived_recompute": "#/components/schemas/DerivedRecomputeRule",
+                  "encoding_check": "#/components/schemas/EncodingCheckRule",
+                  "field_compare": "#/components/schemas/FieldCompareRule",
+                  "referential": "#/components/schemas/ReferentialRule",
+                  "sort_order_check": "#/components/schemas/SortOrderCheckRule"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FieldCompareRule"
+                },
+                {
+                  "$ref": "#/components/schemas/CountBalanceRule"
+                },
+                {
+                  "$ref": "#/components/schemas/ReferentialRule"
+                },
+                {
+                  "$ref": "#/components/schemas/DerivedRecomputeRule"
+                },
+                {
+                  "$ref": "#/components/schemas/EncodingCheckRule"
+                },
+                {
+                  "$ref": "#/components/schemas/SortOrderCheckRule"
+                }
+              ]
+            },
+            "title": "Detection Rules",
+            "type": "array"
+          },
+          "failure_modes": {
+            "items": {
+              "$ref": "#/components/schemas/FailureMode"
+            },
+            "minItems": 1,
+            "title": "Failure Modes",
+            "type": "array"
+          },
+          "fingerprint_id": {
+            "title": "Fingerprint Id",
+            "type": "string"
+          },
+          "platform_pair": {
+            "$ref": "#/components/schemas/PlatformPairRef"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "published",
+              "superseded"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "updated_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated By"
+          },
+          "version": {
+            "pattern": "^\\d+\\.\\d+\\.\\d+$",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fingerprint_id",
+          "platform_pair",
+          "version",
+          "status",
+          "failure_modes"
+        ],
+        "title": "Fingerprint",
+        "type": "object"
+      },
+      "FingerprintVersions": {
+        "additionalProperties": false,
+        "properties": {
+          "current": {
+            "title": "Current",
+            "type": "string"
+          },
+          "pair_id": {
+            "title": "Pair Id",
+            "type": "string"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/VersionInfo"
+            },
+            "title": "Versions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "pair_id",
+          "current",
+          "versions"
+        ],
+        "title": "FingerprintVersions",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "LearningEvent": {
+        "additionalProperties": false,
+        "description": "The fingerprint mutation a review produced (spec \u00a75.7, \u00a714.2).\nAppend-only; formula inputs are recorded exactly (as strings) so the\nwrite-back is reproducible from the event log alone (REQ-027).",
+        "properties": {
+          "counters_after": {
+            "$ref": "#/components/schemas/FailureModeHistory"
+          },
+          "counters_before": {
+            "$ref": "#/components/schemas/FailureModeHistory"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "decision": {
+            "enum": [
+              "confirmed",
+              "false_positive"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "draft_version": {
+            "pattern": "^\\d+\\.\\d+\\.\\d+$",
+            "title": "Draft Version",
+            "type": "string"
+          },
+          "finding_id": {
+            "title": "Finding Id",
+            "type": "string"
+          },
+          "fm_id": {
+            "pattern": "^FM-\\d{3}$",
+            "title": "Fm Id",
+            "type": "string"
+          },
+          "formula_inputs": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Formula Inputs",
+            "type": "object"
+          },
+          "pair_id": {
+            "title": "Pair Id",
+            "type": "string"
+          },
+          "probability_after": {
+            "title": "Probability After",
+            "type": "number"
+          },
+          "probability_before": {
+            "title": "Probability Before",
+            "type": "number"
+          },
+          "reviewer": {
+            "title": "Reviewer",
+            "type": "string"
+          },
+          "run_id": {
+            "pattern": "^RUN-\\d{4}-\\d{2}-\\d{2}-\\d{4}$",
+            "title": "Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pair_id",
+          "fm_id",
+          "finding_id",
+          "run_id",
+          "decision",
+          "reviewer",
+          "counters_before",
+          "counters_after",
+          "probability_before",
+          "probability_after",
+          "formula_inputs",
+          "draft_version"
+        ],
+        "title": "LearningEvent",
+        "type": "object"
+      },
+      "PairSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "current_version": {
+            "title": "Current Version",
+            "type": "string"
+          },
+          "modes": {
+            "title": "Modes",
+            "type": "integer"
+          },
+          "pair_id": {
+            "title": "Pair Id",
+            "type": "string"
+          },
+          "rules": {
+            "title": "Rules",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pair_id",
+          "current_version",
+          "modes",
+          "rules"
+        ],
+        "title": "PairSummary",
+        "type": "object"
+      },
+      "PlatformPairRef": {
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "target": {
+            "title": "Target",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "target"
+        ],
+        "title": "PlatformPairRef",
+        "type": "object"
+      },
+      "PrioritizedSuiteEntry": {
+        "additionalProperties": false,
+        "description": "One row of the prioritized suite view (spec \u00a712.2, CLI_SPEC `suite`).\n\nDisabled rules stay in their priority position, marked skipped:disabled.\npriority_score is exact Decimal arithmetic so the suite is reproducible\nbyte-for-byte (REQ-009).",
+        "properties": {
+          "fm_id": {
+            "pattern": "^FM-\\d{3}$",
+            "title": "Fm Id",
+            "type": "string"
+          },
+          "order": {
+            "minimum": 1.0,
+            "title": "Order",
+            "type": "integer"
+          },
+          "priority_score": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Priority Score",
+            "type": "string"
+          },
+          "rule_id": {
+            "pattern": "^RULE-[A-Z0-9]+(-[A-Z0-9]+)*$",
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "CRITICAL",
+              "HIGH",
+              "MEDIUM",
+              "LOW"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "source_dataset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Dataset"
+          },
+          "status": {
+            "default": "pending",
+            "enum": [
+              "pending",
+              "skipped:disabled"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "target_dataset": {
+            "title": "Target Dataset",
+            "type": "string"
+          }
+        },
+        "required": [
+          "order",
+          "rule_id",
+          "fm_id",
+          "priority_score",
+          "severity",
+          "target_dataset"
+        ],
+        "title": "PrioritizedSuiteEntry",
+        "type": "object"
+      },
+      "PublishAccepted": {
+        "additionalProperties": false,
+        "properties": {
+          "diff": {
+            "additionalProperties": true,
+            "title": "Diff",
+            "type": "object"
+          },
+          "new_version": {
+            "title": "New Version",
+            "type": "string"
+          },
+          "old_version": {
+            "title": "Old Version",
+            "type": "string"
+          },
+          "pair_id": {
+            "title": "Pair Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pair_id",
+          "old_version",
+          "new_version",
+          "diff"
+        ],
+        "title": "PublishAccepted",
+        "type": "object"
+      },
+      "PublishRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "bump": {
+            "pattern": "^(patch|minor|major)$",
+            "title": "Bump",
+            "type": "string"
+          },
+          "changelog": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Changelog"
+          }
+        },
+        "required": [
+          "bump"
+        ],
+        "title": "PublishRequest",
+        "type": "object"
+      },
+      "ReferentialParams": {
+        "additionalProperties": false,
+        "description": "Empty params = plain bidirectional orphan detection on join_keys.",
+        "properties": {
+          "unique": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unique"
+          },
+          "unmapped_target_fields": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UnmappedTargetFields"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "ReferentialParams",
+        "type": "object"
+      },
+      "ReferentialRule": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "failure_mode": {
+            "pattern": "^FM-\\d{3}$",
+            "title": "Failure Mode",
+            "type": "string"
+          },
+          "join_keys": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Join Keys"
+          },
+          "params": {
+            "$ref": "#/components/schemas/ReferentialParams",
+            "default": {}
+          },
+          "rule_id": {
+            "pattern": "^RULE-[A-Z0-9]+(-[A-Z0-9]+)*$",
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "CRITICAL",
+              "HIGH",
+              "MEDIUM",
+              "LOW"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "source_dataset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Dataset"
+          },
+          "target_dataset": {
+            "title": "Target Dataset",
+            "type": "string"
+          },
+          "type": {
+            "const": "referential",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_id",
+          "failure_mode",
+          "target_dataset",
+          "severity",
+          "type"
+        ],
+        "title": "ReferentialRule",
+        "type": "object"
+      },
+      "ReviewAccepted": {
+        "additionalProperties": false,
+        "description": "Mirrors the spec \u00a718.2 sample response for POST review.",
+        "properties": {
+          "finding_status": {
+            "title": "Finding Status",
+            "type": "string"
+          },
+          "learning_event": {
+            "additionalProperties": true,
+            "title": "Learning Event",
+            "type": "object"
+          }
+        },
+        "required": [
+          "finding_status",
+          "learning_event"
+        ],
+        "title": "ReviewAccepted",
+        "type": "object"
+      },
+      "ReviewRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "decision": {
+            "pattern": "^(confirmed|false_positive)$",
+            "title": "Decision",
+            "type": "string"
+          },
+          "reviewer": {
+            "default": "analyst",
+            "title": "Reviewer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "title": "ReviewRequest",
+        "type": "object"
+      },
+      "RunAccepted": {
+        "additionalProperties": false,
+        "properties": {
+          "findings": {
+            "title": "Findings",
+            "type": "integer"
+          },
+          "fingerprint_version": {
+            "title": "Fingerprint Version",
+            "type": "string"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/RunSummary"
+          }
+        },
+        "required": [
+          "run_id",
+          "status",
+          "fingerprint_version",
+          "summary",
+          "findings"
+        ],
+        "title": "RunAccepted",
+        "type": "object"
+      },
+      "RunDatasets": {
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "title": "Source",
+            "type": "object"
+          },
+          "target": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "title": "Target",
+            "type": "object"
+          }
+        },
+        "title": "RunDatasets",
+        "type": "object"
+      },
+      "RunRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "fingerprint_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fingerprint Version"
+          },
+          "layout_dir": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Layout Dir"
+          },
+          "pair_id": {
+            "title": "Pair Id",
+            "type": "string"
+          },
+          "plans": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plans"
+          },
+          "source_dir": {
+            "title": "Source Dir",
+            "type": "string"
+          },
+          "target_dir": {
+            "title": "Target Dir",
+            "type": "string"
+          },
+          "wave": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wave"
+          }
+        },
+        "required": [
+          "pair_id",
+          "source_dir",
+          "target_dir"
+        ],
+        "title": "RunRequest",
+        "type": "object"
+      },
+      "RunScope": {
+        "additionalProperties": false,
+        "properties": {
+          "plans": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plans"
+          },
+          "wave": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wave"
+          }
+        },
+        "title": "RunScope",
+        "type": "object"
+      },
+      "RunSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "failed": {
+            "minimum": 0.0,
+            "title": "Failed",
+            "type": "integer"
+          },
+          "passed": {
+            "minimum": 0.0,
+            "title": "Passed",
+            "type": "integer"
+          },
+          "records_affected": {
+            "minimum": 0.0,
+            "title": "Records Affected",
+            "type": "integer"
+          },
+          "rules_run": {
+            "minimum": 0.0,
+            "title": "Rules Run",
+            "type": "integer"
+          },
+          "severity_mix": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "default": {},
+            "propertyNames": {
+              "enum": [
+                "CRITICAL",
+                "HIGH",
+                "MEDIUM",
+                "LOW"
+              ]
+            },
+            "title": "Severity Mix",
+            "type": "object"
+          }
+        },
+        "required": [
+          "rules_run",
+          "passed",
+          "failed",
+          "records_affected"
+        ],
+        "title": "RunSummary",
+        "type": "object"
+      },
+      "SortOrderCheckParams": {
+        "additionalProperties": false,
+        "properties": {
+          "collation": {
+            "enum": [
+              "ascii",
+              "ebcdic"
+            ],
+            "title": "Collation",
+            "type": "string"
+          },
+          "dataset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset"
+          },
+          "order_by": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Order By",
+            "type": "array"
+          }
+        },
+        "required": [
+          "order_by",
+          "collation"
+        ],
+        "title": "SortOrderCheckParams",
+        "type": "object"
+      },
+      "SortOrderCheckRule": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "failure_mode": {
+            "pattern": "^FM-\\d{3}$",
+            "title": "Failure Mode",
+            "type": "string"
+          },
+          "join_keys": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Join Keys"
+          },
+          "params": {
+            "$ref": "#/components/schemas/SortOrderCheckParams"
+          },
+          "rule_id": {
+            "pattern": "^RULE-[A-Z0-9]+(-[A-Z0-9]+)*$",
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "CRITICAL",
+              "HIGH",
+              "MEDIUM",
+              "LOW"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "source_dataset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Dataset"
+          },
+          "target_dataset": {
+            "title": "Target Dataset",
+            "type": "string"
+          },
+          "type": {
+            "const": "sort_order_check",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_id",
+          "failure_mode",
+          "target_dataset",
+          "severity",
+          "type",
+          "params"
+        ],
+        "title": "SortOrderCheckRule",
+        "type": "object"
+      },
+      "SuiteItem": {
+        "additionalProperties": false,
+        "description": "One entry of a run's immutable suite snapshot (spec \u00a712.2).",
+        "properties": {
+          "fm_id": {
+            "anyOf": [
+              {
+                "pattern": "^FM-\\d{3}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fm Id"
+          },
+          "order": {
+            "minimum": 1.0,
+            "title": "Order",
+            "type": "integer"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "enum": [
+                  "pass",
+                  "fail",
+                  "skipped"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome"
+          },
+          "priority_score": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Priority Score",
+            "type": "number"
+          },
+          "records_affected": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Records Affected"
+          },
+          "rule_id": {
+            "pattern": "^RULE-[A-Z0-9]+(-[A-Z0-9]+)*$",
+            "title": "Rule Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_id",
+          "priority_score",
+          "order"
+        ],
+        "title": "SuiteItem",
+        "type": "object"
+      },
+      "SuiteView": {
+        "additionalProperties": false,
+        "properties": {
+          "pair_id": {
+            "title": "Pair Id",
+            "type": "string"
+          },
+          "suite": {
+            "items": {
+              "$ref": "#/components/schemas/PrioritizedSuiteEntry"
+            },
+            "title": "Suite",
+            "type": "array"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pair_id",
+          "version",
+          "suite"
+        ],
+        "title": "SuiteView",
+        "type": "object"
+      },
+      "UnmappedTargetFields": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Fields",
+            "type": "array"
+          },
+          "mapping_manifest": {
+            "title": "Mapping Manifest",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fields",
+          "mapping_manifest"
+        ],
+        "title": "UnmappedTargetFields",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "ValidityCheck": {
+        "additionalProperties": false,
+        "description": "Single-sided validity constraint (spec \u00a711.2.1 ``validity`` block).\n\n``min``/``max`` are strings parsed at execution time: an ISO date or a\ndecimal amount; ``max`` additionally accepts the literal ``\"today\"``.\n``gte_field`` requires this field's value >= the named field's value\n(cross-field comparison, e.g. term_date >= hire_date).",
+        "properties": {
+          "field": {
+            "title": "Field",
+            "type": "string"
+          },
+          "gte_field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gte Field"
+          },
+          "max": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max"
+          },
+          "max_length": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Length"
+          },
+          "min": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min"
+          },
+          "not_null": {
+            "default": false,
+            "title": "Not Null",
+            "type": "boolean"
+          },
+          "pattern": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pattern"
+          }
+        },
+        "required": [
+          "field"
+        ],
+        "title": "ValidityCheck",
+        "type": "object"
+      },
+      "VersionInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "status"
+        ],
+        "title": "VersionInfo",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Targeted, not generic: prioritized plan-conversion validation driven by the platform pair's Migration Fingerprint. POC layer \u2014 no authentication (product adds Cognito role scopes, spec \u00a718.4); runs execute synchronously in-process (product enqueues to SQS).",
+    "title": "MAPTIVA Migration Fingerprint API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/findings/{finding_id}": {
+      "get": {
+        "operationId": "get_finding_findings__finding_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "finding_id",
+            "required": true,
+            "schema": {
+              "title": "Finding Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Finding"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Finding",
+        "tags": [
+          "findings"
+        ]
+      }
+    },
+    "/findings/{finding_id}/review": {
+      "post": {
+        "operationId": "post_review_findings__finding_id__review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "finding_id",
+            "required": true,
+            "schema": {
+              "title": "Finding Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewAccepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Review",
+        "tags": [
+          "learning"
+        ]
+      }
+    },
+    "/fingerprints/{pair_id}": {
+      "get": {
+        "operationId": "get_fingerprint_fingerprints__pair_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pair_id",
+            "required": true,
+            "schema": {
+              "title": "Pair Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Fingerprint"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Fingerprint",
+        "tags": [
+          "fingerprints"
+        ]
+      }
+    },
+    "/fingerprints/{pair_id}/learning-history": {
+      "get": {
+        "operationId": "get_learning_history_fingerprints__pair_id__learning_history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pair_id",
+            "required": true,
+            "schema": {
+              "title": "Pair Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fm",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fm"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LearningEvent"
+                  },
+                  "title": "Response Get Learning History Fingerprints  Pair Id  Learning History Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Learning History",
+        "tags": [
+          "learning"
+        ]
+      }
+    },
+    "/fingerprints/{pair_id}/publish": {
+      "post": {
+        "operationId": "post_publish_fingerprints__pair_id__publish_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pair_id",
+            "required": true,
+            "schema": {
+              "title": "Pair Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishAccepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Publish",
+        "tags": [
+          "learning"
+        ]
+      }
+    },
+    "/fingerprints/{pair_id}/suite": {
+      "get": {
+        "operationId": "get_suite_fingerprints__pair_id__suite_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pair_id",
+            "required": true,
+            "schema": {
+              "title": "Pair Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "version",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuiteView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Suite",
+        "tags": [
+          "fingerprints"
+        ]
+      }
+    },
+    "/fingerprints/{pair_id}/versions": {
+      "get": {
+        "operationId": "get_versions_fingerprints__pair_id__versions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pair_id",
+            "required": true,
+            "schema": {
+              "title": "Pair Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FingerprintVersions"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Versions",
+        "tags": [
+          "fingerprints"
+        ]
+      }
+    },
+    "/fingerprints/{pair_id}/versions/{version}": {
+      "get": {
+        "operationId": "get_fingerprint_version_fingerprints__pair_id__versions__version__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pair_id",
+            "required": true,
+            "schema": {
+              "title": "Pair Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "title": "Version",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Fingerprint"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Fingerprint Version",
+        "tags": [
+          "fingerprints"
+        ]
+      }
+    },
+    "/platform-pairs": {
+      "get": {
+        "operationId": "get_pairs_platform_pairs_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PairSummary"
+                  },
+                  "title": "Response Get Pairs Platform Pairs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Pairs",
+        "tags": [
+          "fingerprints"
+        ]
+      }
+    },
+    "/runs": {
+      "post": {
+        "operationId": "post_run_runs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunAccepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Run",
+        "tags": [
+          "runs"
+        ]
+      }
+    },
+    "/runs/{run_id}": {
+      "get": {
+        "operationId": "get_run_runs__run_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversionRun"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Run",
+        "tags": [
+          "runs"
+        ]
+      }
+    },
+    "/runs/{run_id}/findings": {
+      "get": {
+        "operationId": "get_findings_runs__run_id__findings_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Severity"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Finding"
+                  },
+                  "title": "Response Get Findings Runs  Run Id  Findings Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Findings",
+        "tags": [
+          "findings"
+        ]
+      }
+    },
+    "/runs/{run_id}/reconciliation/{kind}": {
+      "get": {
+        "operationId": "get_reconciliation_runs__run_id__reconciliation__kind__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "title": "Kind",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Reconciliation",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/runs/{run_id}/report": {
+      "get": {
+        "operationId": "get_report_runs__run_id__report_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "schema": {
+              "default": "json",
+              "pattern": "^(json|html)$",
+              "title": "Format",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Report",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/runs/{run_id}/suite": {
+      "get": {
+        "operationId": "get_run_suite_runs__run_id__suite_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Run Suite",
+        "tags": [
+          "runs"
+        ]
+      }
+    }
+  }
+}

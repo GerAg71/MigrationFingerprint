@@ -27,7 +27,8 @@ Session rules for Claude Code: `CLAUDE.md`.
 | MS-2.3 | Self-contained `findings.html` + five reconciliation reports; CLI `report` | ✅ done |
 | MS-2.4 | Learning loop: review write-back (§14.2), draft/publish versioning, `diff`/`history`/`author-mode` | ✅ done |
 | **Phase 2 complete** | | |
-| MS-3.1 … MS-3.3 | see spec Ch. 23 | open |
+| MS-3.1 | FastAPI endpoints (Ch. 18 subset) + OpenAPI companion (`docs/openapi.json`) | ✅ done |
+| MS-3.2 … MS-3.3 | see spec Ch. 23 | open |
 
 ## Setup
 
@@ -62,6 +63,21 @@ draft under `data/fingerprints/<pair>/draft/`; `publish` finalizes it as a
 new immutable version. Learning events append to
 `data/fingerprints/<pair>/learning_events.jsonl` and are replayable
 (REQ-027).
+
+## REST API (MS-3.1)
+
+```
+uv run uvicorn src.api.app:app --reload
+```
+
+Spec Ch. 18 subset over the identical engine: platform pairs, fingerprints
+(current/versions/suite/learning-history/publish), runs (create — executes
+synchronously in the POC — status, suite, findings), finding detail +
+review, and report artifacts (findings JSON/HTML + the reconciliation
+suite). Error envelope per §18.5 with per-request ids. No auth in the POC
+(product adds Cognito role scopes). OpenAPI at `/openapi.json`; committed
+companion at [docs/openapi.json](docs/openapi.json) (regenerate with
+`uv run python -m src.api`).
 
 A run writes `data/runs/<run_id>/`: `suite_snapshot.json` (persisted before
 execution, REQ-001), deterministic `findings.json` (REQ-009), per-finding
