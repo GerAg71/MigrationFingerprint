@@ -2470,6 +2470,47 @@
         ]
       }
     },
+    "/findings/{finding_id}/explanation": {
+      "get": {
+        "description": "ExplainReconciliationVariance() \u2014 read-only suggestion (REQ-019),\nrendered visibly labeled as AI-generated (\u00a720.4).",
+        "operationId": "get_explanation_findings__finding_id__explanation_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "finding_id",
+            "required": true,
+            "schema": {
+              "title": "Finding Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Explanation",
+        "tags": [
+          "ai"
+        ]
+      }
+    },
     "/findings/{finding_id}/history": {
       "get": {
         "operationId": "get_finding_history_findings__finding_id__history_get",

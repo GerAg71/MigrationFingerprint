@@ -87,6 +87,10 @@ def test_dashboard_calls_only_existing_endpoints(client):
         "/runs/${runId}/suite": "/runs/{run_id}/suite",
         "/findings/${findingId}": "/findings/{finding_id}",
         "/findings/${findingId}/review": "/findings/{finding_id}/review",
+        "/findings/${findingId}/history": "/findings/{finding_id}/history",
+        "/findings/${findingId}/explanation":
+            "/findings/{finding_id}/explanation",
+        "/runs/${runId}/exceptions": "/runs/{run_id}/exceptions",
     }
     for js_path, api_path in referenced.items():
         assert js_path in html, js_path

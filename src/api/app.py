@@ -402,6 +402,33 @@ def create_app(
             register = [row for row in register if row["status"] == status]
         return register
 
+    # --- AI assistance (spec Ch. 8; stub provider in the POC) -----------------------
+
+    @app.get("/findings/{finding_id}/explanation", tags=["ai"])
+    def get_explanation(finding_id: str, request: Request):
+        """ExplainReconciliationVariance() — read-only suggestion (REQ-019),
+        rendered visibly labeled as AI-generated (§20.4)."""
+        from src.ai.orchestrator import AIOrchestrator
+
+        fingerprint_dir, runs_dir = _dirs(request)
+        run_id = finding_id.rsplit("-F", 1)[0]
+        report = _load_report(runs_dir, run_id)
+        finding = next((f for f in report.findings
+                        if f.finding_id == finding_id), None)
+        if finding is None:
+            raise NotFoundError(f"finding {finding_id!r} not found")
+        failure_mode = None
+        try:
+            fingerprint = load(report.run.pair_id,
+                               version=report.run.fingerprint_version,
+                               fingerprint_dir=fingerprint_dir)
+            failure_mode = next((m for m in fingerprint.failure_modes
+                                 if m.id == finding.failure_mode), None)
+        except (FileNotFoundError, FingerprintDirectoryError):
+            pass  # explanation still works without the mode context
+        orchestrator = AIOrchestrator(audit_path=runs_dir / "ai_audit.jsonl")
+        return orchestrator.explain_variance(finding, failure_mode).to_payload()
+
     # --- report artifacts (§13) -----------------------------------------------------
 
     @app.get("/runs/{run_id}/report", tags=["reports"])

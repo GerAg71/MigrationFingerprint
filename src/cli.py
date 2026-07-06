@@ -519,6 +519,52 @@ def cmd_exceptions(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def cmd_explain(args: argparse.Namespace) -> int:
+    """AI-assisted variance explanation (spec §8.2) — stub provider, fully
+    local; output is a suggestion, visibly labeled AI-generated."""
+    from src.ai.orchestrator import AIGuardError, AIOrchestrator
+
+    run_id = args.finding_id.rsplit("-F", 1)[0]
+    try:
+        report = _load_report(args.runs_dir, run_id)
+    except FileNotFoundError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_RUNTIME
+    finding = next((f for f in report.findings
+                    if f.finding_id == args.finding_id), None)
+    if finding is None:
+        print(f"error: finding {args.finding_id!r} not found", file=sys.stderr)
+        return EXIT_RUNTIME
+    failure_mode = None
+    try:
+        fingerprint = load(report.run.pair_id,
+                           version=report.run.fingerprint_version,
+                           fingerprint_dir=args.fingerprint_dir)
+        failure_mode = next((m for m in fingerprint.failure_modes
+                             if m.id == finding.failure_mode), None)
+    except (FileNotFoundError, FingerprintDirectoryError, ValidationError):
+        pass
+    try:
+        result = AIOrchestrator(
+            audit_path=Path(args.runs_dir) / "ai_audit.jsonl"
+        ).explain_variance(finding, failure_mode)
+    except AIGuardError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_RUNTIME
+
+    if args.json:
+        print(json.dumps(result.to_payload(), indent=2))
+        return EXIT_OK
+    output = result.output
+    print(f"[AI-generated — provider {result.provider}, "
+          f"confidence {result.confidence}"
+          f"{', needs human review' if result.needs_review else ''}]")
+    print(f"Explanation: {output.explanation}")
+    print(f"Likely cause: {output.likely_cause}")
+    print(f"Suggested check: {output.suggested_check}")
+    return EXIT_OK
+
+
 def cmd_author_mode(args: argparse.Namespace) -> int:
     from src.learning.versioning import author_failure_mode
 
@@ -724,6 +770,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_history.add_argument("--fingerprint-dir", default=str(DEFAULT_FINGERPRINT_DIR))
     p_history.add_argument("--json", action="store_true", help="JSON output")
     p_history.set_defaults(func=cmd_history)
+
+    p_explain = sub.add_parser(
+        "explain", help="AI-assisted variance explanation (spec §8.2; "
+                        "stub provider, fully local)")
+    p_explain.add_argument("finding_id")
+    p_explain.add_argument("--runs-dir", default=str(DEFAULT_RUNS_DIR))
+    p_explain.add_argument("--fingerprint-dir", default=str(DEFAULT_FINGERPRINT_DIR))
+    p_explain.add_argument("--json", action="store_true", help="JSON output")
+    p_explain.set_defaults(func=cmd_explain)
 
     p_author = sub.add_parser(
         "author-mode", help="Draft a new failure mode + rule (spec §14.4); "

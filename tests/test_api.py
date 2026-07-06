@@ -222,6 +222,7 @@ EXPECTED_PATHS = {
     "/findings/{finding_id}/resolve",
     "/findings/{finding_id}/close",
     "/findings/{finding_id}/history",
+    "/findings/{finding_id}/explanation",
     "/runs/{run_id}/exceptions",
     "/runs/{run_id}/report",
     "/runs/{run_id}/reconciliation/{kind}",

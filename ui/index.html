@@ -360,6 +360,10 @@ async function viewFinding(findingId) {
       ${finding.remediation ? `<br>Remediation: ${esc(finding.remediation)}` : ""}</p>
     <table><tr>${keyColumns.map((c) => `<th>${esc(c)}</th>`).join("")}
       <th>source</th><th>target</th><th class="num">delta</th></tr>${rows}</table>
+    <h2>AI-assisted explanation</h2>
+    <p><button class="secondary" id="btnExplain">Explain this variance</button>
+       <span class="note">stub provider — fully local (spec §8.1)</span></p>
+    <div id="explainResult"></div>
     <h2>Review (the Learning Loop)</h2>
     ${reviewable ? `
       <div class="grid2">
@@ -409,6 +413,21 @@ function wireWorkflow(findingId) {
     }
   };
   const wire = (id, fn) => { const b = $(id); if (b) b.addEventListener("click", fn); };
+  wire("#btnExplain", async () => {
+    try {
+      const result = await api(`/findings/${findingId}/explanation`);
+      const out = result.output;
+      $("#explainResult").innerHTML = `<div class="card">
+        <p class="note">AI-generated — provider ${esc(result.provider)},
+          confidence ${esc(result.confidence)}${result.needs_review
+            ? " — needs human review" : ""} (§20.4 label)</p>
+        <p>${esc(out.explanation)}</p>
+        <p><strong>Likely cause:</strong> ${esc(out.likely_cause)}</p>
+        <p><strong>Suggested check:</strong> ${esc(out.suggested_check)}</p></div>`;
+    } catch (error) {
+      $("#explainResult").innerHTML = flash("err", error.message);
+    }
+  });
   wire("#btnAssign", () => post("assign",
     { assignee: $("#wfAssignee").value, comment: $("#wfText").value || null }));
   wire("#btnComment", () => post("comment", { text: $("#wfText").value }));
