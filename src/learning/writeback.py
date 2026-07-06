@@ -190,6 +190,17 @@ def apply_review(
     with (run_dir / "reviews.jsonl").open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(review.model_dump(mode="json"), sort_keys=True) + "\n")
 
+    # mirror the decision into the unified workflow history (spec §15.2)
+    from src.fingerprint.models import WorkflowEvent
+    from src.learning.workflow import record_event
+
+    record_event(run_dir, WorkflowEvent(
+        run_id=run_id, finding_id=finding_id, action="transition",
+        actor=reviewer, text=comment,
+        from_status=finding.status, to_status=decision,  # type: ignore[arg-type]
+        created_at=created_at,
+    ))
+
     finding.status = decision
     findings_path.write_bytes(_dump_json_bytes(report.model_dump(mode="json")))
     return ReviewOutcome(review=review, event=event, draft=draft)

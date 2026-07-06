@@ -115,6 +115,55 @@
         "title": "Aggregation",
         "type": "object"
       },
+      "AssignRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "actor": {
+            "default": "analyst",
+            "title": "Actor",
+            "type": "string"
+          },
+          "assignee": {
+            "title": "Assignee",
+            "type": "string"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          }
+        },
+        "required": [
+          "assignee"
+        ],
+        "title": "AssignRequest",
+        "type": "object"
+      },
+      "CommentRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "actor": {
+            "default": "analyst",
+            "title": "Actor",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "CommentRequest",
+        "type": "object"
+      },
       "CompareField": {
         "additionalProperties": false,
         "properties": {
@@ -828,6 +877,17 @@
       "Finding": {
         "additionalProperties": false,
         "properties": {
+          "assignee": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assignee"
+          },
           "failure_mode": {
             "pattern": "^FM-\\d{3}$",
             "title": "Failure Mode",
@@ -1917,6 +1977,26 @@
         "title": "SuiteView",
         "type": "object"
       },
+      "TransitionRequest": {
+        "additionalProperties": false,
+        "description": "resolve: remediation note; close: evidence (re-run ref or note).",
+        "properties": {
+          "actor": {
+            "default": "analyst",
+            "title": "Actor",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "TransitionRequest",
+        "type": "object"
+      },
       "UnmappedTargetFields": {
         "additionalProperties": false,
         "properties": {
@@ -2074,6 +2154,114 @@
         ],
         "title": "VersionInfo",
         "type": "object"
+      },
+      "WorkflowEvent": {
+        "additionalProperties": false,
+        "description": "One exception-workflow action on a finding (spec \u00a715.1\u201315.2):\nan assignment, a comment, or a state transition. The per-run\nworkflow.jsonl of these events is the audit trail (REQ-020).",
+        "properties": {
+          "action": {
+            "enum": [
+              "assign",
+              "comment",
+              "transition"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "actor": {
+            "default": "analyst",
+            "title": "Actor",
+            "type": "string"
+          },
+          "assignee": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assignee"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "finding_id": {
+            "title": "Finding Id",
+            "type": "string"
+          },
+          "from_status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "new",
+                  "in_review",
+                  "confirmed",
+                  "false_positive",
+                  "remediated",
+                  "closed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Status"
+          },
+          "run_id": {
+            "pattern": "^RUN-\\d{4}-\\d{2}-\\d{2}-\\d{4}$",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "to_status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "new",
+                  "in_review",
+                  "confirmed",
+                  "false_positive",
+                  "remediated",
+                  "closed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Status"
+          }
+        },
+        "required": [
+          "run_id",
+          "finding_id",
+          "action"
+        ],
+        "title": "WorkflowEvent",
+        "type": "object"
       }
     }
   },
@@ -2123,6 +2311,260 @@
         "summary": "Get Finding",
         "tags": [
           "findings"
+        ]
+      }
+    },
+    "/findings/{finding_id}/assign": {
+      "post": {
+        "operationId": "post_assign_findings__finding_id__assign_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "finding_id",
+            "required": true,
+            "schema": {
+              "title": "Finding Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowEvent"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Assign",
+        "tags": [
+          "workflow"
+        ]
+      }
+    },
+    "/findings/{finding_id}/close": {
+      "post": {
+        "operationId": "post_close_findings__finding_id__close_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "finding_id",
+            "required": true,
+            "schema": {
+              "title": "Finding Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowEvent"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Close",
+        "tags": [
+          "workflow"
+        ]
+      }
+    },
+    "/findings/{finding_id}/comment": {
+      "post": {
+        "operationId": "post_comment_findings__finding_id__comment_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "finding_id",
+            "required": true,
+            "schema": {
+              "title": "Finding Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowEvent"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Comment",
+        "tags": [
+          "workflow"
+        ]
+      }
+    },
+    "/findings/{finding_id}/history": {
+      "get": {
+        "operationId": "get_finding_history_findings__finding_id__history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "finding_id",
+            "required": true,
+            "schema": {
+              "title": "Finding Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WorkflowEvent"
+                  },
+                  "title": "Response Get Finding History Findings  Finding Id  History Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Finding History",
+        "tags": [
+          "workflow"
+        ]
+      }
+    },
+    "/findings/{finding_id}/resolve": {
+      "post": {
+        "operationId": "post_resolve_findings__finding_id__resolve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "finding_id",
+            "required": true,
+            "schema": {
+              "title": "Finding Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowEvent"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Resolve",
+        "tags": [
+          "workflow"
         ]
       }
     },
@@ -2590,6 +3032,62 @@
         "summary": "Get Run",
         "tags": [
           "runs"
+        ]
+      }
+    },
+    "/runs/{run_id}/exceptions": {
+      "get": {
+        "operationId": "get_exceptions_runs__run_id__exceptions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Exceptions",
+        "tags": [
+          "workflow"
         ]
       }
     },

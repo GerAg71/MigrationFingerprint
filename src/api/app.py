@@ -33,6 +33,8 @@ from fastapi.responses import (
 from pydantic import ValidationError
 
 from src.api.schemas import (
+    AssignRequest,
+    CommentRequest,
     FingerprintVersions,
     PairSummary,
     PublishAccepted,
@@ -42,6 +44,7 @@ from src.api.schemas import (
     RunAccepted,
     RunRequest,
     SuiteView,
+    TransitionRequest,
     VersionInfo,
 )
 from src.fingerprint.loader import (
@@ -57,10 +60,20 @@ from src.fingerprint.models import (
     FindingsReport,
     Fingerprint,
     LearningEvent,
+    WorkflowEvent,
 )
 from src.fingerprint.prioritize import prioritized_suite
 from src.ingest.registration import PartialFileError
 from src.learning.versioning import PublishError, publish_draft
+from src.learning.workflow import (
+    WorkflowError,
+    assign as workflow_assign,
+    close as workflow_close,
+    comment as workflow_comment,
+    exception_register,
+    history as workflow_history,
+    resolve as workflow_resolve,
+)
 from src.learning.writeback import ReviewError, apply_review, read_events
 from src.report.html import (
     RECON_KINDS,
@@ -99,6 +112,12 @@ def _register_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(PublishError)
     async def _conflict(request: Request, exc):
         return _error(409, str(exc), request)
+
+    @app.exception_handler(WorkflowError)
+    async def _workflow(request: Request, exc):
+        message = str(exc)
+        not_found = "not found" in message or "no findings report" in message
+        return _error(404 if not_found else 409, message, request)
 
     @app.exception_handler(DatasetGateError)
     @app.exception_handler(PartialFileError)
@@ -337,6 +356,51 @@ def create_app(
                 "pending_publish": True,
             },
         )
+
+    # --- exception workflow (spec Ch. 15) -------------------------------------------
+
+    @app.post("/findings/{finding_id}/assign", response_model=WorkflowEvent,
+              tags=["workflow"])
+    def post_assign(finding_id: str, body: AssignRequest, request: Request):
+        _, runs_dir = _dirs(request)
+        return workflow_assign(finding_id, body.assignee, actor=body.actor,
+                               comment=body.comment, runs_dir=runs_dir)
+
+    @app.post("/findings/{finding_id}/comment", response_model=WorkflowEvent,
+              tags=["workflow"])
+    def post_comment(finding_id: str, body: CommentRequest, request: Request):
+        _, runs_dir = _dirs(request)
+        return workflow_comment(finding_id, body.text, actor=body.actor,
+                                runs_dir=runs_dir)
+
+    @app.post("/findings/{finding_id}/resolve", response_model=WorkflowEvent,
+              tags=["workflow"])
+    def post_resolve(finding_id: str, body: TransitionRequest, request: Request):
+        _, runs_dir = _dirs(request)
+        return workflow_resolve(finding_id, body.text, actor=body.actor,
+                                runs_dir=runs_dir)
+
+    @app.post("/findings/{finding_id}/close", response_model=WorkflowEvent,
+              tags=["workflow"])
+    def post_close(finding_id: str, body: TransitionRequest, request: Request):
+        _, runs_dir = _dirs(request)
+        return workflow_close(finding_id, body.text, actor=body.actor,
+                              runs_dir=runs_dir)
+
+    @app.get("/findings/{finding_id}/history", response_model=list[WorkflowEvent],
+             tags=["workflow"])
+    def get_finding_history(finding_id: str, request: Request):
+        _, runs_dir = _dirs(request)
+        return workflow_history(finding_id, runs_dir)
+
+    @app.get("/runs/{run_id}/exceptions", tags=["workflow"])
+    def get_exceptions(run_id: str, request: Request,
+                       status: str | None = Query(default=None)):
+        _, runs_dir = _dirs(request)
+        register = exception_register(run_id, runs_dir)
+        if status:
+            register = [row for row in register if row["status"] == status]
+        return register
 
     # --- report artifacts (§13) -----------------------------------------------------
 

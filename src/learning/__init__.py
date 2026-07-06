@@ -25,6 +25,15 @@ from src.learning.versioning import (
     next_fm_id,
     publish_draft,
 )
+from src.learning.workflow import (
+    WorkflowError,
+    assign,
+    close,
+    comment,
+    exception_register,
+    history as workflow_history,
+    resolve,
+)
 
 __all__ = [
     "CLAMP_HIGH",
@@ -34,7 +43,14 @@ __all__ = [
     "PublishResult",
     "ReviewError",
     "ReviewOutcome",
+    "WorkflowError",
     "apply_review",
+    "assign",
+    "close",
+    "comment",
+    "exception_register",
+    "resolve",
+    "workflow_history",
     "author_failure_mode",
     "bump_version",
     "compute_probability",

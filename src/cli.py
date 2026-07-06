@@ -445,6 +445,80 @@ def cmd_history(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def _workflow_call(args: argparse.Namespace, fn, **kwargs) -> int:
+    from src.learning.workflow import WorkflowError
+
+    try:
+        event = fn(**kwargs)
+    except WorkflowError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_RUNTIME
+    if args.json:
+        print(json.dumps(event.model_dump(mode="json"), indent=2, default=str))
+        return EXIT_OK
+    detail = f" ({event.from_status} -> {event.to_status})" \
+        if event.to_status else ""
+    print(f"{event.finding_id}: {event.action}{detail} by {event.actor}")
+    return EXIT_OK
+
+
+def cmd_assign(args: argparse.Namespace) -> int:
+    from src.learning.workflow import assign
+
+    return _workflow_call(args, assign, finding_id=args.finding_id,
+                          assignee=args.to, actor=args.actor,
+                          comment=args.comment, runs_dir=args.runs_dir)
+
+
+def cmd_comment(args: argparse.Namespace) -> int:
+    from src.learning.workflow import comment
+
+    return _workflow_call(args, comment, finding_id=args.finding_id,
+                          text=args.text, actor=args.actor,
+                          runs_dir=args.runs_dir)
+
+
+def cmd_resolve(args: argparse.Namespace) -> int:
+    from src.learning.workflow import resolve
+
+    return _workflow_call(args, resolve, finding_id=args.finding_id,
+                          note=args.note, actor=args.actor,
+                          runs_dir=args.runs_dir)
+
+
+def cmd_close(args: argparse.Namespace) -> int:
+    from src.learning.workflow import close
+
+    return _workflow_call(args, close, finding_id=args.finding_id,
+                          evidence=args.evidence, actor=args.actor,
+                          runs_dir=args.runs_dir)
+
+
+def cmd_exceptions(args: argparse.Namespace) -> int:
+    from src.learning.workflow import WorkflowError, exception_register
+
+    try:
+        register = exception_register(args.run_id, args.runs_dir)
+    except WorkflowError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_RUNTIME
+    if args.status:
+        register = [row for row in register if row["status"] == args.status]
+    if args.json:
+        print(json.dumps(register, indent=2))
+        return EXIT_OK
+    open_count = sum(1 for row in register if row["status"] != "closed")
+    print(f"Exception register — {args.run_id}: {len(register)} exception(s), "
+          f"{open_count} open (spec §13.3)")
+    print(f"{'EXCEPTION':<28} {'FM':<7} {'SEVERITY':<9} {'OWNER':<10} "
+          f"{'STATUS':<15} {'CLOSED':<11} RESOLUTION")
+    for row in register:
+        print(f"{row['exception']:<28} {row['failure_mode']:<7} "
+              f"{row['severity']:<9} {row['owner']:<10} {row['status']:<15} "
+              f"{row['closed']:<11} {row['resolution']}")
+    return EXIT_OK
+
+
 def cmd_author_mode(args: argparse.Namespace) -> int:
     from src.learning.versioning import author_failure_mode
 
@@ -573,6 +647,41 @@ def build_parser() -> argparse.ArgumentParser:
     p_report.add_argument("--runs-dir", default=str(DEFAULT_RUNS_DIR))
     p_report.add_argument("--json", action="store_true", help="JSON output")
     p_report.set_defaults(func=cmd_report)
+
+    def _workflow_parser(name: str, help_text: str, func):
+        parser_ = sub.add_parser(name, help=help_text)
+        parser_.add_argument("finding_id")
+        parser_.add_argument("--actor", default="analyst")
+        parser_.add_argument("--runs-dir", default=str(DEFAULT_RUNS_DIR))
+        parser_.add_argument("--json", action="store_true", help="JSON output")
+        parser_.set_defaults(func=func)
+        return parser_
+
+    p_assign = _workflow_parser(
+        "assign", "Assign an owner (new -> in_review; spec §15.2)", cmd_assign)
+    p_assign.add_argument("--to", required=True, help="assignee")
+    p_assign.add_argument("--comment")
+
+    p_comment = _workflow_parser(
+        "comment", "Add a comment to a finding's history", cmd_comment)
+    p_comment.add_argument("--text", required=True)
+
+    p_resolve = _workflow_parser(
+        "resolve", "Mark a confirmed finding remediated (spec §15.1)", cmd_resolve)
+    p_resolve.add_argument("--note", required=True, help="remediation note")
+
+    p_close = _workflow_parser(
+        "close", "Close a remediated finding with evidence (spec §15.1)", cmd_close)
+    p_close.add_argument("--evidence", required=True,
+                         help="re-run reference or resolution note")
+
+    p_exceptions = sub.add_parser(
+        "exceptions", help="Exception register for a run (spec §13.3)")
+    p_exceptions.add_argument("run_id")
+    p_exceptions.add_argument("--status")
+    p_exceptions.add_argument("--runs-dir", default=str(DEFAULT_RUNS_DIR))
+    p_exceptions.add_argument("--json", action="store_true", help="JSON output")
+    p_exceptions.set_defaults(func=cmd_exceptions)
 
     p_review = sub.add_parser(
         "review", help="Record a review and apply the probability write-back "

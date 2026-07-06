@@ -217,6 +217,12 @@ EXPECTED_PATHS = {
     "/runs/{run_id}/findings",
     "/findings/{finding_id}",
     "/findings/{finding_id}/review",
+    "/findings/{finding_id}/assign",
+    "/findings/{finding_id}/comment",
+    "/findings/{finding_id}/resolve",
+    "/findings/{finding_id}/close",
+    "/findings/{finding_id}/history",
+    "/runs/{run_id}/exceptions",
     "/runs/{run_id}/report",
     "/runs/{run_id}/reconciliation/{kind}",
 }

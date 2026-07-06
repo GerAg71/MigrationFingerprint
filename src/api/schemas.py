@@ -67,6 +67,24 @@ class PublishAccepted(StrictDTO):
     diff: dict
 
 
+class AssignRequest(StrictDTO):
+    assignee: str
+    comment: str | None = None
+    actor: str = "analyst"
+
+
+class CommentRequest(StrictDTO):
+    text: str
+    actor: str = "analyst"
+
+
+class TransitionRequest(StrictDTO):
+    """resolve: remediation note; close: evidence (re-run ref or note)."""
+
+    text: str
+    actor: str = "analyst"
+
+
 class PairSummary(StrictDTO):
     pair_id: str
     current_version: str

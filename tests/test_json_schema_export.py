@@ -8,7 +8,7 @@ EXPECTED = {
     "PlatformPair", "Fingerprint", "FailureMode", "DetectionRule",
     "ConversionRun", "SuiteItem", "PrioritizedSuiteEntry", "Finding",
     "FindingsReport", "LayoutSpec", "DatasetRegistration",
-    "FindingReview", "LearningEvent",
+    "FindingReview", "LearningEvent", "WorkflowEvent",
 }
 
 

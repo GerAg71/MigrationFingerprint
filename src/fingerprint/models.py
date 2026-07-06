@@ -464,6 +464,7 @@ class Finding(StrictModel):
     sample_records: list[AffectedRecord] = Field(default=[], max_length=25)
     full_detail_uri: str | None = None
     remediation: str | None = None
+    assignee: str | None = None  # exception workflow owner (spec §15.2)
 
 
 class FindingReview(StrictModel):
@@ -495,6 +496,22 @@ class LearningEvent(StrictModel):
     probability_after: float
     formula_inputs: dict[str, str]  # p_seed, k, confirmed_total, false_positive_total
     draft_version: str = Field(pattern=SEMVER_PATTERN)
+    created_at: datetime | None = None
+
+
+class WorkflowEvent(StrictModel):
+    """One exception-workflow action on a finding (spec §15.1–15.2):
+    an assignment, a comment, or a state transition. The per-run
+    workflow.jsonl of these events is the audit trail (REQ-020)."""
+
+    run_id: str = Field(pattern=RUN_ID_PATTERN)
+    finding_id: str
+    action: Literal["assign", "comment", "transition"]
+    actor: str = "analyst"
+    from_status: FindingStatus | None = None
+    to_status: FindingStatus | None = None
+    assignee: str | None = None
+    text: str | None = None
     created_at: datetime | None = None
 
 
@@ -594,6 +611,7 @@ _EXPORTED_MODELS: dict[str, type[BaseModel]] = {
     "DatasetRegistration": DatasetRegistration,
     "FindingReview": FindingReview,
     "LearningEvent": LearningEvent,
+    "WorkflowEvent": WorkflowEvent,
 }
 
 

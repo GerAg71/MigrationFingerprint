@@ -324,6 +324,7 @@ async function viewRun(runId) {
     </div>
     <p>Severity mix: ${mix}</p>
     <p><a class="btn" target="_blank" href="/runs/${esc(runId)}/report?format=html">Findings report (HTML)</a>
+       <a class="btn" href="#/exceptions/${esc(runId)}">Exception register</a>
        reconciliation: ${recon}</p>
     <h2>Findings (priority order)</h2>
     <table><tr><th>Finding</th><th>FM</th><th>Rule</th><th>Severity</th>
@@ -335,7 +336,10 @@ async function viewRun(runId) {
 }
 
 async function viewFinding(findingId) {
-  const finding = await api(`/findings/${findingId}`);
+  const [finding, events] = await Promise.all([
+    api(`/findings/${findingId}`),
+    api(`/findings/${findingId}/history`),
+  ]);
   const runId = findingId.split("-F")[0];
   const keyColumns = [...new Set(finding.sample_records
     .flatMap((r) => Object.keys(r.keys)))].sort();
@@ -365,7 +369,51 @@ async function viewFinding(findingId) {
       <p><button id="btnConfirm">Confirm defect</button>
          <button id="btnFalsePositive" class="danger">False positive</button></p>`
       : `<p class="note">Already adjudicated — reviews are immutable (spec §14.1).</p>`}
-    <div id="reviewResult"></div>`;
+    <div id="reviewResult"></div>
+    <h2>Exception workflow (spec §15)</h2>
+    <p class="note">Owner: <strong>${esc(finding.assignee || "unassigned")}</strong>
+       — status ${esc(finding.status)}</p>
+    <div class="grid2">
+      <div><label>Assign to</label><input id="wfAssignee" value=""></div>
+      <div><label>Comment / note / evidence</label><input id="wfText" value=""></div>
+    </div>
+    <p>
+      <button class="secondary" id="btnAssign">Assign</button>
+      <button class="secondary" id="btnComment">Comment</button>
+      ${finding.status === "confirmed"
+        ? `<button id="btnResolve">Mark remediated</button>` : ""}
+      ${finding.status === "remediated"
+        ? `<button id="btnClose">Close with evidence</button>` : ""}
+    </p>
+    <div id="workflowResult"></div>
+    <h2>History</h2>
+    <table><tr><th>Action</th><th>Actor</th><th>Status</th><th>Detail</th></tr>
+    ${events.map((e) => `<tr>
+      <td>${esc(e.action)}</td><td>${esc(e.actor)}</td>
+      <td>${e.to_status ? esc((e.from_status || "") + " → " + e.to_status)
+           : ""}</td>
+      <td>${esc(e.assignee ? "assignee: " + e.assignee + "; " : "")}${esc(e.text || "")}</td></tr>`).join("")
+      || "<tr><td colspan='4'>No workflow events yet.</td></tr>"}
+    </table>`;
+}
+function wireWorkflow(findingId) {
+  const post = async (path, body) => {
+    try {
+      await api(`/findings/${findingId}/${path}`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      render();  // reload the view with the new status/history
+    } catch (error) {
+      $("#workflowResult").innerHTML = flash("err", error.message);
+    }
+  };
+  const wire = (id, fn) => { const b = $(id); if (b) b.addEventListener("click", fn); };
+  wire("#btnAssign", () => post("assign",
+    { assignee: $("#wfAssignee").value, comment: $("#wfText").value || null }));
+  wire("#btnComment", () => post("comment", { text: $("#wfText").value }));
+  wire("#btnResolve", () => post("resolve", { text: $("#wfText").value }));
+  wire("#btnClose", () => post("close", { text: $("#wfText").value }));
 }
 function wireFindingReview(findingId) {
   const post = async (decision) => {
@@ -394,6 +442,25 @@ function wireFindingReview(findingId) {
   if (confirm) confirm.addEventListener("click", () => post("confirmed"));
   if (falsePositive)
     falsePositive.addEventListener("click", () => post("false_positive"));
+}
+
+async function viewExceptions(runId) {
+  const register = await api(`/runs/${runId}/exceptions`);
+  const rows = register.map((r) => `
+    <tr class="rowlink" onclick="location.hash='#/finding/${esc(r.exception)}'">
+      <td class="mono">${esc(r.exception)}</td><td>${esc(r.failure_mode)}</td>
+      <td>${sev(r.severity)}</td><td>${esc(r.owner || "—")}</td>
+      <td>${esc(r.status)}</td><td>${esc(r.opened)}</td>
+      <td>${esc(r.closed || "—")}</td><td>${esc(r.resolution || "")}</td></tr>`).join("");
+  const open = register.filter((r) => r.status !== "closed").length;
+  return `<div class="crumbs"><a href="#/run/${esc(runId)}">${esc(runId)}</a>
+      › exception register</div>
+    <h1>Exception register — ${esc(runId)}</h1>
+    <p class="note">${register.length} exception(s), ${open} open — every
+      finding not marked false positive, tracked to closure (spec §13.3).</p>
+    <table><tr><th>Exception</th><th>FM</th><th>Severity</th><th>Owner</th>
+      <th>Status</th><th>Opened</th><th>Closed</th><th>Resolution</th></tr>
+      ${rows || "<tr><td colspan='8'>No exceptions.</td></tr>"}</table>`;
 }
 
 function sparkline(values) {
@@ -488,7 +555,8 @@ const ROUTES = [
   [/^#\/runs$/,             () => viewRuns(),               null, "runs"],
   [/^#\/run\/(.+)$/,        (m) => viewRun(m[1]),           null, "runs"],
   [/^#\/finding\/(.+)$/,    (m) => viewFinding(m[1]),
-     (m) => wireFindingReview(m[1]), "runs"],
+     (m) => { wireFindingReview(m[1]); wireWorkflow(m[1]); }, "runs"],
+  [/^#\/exceptions\/(.+)$/, (m) => viewExceptions(m[1]),     null, "runs"],
   [/^#\/history$/,          () => viewHistory(null),
      async () => wirePublish((await api("/platform-pairs"))[0].pair_id), "history"],
   [/^#\/history\/(.+)$/,    (m) => viewHistory(m[1]),
