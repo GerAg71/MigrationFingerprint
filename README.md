@@ -28,7 +28,8 @@ Session rules for Claude Code: `CLAUDE.md`.
 | MS-2.4 | Learning loop: review write-back (§14.2), draft/publish versioning, `diff`/`history`/`author-mode` | ✅ done |
 | **Phase 2 complete** | | |
 | MS-3.1 | FastAPI endpoints (Ch. 18 subset) + OpenAPI companion (`docs/openapi.json`) | ✅ done |
-| MS-3.2 … MS-3.3 | see spec Ch. 23 | open |
+| MS-3.2 | Dashboard UI at `/ui`: library → fingerprint → suite → run wizard → findings/review → history/publish | ✅ done |
+| MS-3.3 | see spec Ch. 23 | open |
 
 ## Setup
 
@@ -64,11 +65,20 @@ new immutable version. Learning events append to
 `data/fingerprints/<pair>/learning_events.jsonl` and are replayable
 (REQ-027).
 
-## REST API (MS-3.1)
+## REST API + dashboard (MS-3.1 / MS-3.2)
 
 ```
 uv run uvicorn src.api.app:app --reload
 ```
+
+Open <code>http://127.0.0.1:8000/</code> for the dashboard (redirects to
+`/ui`): Fingerprint Library → fingerprint detail → prioritized suite (with
+the generic-ordering comparison toggle) → new-run wizard with sample-pair
+quick picks → run scoreboard and findings → finding drill-down with
+confirm/false-positive review → learning history with probability sparklines
+and publish. The POC page is a no-build, self-contained single page served
+by the API (the original POC brief's Phase-3 allowance); the product moves
+to the React + Vite + Tailwind design system (spec §20.4).
 
 Spec Ch. 18 subset over the identical engine: platform pairs, fingerprints
 (current/versions/suite/learning-history/publish), runs (create — executes

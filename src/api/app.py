@@ -24,7 +24,12 @@ from pathlib import Path
 
 from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import (
+    FileResponse,
+    HTMLResponse,
+    JSONResponse,
+    RedirectResponse,
+)
 from pydantic import ValidationError
 
 from src.api.schemas import (
@@ -65,6 +70,7 @@ from src.report.html import (
 from src.runner.run import DEFAULT_RUNS_DIR, DatasetGateError, run as run_conversion
 
 API_VERSION = "0.1.0"
+UI_INDEX = Path(__file__).resolve().parents[2] / "ui" / "index.html"
 
 
 # --- error envelope (§18.5) -----------------------------------------------------
@@ -169,6 +175,18 @@ def create_app(
         return response
 
     _register_error_handlers(app)
+
+    # --- dashboard (MS-3.2, spec Ch. 20) — excluded from the OpenAPI catalog
+
+    @app.get("/", include_in_schema=False)
+    def root():
+        return RedirectResponse("/ui")
+
+    @app.get("/ui", include_in_schema=False)
+    def dashboard():
+        if not UI_INDEX.is_file():
+            raise NotFoundError(f"dashboard not found at {UI_INDEX}")
+        return FileResponse(UI_INDEX, media_type="text/html")
 
     # --- platform pairs & fingerprints (UC-01) ---------------------------------
 

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAPTIVA™ Migration Fingerprint™</title>
+<!--
+  MS-3.2 dashboard (spec Ch. 20): fingerprint view -> prioritized suite ->
+  run results -> finding drill-down/review -> learning history/publish.
+  POC form: a no-build, self-contained single page served by the FastAPI app
+  (per the original POC brief's Phase-3 allowance); the product moves to the
+  React + Vite + Tailwind design system (spec §20.4). No external resources.
+-->
+<style>
+  :root { --ink:#1e293b; --muted:#64748b; --line:#e2e8f0; --brand:#0f4c81;
+          --brand-dark:#0b3a63; --ok:#15803d; --bad:#b91c1c; --bg:#f1f5f9; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Segoe UI",Arial,sans-serif; color:var(--ink);
+         background:var(--bg); display:flex; min-height:100vh; }
+  nav { width:220px; background:var(--brand); color:#fff; padding:18px 0;
+        flex-shrink:0; }
+  nav .logo { font-weight:700; letter-spacing:.06em; padding:0 18px 4px; }
+  nav .tagline { font-size:.72rem; opacity:.8; padding:0 18px 16px; }
+  nav a { display:block; color:#dbeafe; text-decoration:none; padding:9px 18px;
+          font-size:.9rem; }
+  nav a.active, nav a:hover { background:var(--brand-dark); color:#fff; }
+  main { flex:1; padding:22px 30px 60px; max-width:1150px; }
+  h1 { font-size:1.3rem; margin:4px 0 14px; }
+  h2 { font-size:1.02rem; margin:22px 0 8px; border-bottom:1px solid var(--line);
+       padding-bottom:4px; }
+  .crumbs { font-size:.82rem; color:var(--muted); margin-bottom:10px; }
+  .crumbs a { color:var(--brand); text-decoration:none; }
+  table { border-collapse:collapse; width:100%; background:#fff; margin:8px 0 16px; }
+  th, td { border:1px solid var(--line); padding:6px 9px; text-align:left;
+           font-size:.86rem; }
+  th { background:#eef2f7; }
+  td.num, th.num { text-align:right; font-family:Consolas,monospace; }
+  tr.fail td { background:#fef2f2; }
+  tr.rowlink { cursor:pointer; } tr.rowlink:hover td { background:#eff6ff; }
+  .cards { display:flex; gap:14px; flex-wrap:wrap; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:8px;
+          padding:14px 18px; min-width:230px; }
+  .card h3 { margin:0 0 6px; font-size:1rem; }
+  .tiles { display:flex; gap:14px; margin:12px 0; flex-wrap:wrap; }
+  .tile { background:#fff; border:1px solid var(--line); border-radius:8px;
+          padding:10px 18px; min-width:110px; }
+  .tile .n { font-size:1.45rem; font-weight:700; }
+  .tile.ok .n { color:var(--ok); } .tile.bad .n { color:var(--bad); }
+  .tile .l { color:var(--muted); font-size:.78rem; }
+  .sev { display:inline-block; padding:1px 8px; border-radius:10px; color:#fff;
+         font-size:.73rem; font-weight:600; }
+  .pill { display:inline-block; padding:1px 10px; border-radius:10px;
+          font-size:.76rem; font-weight:600; color:#fff; }
+  .pill.ok { background:var(--ok); } .pill.bad { background:var(--bad); }
+  .pill.mut { background:var(--muted); }
+  .bar { display:inline-block; height:9px; background:var(--brand);
+         border-radius:4px; vertical-align:middle; }
+  .barwrap { display:inline-block; width:130px; background:#e2e8f0;
+             border-radius:4px; margin-right:6px; }
+  button, .btn { background:var(--brand); color:#fff; border:0; border-radius:6px;
+          padding:7px 14px; font-size:.86rem; cursor:pointer; text-decoration:none;
+          display:inline-block; }
+  button.secondary { background:#fff; color:var(--brand);
+          border:1px solid var(--brand); }
+  button.danger { background:var(--bad); }
+  button:disabled { opacity:.5; cursor:default; }
+  input, select, textarea { border:1px solid var(--line); border-radius:6px;
+          padding:7px 9px; font-size:.86rem; width:100%; font-family:inherit; }
+  label { display:block; font-size:.8rem; color:var(--muted); margin:10px 0 3px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:0 20px; }
+  .note { color:var(--muted); font-size:.82rem; }
+  .flash { padding:10px 14px; border-radius:8px; margin:12px 0; font-size:.88rem; }
+  .flash.ok { background:#dcfce7; color:#14532d; }
+  .flash.err { background:#fee2e2; color:#7f1d1d; }
+  .mono { font-family:Consolas,monospace; font-size:.82rem; }
+  .spark { vertical-align:middle; }
+  details > summary { cursor:pointer; color:var(--brand); font-size:.86rem; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">MAPTIVA™</div>
+  <div class="tagline">Migration Fingerprint™ — targeted, not generic</div>
+  <a href="#/" data-nav="library">Fingerprint Library</a>
+  <a href="#/runs" data-nav="runs">Runs</a>
+  <a href="#/history" data-nav="history">Learning History</a>
+</nav>
+<main id="main">Loading…</main>
+
+<script>
+"use strict";
+const SEV = { CRITICAL:"#b91c1c", HIGH:"#ea580c", MEDIUM:"#f59e0b", LOW:"#94a3b8" };
+const $ = (sel) => document.querySelector(sel);
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g,
+  (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const sev = (s) => `<span class="sev" style="background:${SEV[s]||"#64748b"}">${esc(s)}</span>`;
+const state = { runs: [] };  // run ids created this session (POC has no run-list endpoint)
+
+async function api(path, options) {
+  const response = await fetch(path, options);
+  const text = await response.text();
+  let body; try { body = JSON.parse(text); } catch { body = text; }
+  if (!response.ok) {
+    const message = body && body.error ? body.error.message : `HTTP ${response.status}`;
+    throw new Error(message);
+  }
+  return body;
+}
+const flash = (kind, text) =>
+  `<div class="flash ${kind}">${esc(text)}</div>`;
+
+// ---- views --------------------------------------------------------------------
+
+async function viewLibrary() {
+  const pairs = await api("/platform-pairs");
+  const cards = pairs.map((p) => `
+    <div class="card">
+      <h3>${esc(p.pair_id)}</h3>
+      <div class="note">fingerprint v${esc(p.current_version)} —
+        ${p.modes} failure modes, ${p.rules} rules</div>
+      <p>
+        <a class="btn" href="#/fp/${esc(p.pair_id)}">Fingerprint</a>
+        <a class="btn" href="#/suite/${esc(p.pair_id)}">Suite</a>
+        <a class="btn" href="#/run-new/${esc(p.pair_id)}">New run</a>
+        <a class="btn" href="#/history/${esc(p.pair_id)}">History</a>
+      </p>
+    </div>`).join("");
+  return `<h1>Fingerprint Library</h1>
+    <p class="note">Every platform pair carries its own codified failure
+    signature. Demo step 5: switching pairs loads a different prioritized suite.</p>
+    <div class="cards">${cards || "<p>No platform pairs found.</p>"}</div>`;
+}
+
+async function viewFingerprint(pairId) {
+  const fp = await api(`/fingerprints/${pairId}`);
+  const rows = fp.failure_modes
+    .slice().sort((a, b) => a.id.localeCompare(b.id))
+    .map((m) => {
+      const score = (m.probability * m.impact).toFixed(4);
+      return `<tr>
+        <td>${esc(m.id)}</td><td>${esc(m.name)}</td><td>${esc(m.category)}</td>
+        <td class="num">${m.probability}</td><td class="num">${m.impact}</td>
+        <td class="num">${score}</td>
+        <td class="num">${m.history.times_detected}/${m.history.times_confirmed}/${m.history.false_positives}</td>
+        <td class="mono">${m.detection_rules.map(esc).join("<br>")}</td></tr>`;
+    }).join("");
+  return `<div class="crumbs"><a href="#/">Library</a> › ${esc(pairId)}</div>
+    <h1>Fingerprint — ${esc(pairId)} <span class="pill mut">v${esc(fp.version)} ${esc(fp.status)}</span></h1>
+    <p class="note">${esc(fp.changelog || "")}</p>
+    <p><a class="btn" href="#/suite/${esc(pairId)}">Prioritized suite</a>
+       <a class="btn" href="#/run-new/${esc(pairId)}">New run</a>
+       <a class="btn" href="#/history/${esc(pairId)}">Learning history</a></p>
+    <table><tr><th>FM</th><th>Failure mode</th><th>Category</th>
+      <th class="num">Probability</th><th class="num">Impact</th>
+      <th class="num">Score</th><th class="num">Det/Conf/FP</th><th>Rules</th></tr>
+      ${rows}</table>`;
+}
+
+async function viewSuite(pairId) {
+  const view = await api(`/fingerprints/${pairId}/suite`);
+  const render = (entries) => entries.map((e) => {
+    const width = Math.round(parseFloat(e.priority_score) * 130);
+    return `<tr>
+      <td class="num">${e.order}</td>
+      <td class="mono">${esc(e.rule_id)}</td><td>${esc(e.fm_id)}</td>
+      <td><span class="barwrap"><span class="bar" style="width:${width}px"></span></span>
+          <span class="mono">${esc(e.priority_score)}</span></td>
+      <td>${sev(e.severity)}</td>
+      <td class="mono">${esc(e.source_dataset || "—")} → ${esc(e.target_dataset)}</td>
+    </tr>`;
+  }).join("");
+  const generic = view.suite.slice().sort((a, b) => a.rule_id.localeCompare(b.rule_id));
+  return `<div class="crumbs"><a href="#/">Library</a> ›
+      <a href="#/fp/${esc(pairId)}">${esc(pairId)}</a> › suite</div>
+    <h1>Prioritized suite — targeted, not generic
+      <span class="pill mut">v${esc(view.version)}</span></h1>
+    <p class="note">Ordered by probability × impact (spec §12.2), so validation
+      effort lands where this migration is statistically most likely to fail.
+      <label style="display:inline"><input type="checkbox" id="genericToggle"
+        style="width:auto"> compare against a generic (alphabetical) ordering</label></p>
+    <div id="suiteTargeted"><table><tr><th class="num">#</th><th>Rule</th><th>FM</th>
+      <th>Score (probability × impact)</th><th>Severity</th><th>Datasets</th></tr>
+      ${render(view.suite)}</table></div>
+    <div id="suiteGeneric" style="display:none"><table><tr><th class="num">#</th>
+      <th>Rule</th><th>FM</th><th>Score</th><th>Severity</th><th>Datasets</th></tr>
+      ${render(generic)}</table></div>
+    <script-hook></script-hook>`;
+}
+function wireSuiteToggle() {
+  const toggle = $("#genericToggle");
+  if (!toggle) return;
+  toggle.addEventListener("change", () => {
+    $("#suiteTargeted").style.display = toggle.checked ? "none" : "";
+    $("#suiteGeneric").style.display = toggle.checked ? "" : "none";
+  });
+}
+
+const PRESETS = [
+  { label: "Clean pair (CSV)", s: "data/samples/source/PLN-CLEAN-01",
+    t: "data/samples/target/PLN-CLEAN-01", layout: "" },
+  { label: "Seeded pair (CSV)", s: "data/samples/source/PLN-SEED-01",
+    t: "data/samples/target/PLN-SEED-01", layout: "" },
+  { label: "Clean pair (EBCDIC)", s: "data/samples/source/PLN-CLEAN-EB",
+    t: "data/samples/target/PLN-CLEAN-EB", layout: "data/samples/layouts" },
+  { label: "Seeded pair (EBCDIC)", s: "data/samples/source/PLN-SEED-EB",
+    t: "data/samples/target/PLN-SEED-EB", layout: "data/samples/layouts" },
+];
+
+async function viewRunNew(pairId) {
+  const presets = PRESETS.map((p, i) =>
+    `<button class="secondary" type="button" data-preset="${i}">${esc(p.label)}</button>`
+  ).join(" ");
+  return `<div class="crumbs"><a href="#/">Library</a> ›
+      <a href="#/fp/${esc(pairId)}">${esc(pairId)}</a> › new run</div>
+    <h1>New conversion run — ${esc(pairId)}</h1>
+    <p class="note">POC runs execute synchronously; the product enqueues them
+      (spec §7.4). Quick picks fill the shipped synthetic sample pairs:</p>
+    <p>${presets}</p>
+    <div class="grid2">
+      <div><label>Source extract directory</label>
+        <input id="srcDir" value="${esc(PRESETS[1].s)}"></div>
+      <div><label>Target extract directory</label>
+        <input id="tgtDir" value="${esc(PRESETS[1].t)}"></div>
+      <div><label>Layout directory (fixed-width .dat extracts)</label>
+        <input id="layoutDir" value=""></div>
+      <div><label>Fingerprint version (blank = latest published)</label>
+        <input id="fpVersion" value=""></div>
+      <div><label>Plans (comma-separated, blank = all)</label>
+        <input id="plans" value=""></div>
+      <div><label>Wave label</label><input id="wave" value=""></div>
+    </div>
+    <p><button id="startRun">Execute run</button></p>
+    <div id="runResult"></div>`;
+}
+function wireRunNew(pairId) {
+  document.querySelectorAll("[data-preset]").forEach((button) =>
+    button.addEventListener("click", () => {
+      const preset = PRESETS[Number(button.dataset.preset)];
+      $("#srcDir").value = preset.s;
+      $("#tgtDir").value = preset.t;
+      $("#layoutDir").value = preset.layout;
+    }));
+  const start = $("#startRun");
+  if (!start) return;
+  start.addEventListener("click", async () => {
+    start.disabled = true;
+    $("#runResult").innerHTML = "<p class='note'>Running…</p>";
+    try {
+      const body = {
+        pair_id: pairId,
+        source_dir: $("#srcDir").value,
+        target_dir: $("#tgtDir").value,
+        layout_dir: $("#layoutDir").value || null,
+        fingerprint_version: $("#fpVersion").value || null,
+        plans: $("#plans").value
+          ? $("#plans").value.split(",").map((p) => p.trim()) : null,
+        wave: $("#wave").value || null,
+      };
+      const accepted = await api("/runs", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      state.runs.unshift(accepted.run_id);
+      location.hash = `#/run/${accepted.run_id}`;
+    } catch (error) {
+      $("#runResult").innerHTML = flash("err", error.message);
+      start.disabled = false;
+    }
+  });
+}
+
+async function viewRuns() {
+  const rows = state.runs.map((id) =>
+    `<tr class="rowlink" onclick="location.hash='#/run/${esc(id)}'">
+       <td class="mono">${esc(id)}</td></tr>`).join("");
+  return `<h1>Runs (this session)</h1>
+    <p class="note">The POC stores runs under data/runs/; runs started in this
+      browser session are listed here. Open any run directly via
+      <span class="mono">#/run/&lt;run_id&gt;</span>.</p>
+    <table><tr><th>Run</th></tr>${rows ||
+      "<tr><td>No runs started this session — use a pair's New run.</td></tr>"}</table>`;
+}
+
+async function viewRun(runId) {
+  const [run, findings, suite] = await Promise.all([
+    api(`/runs/${runId}`), api(`/runs/${runId}/findings`),
+    api(`/runs/${runId}/suite`),
+  ]);
+  const summary = run.summary || { rules_run:0, passed:0, failed:0,
+                                   records_affected:0, severity_mix:{} };
+  const mix = Object.keys(SEV).filter((s) => summary.severity_mix[s])
+    .map((s) => `<span class="sev" style="background:${SEV[s]}">${s} ${summary.severity_mix[s]}</span>`)
+    .join(" ") || "<span class='pill ok'>GREEN</span>";
+  const outcomes = { pass: 0, fail: 0, skipped: 0 };
+  const findingByRule = {};
+  findings.forEach((f) => { findingByRule[f.rule_id] = f; });
+  const suiteRows = suite.map((entry) => {
+    const finding = findingByRule[entry.rule_id];
+    const outcome = finding ? "fail" : "pass";
+    return `<tr class="${finding ? "fail" : ""}">
+      <td class="num">${entry.order}</td><td class="mono">${esc(entry.rule_id)}</td>
+      <td>${esc(entry.fm_id)}</td>
+      <td class="num">${esc(entry.priority_score)}</td>
+      <td>${finding
+        ? `<a href="#/finding/${esc(finding.finding_id)}">FAIL — ${finding.records_affected} record(s)</a>`
+        : "pass"}</td></tr>`;
+  }).join("");
+  const findingRows = findings.map((f) => `
+    <tr class="rowlink" onclick="location.hash='#/finding/${esc(f.finding_id)}'">
+      <td class="mono">${esc(f.finding_id)}</td><td>${esc(f.failure_mode)}</td>
+      <td class="mono">${esc(f.rule_id)}</td><td>${sev(f.severity)}</td>
+      <td class="num">${f.records_affected}</td><td>${esc(f.status)}</td></tr>`).join("");
+  const recon = ["plan","participant","loan","contribution","quality"].map((k) =>
+    `<a class="btn" target="_blank" href="/runs/${esc(runId)}/reconciliation/${k}">${k}</a>`
+  ).join(" ");
+  return `<div class="crumbs"><a href="#/">Library</a> › run</div>
+    <h1>Run ${esc(runId)}
+      <span class="pill mut">${esc(run.pair_id)} v${esc(run.fingerprint_version)}</span></h1>
+    <div class="tiles">
+      <div class="tile"><div class="n">${summary.rules_run}</div><div class="l">rules run</div></div>
+      <div class="tile ok"><div class="n">${summary.passed}</div><div class="l">passed</div></div>
+      <div class="tile bad"><div class="n">${summary.failed}</div><div class="l">failed</div></div>
+      <div class="tile"><div class="n">${summary.records_affected}</div><div class="l">records affected</div></div>
+    </div>
+    <p>Severity mix: ${mix}</p>
+    <p><a class="btn" target="_blank" href="/runs/${esc(runId)}/report?format=html">Findings report (HTML)</a>
+       reconciliation: ${recon}</p>
+    <h2>Findings (priority order)</h2>
+    <table><tr><th>Finding</th><th>FM</th><th>Rule</th><th>Severity</th>
+      <th class="num">Records</th><th>Status</th></tr>
+      ${findingRows || "<tr><td colspan='6'>None — green board.</td></tr>"}</table>
+    <h2>Suite outcomes</h2>
+    <table><tr><th class="num">#</th><th>Rule</th><th>FM</th>
+      <th class="num">Score</th><th>Outcome</th></tr>${suiteRows}</table>`;
+}
+
+async function viewFinding(findingId) {
+  const finding = await api(`/findings/${findingId}`);
+  const runId = findingId.split("-F")[0];
+  const keyColumns = [...new Set(finding.sample_records
+    .flatMap((r) => Object.keys(r.keys)))].sort();
+  const rows = finding.sample_records.map((r) => `<tr>
+      ${keyColumns.map((c) => `<td>${esc(r.keys[c] || "")}</td>`).join("")}
+      <td class="mono">${esc(JSON.stringify(r.source))}</td>
+      <td class="mono">${esc(JSON.stringify(r.target))}</td>
+      <td class="num">${esc(r.delta ?? "")}</td></tr>`).join("");
+  const reviewable = finding.status === "new" || finding.status === "in_review";
+  return `<div class="crumbs"><a href="#/">Library</a> ›
+      <a href="#/run/${esc(runId)}">${esc(runId)}</a> › finding</div>
+    <h1>${esc(findingId)} ${sev(finding.severity)}
+      <span class="pill mut">${esc(finding.failure_mode)} / ${esc(finding.rule_id)}</span>
+      <span class="pill ${finding.status === "new" ? "mut" :
+        finding.status === "false_positive" ? "ok" : "bad"}">${esc(finding.status)}</span></h1>
+    <p>${finding.records_affected} record(s) affected
+      (showing ${finding.sample_records.length} inline).
+      ${finding.remediation ? `<br>Remediation: ${esc(finding.remediation)}` : ""}</p>
+    <table><tr>${keyColumns.map((c) => `<th>${esc(c)}</th>`).join("")}
+      <th>source</th><th>target</th><th class="num">delta</th></tr>${rows}</table>
+    <h2>Review (the Learning Loop)</h2>
+    ${reviewable ? `
+      <div class="grid2">
+        <div><label>Reviewer</label><input id="reviewer" value="analyst"></div>
+        <div><label>Comment</label><input id="comment" value=""></div>
+      </div>
+      <p><button id="btnConfirm">Confirm defect</button>
+         <button id="btnFalsePositive" class="danger">False positive</button></p>`
+      : `<p class="note">Already adjudicated — reviews are immutable (spec §14.1).</p>`}
+    <div id="reviewResult"></div>`;
+}
+function wireFindingReview(findingId) {
+  const post = async (decision) => {
+    try {
+      const payload = await api(`/findings/${findingId}/review`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          decision, reviewer: $("#reviewer").value || "analyst",
+          comment: $("#comment").value || null,
+        }),
+      });
+      const event = payload.learning_event;
+      $("#reviewResult").innerHTML =
+        flash("ok", `${event.failure_mode} probability ${event.probability_before}` +
+          ` -> ${event.probability_after}; draft ${event.fingerprint_version_created}` +
+          ` pending publish`) +
+        `<p><a class="btn" href="#/history">Learning history & publish</a></p>`;
+      $("#btnConfirm").disabled = true;
+      $("#btnFalsePositive").disabled = true;
+    } catch (error) {
+      $("#reviewResult").innerHTML = flash("err", error.message);
+    }
+  };
+  const confirm = $("#btnConfirm");
+  const falsePositive = $("#btnFalsePositive");
+  if (confirm) confirm.addEventListener("click", () => post("confirmed"));
+  if (falsePositive)
+    falsePositive.addEventListener("click", () => post("false_positive"));
+}
+
+function sparkline(values) {
+  if (values.length < 2) values = [values[0] ?? 0, values[0] ?? 0];
+  const width = 120, height = 26, pad = 2;
+  const min = Math.min(...values), max = Math.max(...values);
+  const span = max - min || 1;
+  const points = values.map((v, i) =>
+    `${pad + (i * (width - 2 * pad)) / (values.length - 1)},` +
+    `${height - pad - ((v - min) / span) * (height - 2 * pad)}`).join(" ");
+  return `<svg class="spark" width="${width}" height="${height}">
+    <polyline points="${points}" fill="none" stroke="#0f4c81" stroke-width="2"/></svg>`;
+}
+
+async function viewHistory(pairId) {
+  if (!pairId) {
+    const pairs = await api("/platform-pairs");
+    if (!pairs.length) return "<h1>Learning History</h1><p>No pairs.</p>";
+    pairId = pairs[0].pair_id;
+  }
+  const events = await api(`/fingerprints/${pairId}/learning-history`);
+  const byMode = {};
+  events.forEach((e) => {
+    (byMode[e.fm_id] = byMode[e.fm_id] || []).push(e);
+  });
+  const sparkRows = Object.keys(byMode).sort().map((fm) => {
+    const series = [byMode[fm][0].probability_before,
+                    ...byMode[fm].map((e) => e.probability_after)];
+    return `<tr><td>${esc(fm)}</td><td>${sparkline(series)}</td>
+      <td class="num">${series[0]} → ${series[series.length - 1]}</td>
+      <td class="num">${byMode[fm].length}</td></tr>`;
+  }).join("");
+  const eventRows = events.map((e) => `<tr>
+    <td>${esc(e.fm_id)}</td>
+    <td>${e.decision === "confirmed" ? "<span class='pill bad'>confirmed</span>"
+         : "<span class='pill ok'>false positive</span>"}</td>
+    <td class="num">${e.probability_before} → ${e.probability_after}</td>
+    <td class="mono">${esc(e.finding_id)}</td><td>${esc(e.reviewer)}</td></tr>`).join("");
+  return `<div class="crumbs"><a href="#/">Library</a> › learning history</div>
+    <h1>Learning history — ${esc(pairId)}</h1>
+    <p class="note">Every review writes back into the fingerprint: each
+      conversion makes the next one smarter.</p>
+    <h2>Probability timelines</h2>
+    <table><tr><th>FM</th><th>Timeline</th><th class="num">Probability</th>
+      <th class="num">Events</th></tr>
+      ${sparkRows || "<tr><td colspan='4'>No learning events yet.</td></tr>"}</table>
+    <h2>Events</h2>
+    <table><tr><th>FM</th><th>Decision</th><th class="num">Probability</th>
+      <th>Finding</th><th>Reviewer</th></tr>
+      ${eventRows || "<tr><td colspan='5'>None.</td></tr>"}</table>
+    <h2>Publish draft version (spec §14.5)</h2>
+    <div class="grid2">
+      <div><label>Bump</label><select id="bump">
+        <option value="patch">patch — write-backs</option>
+        <option value="minor">minor — new modes/rules</option>
+        <option value="major">major — incompatible changes</option></select></div>
+      <div><label>Changelog</label><input id="changelog" value=""></div>
+    </div>
+    <p><button id="btnPublish">Publish</button></p>
+    <div id="publishResult"></div>`;
+}
+function wirePublish(pairId) {
+  const button = $("#btnPublish");
+  if (!button) return;
+  button.addEventListener("click", async () => {
+    try {
+      const payload = await api(`/fingerprints/${pairId}/publish`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bump: $("#bump").value,
+                               changelog: $("#changelog").value || null }),
+      });
+      const changed = (payload.diff.modes_changed || [])
+        .map((m) => m.fm_id).join(", ");
+      $("#publishResult").innerHTML = flash("ok",
+        `published ${payload.old_version} -> ${payload.new_version}` +
+        (changed ? ` (changed: ${changed})` : ""));
+    } catch (error) {
+      $("#publishResult").innerHTML = flash("err", error.message);
+    }
+  });
+}
+
+// ---- router ---------------------------------------------------------------------
+
+const ROUTES = [
+  [/^#?\/?$/,               () => viewLibrary(),            null, "library"],
+  [/^#\/fp\/(.+)$/,         (m) => viewFingerprint(m[1]),   null, "library"],
+  [/^#\/suite\/(.+)$/,      (m) => viewSuite(m[1]),
+     () => wireSuiteToggle(), "library"],
+  [/^#\/run-new\/(.+)$/,    (m) => viewRunNew(m[1]),
+     (m) => wireRunNew(m[1]), "runs"],
+  [/^#\/runs$/,             () => viewRuns(),               null, "runs"],
+  [/^#\/run\/(.+)$/,        (m) => viewRun(m[1]),           null, "runs"],
+  [/^#\/finding\/(.+)$/,    (m) => viewFinding(m[1]),
+     (m) => wireFindingReview(m[1]), "runs"],
+  [/^#\/history$/,          () => viewHistory(null),
+     async () => wirePublish((await api("/platform-pairs"))[0].pair_id), "history"],
+  [/^#\/history\/(.+)$/,    (m) => viewHistory(m[1]),
+     (m) => wirePublish(m[1]), "history"],
+];
+
+async function render() {
+  const hash = location.hash || "#/";
+  for (const [pattern, view, wire, nav] of ROUTES) {
+    const match = hash.match(pattern);
+    if (!match) continue;
+    document.querySelectorAll("nav a").forEach((a) =>
+      a.classList.toggle("active", a.dataset.nav === nav));
+    try {
+      $("#main").innerHTML = await view(match);
+      if (wire) await wire(match);
+    } catch (error) {
+      $("#main").innerHTML = `<h1>Something went wrong</h1>` +
+        flash("err", error.message);
+    }
+    return;
+  }
+  $("#main").innerHTML = "<h1>Not found</h1>";
+}
+window.addEventListener("hashchange", render);
+render();
+</script>
+</body>
+</html>
