@@ -1,0 +1,242 @@
+{
+  "card": "T444/04-T444/09",
+  "process": "T444 With",
+  "description": "T444/04 through T444/09",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_019",
+      "label": "Not Used",
+      "start": 6,
+      "length": 14,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "dtl_fund_id_funds",
+      "label": "DTL-Fund-ID (Funds)",
+      "start": 20,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "cntrb_flg_contr_earn",
+      "label": "Cntrb-Flg (Contr/Earn)",
+      "start": 23,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_exact_flg_exact",
+      "label": "DTL-Exact-Flg (Exact)",
+      "start": 24,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "disb_unsh_code_medium",
+      "label": "Disb-Unsh-Code (Medium)",
+      "start": 25,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "req_unsh_code_type",
+      "label": "Req-Unsh-Code (Type)",
+      "start": 26,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_amt_amt_shrs_annu_variant_cash",
+      "label": "Dtl-Amt (Amt/%/Shrs/Annu) [variant cash]",
+      "start": 27,
+      "length": 11,
+      "picture": "9(9)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_amt_amt_shrs_annu_variant_shares_annuity_or",
+      "label": "Dtl-Amt (Amt/%/Shrs/Annu) [variant shares/annuity OR]",
+      "start": 27,
+      "length": 11,
+      "picture": "9(7)V9(4)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_amt_amt_shrs_annu_variant_percent_or",
+      "label": "Dtl-Amt (Amt/%/Shrs/Annu) [variant percent OR]",
+      "start": 27,
+      "length": 5,
+      "picture": "9(3)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_032_037",
+      "label": "Not Used [if variant percent]",
+      "start": 32,
+      "length": 6,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "chain_flg_link_prev",
+      "label": "Chain-Flg (Link Prev)",
+      "start": 38,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_039_049",
+      "label": "Not Used",
+      "start": 39,
+      "length": 11,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "dtl_fund_id_funds_050",
+      "label": "DTL-Fund-ID (Funds)",
+      "start": 50,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "cntrb_flg_contr_earn_053",
+      "label": "Cntrb-Flg (Contr/Earn)",
+      "start": 53,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_exact_flg_exact_054",
+      "label": "DTL-Exact-Flg (Exact)",
+      "start": 54,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "disb_unsh_code_medium_055",
+      "label": "Disb-Unsh-Code (Medium)",
+      "start": 55,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "req_unsh_code_type_056",
+      "label": "Req-Unsh-Code (Type)",
+      "start": 56,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_amt_amt_shrs_annu_variant_cash_057",
+      "label": "Dtl-Amt (Amt/%/Shrs/Annu) [variant cash]",
+      "start": 57,
+      "length": 11,
+      "picture": "9(9)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_amt_amt_shrs_annu_variant_shares_annuity_or_057",
+      "label": "Dtl-Amt (Amt/%/Shrs/Annu) [variant shares/annuity OR]",
+      "start": 57,
+      "length": 11,
+      "picture": "9(7)V9(4)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_amt_amt_shrs_annu_variant_percent_or_057",
+      "label": "Dtl-Amt (Amt/%/Shrs/Annu) [variant percent OR]",
+      "start": 57,
+      "length": 5,
+      "picture": "9(3)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_062_067",
+      "label": "Not Used [if variant percent]",
+      "start": 62,
+      "length": 6,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "chain_flg_link_prev_068",
+      "label": "Chain-Flg (Link Prev)",
+      "start": 68,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_069_079",
+      "label": "Not Used",
+      "start": 69,
+      "length": 11,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "filler_080_080",
+      "label": "Not Used",
+      "start": 80,
+      "length": 1,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

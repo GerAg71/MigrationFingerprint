@@ -5,3 +5,8 @@ data/samples/**/*.json text eol=lf
 data/fingerprints/**/*.json text eol=lf
 # EBCDIC fixed-width records are binary — no text translation ever.
 *.dat binary
+# The Omni Format Matrix workbook (compile-matrix input) is binary; the
+# compiled layouts/decks are byte-compared by tests.
+*.xlsx binary
+data/layouts/**/*.json text eol=lf
+data/layouts/**/*.cbl text eol=lf

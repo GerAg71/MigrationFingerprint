@@ -1,0 +1,116 @@
+{
+  "card": "T823/01",
+  "process": "T823 PF",
+  "description": "T823/01",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "denum_pf_data_element_number",
+      "label": "DeNum (PF Data Element Number)",
+      "start": 9,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "deval_pf_data_element_value",
+      "label": "DeVal (PF Data Element Value)",
+      "start": 12,
+      "length": 32,
+      "picture": "X(32)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_044_053",
+      "label": "Not Used",
+      "start": 44,
+      "length": 10,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "rpt_opt_report_options",
+      "label": "Rpt-Opt (Report Options)",
+      "start": 54,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "update_sync_update_fund_control_records",
+      "label": "Update-Sync (Update Fund Control Records)",
+      "start": 55,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "auto_create_opt_auto_create_pf_record",
+      "label": "Auto-Create-Opt (Auto Create PF Record)",
+      "start": 56,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_057_058",
+      "label": "Not Used",
+      "start": 57,
+      "length": 2,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "calc_opt_calc_options",
+      "label": "Calc-Opt (Calc Options)",
+      "start": 59,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_060_080",
+      "label": "Not Used",
+      "start": 60,
+      "length": 21,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

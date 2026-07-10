@@ -1,0 +1,305 @@
+{
+  "card": "T404/03",
+  "process": "T404 Term",
+  "description": "T404/03",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "term_date_termination_date_ccyymmdd",
+      "label": "Term Date (Termination Date) [CCYYMMDD]",
+      "start": 9,
+      "length": 8,
+      "picture": "9(8)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "usage_code_5_usage_code_5",
+      "label": "Usage-Code-5 (Usage Code 5)",
+      "start": 17,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "wire_ind",
+      "label": "Wire Ind.",
+      "start": 18,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_019_019",
+      "label": "Not Used",
+      "start": 19,
+      "length": 1,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "dtl_fund_id_funds",
+      "label": "DTL-Fund-ID (Funds)",
+      "start": 20,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "cntrb_flg_contr_earn",
+      "label": "Cntrb-Flg (Contr/Earn)",
+      "start": 23,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_exact_flg_exact",
+      "label": "DTL-Exact-Flg (Exact)",
+      "start": 24,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "disb_unsh_code_medium",
+      "label": "Disb-Unsh-Code (Medium)",
+      "start": 25,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "req_unsh_code_type",
+      "label": "Req-Unsh-Code (Type)",
+      "start": 26,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_amt_amt_shrs_variant_cash",
+      "label": "Dtl-Amt (Amt/%/Shrs) [variant cash]",
+      "start": 27,
+      "length": 11,
+      "picture": "9(9)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_amt_amt_shrs_variant_shares_annuity_or",
+      "label": "Dtl-Amt (Amt/%/Shrs) [variant shares/annuity OR]",
+      "start": 27,
+      "length": 11,
+      "picture": "9(7)V9(4)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_amt_amt_shrs_variant_percent_or",
+      "label": "Dtl-Amt (Amt/%/Shrs) [variant percent OR]",
+      "start": 27,
+      "length": 5,
+      "picture": "9(3)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_032_037",
+      "label": "Not Used [if variant percent]",
+      "start": 32,
+      "length": 6,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "chain_flg_link_prev",
+      "label": "Chain-Flg (Link Prev)",
+      "start": 38,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "pdf_index_reserved_for_future_use",
+      "label": "PDF-Index (Reserved for future use)",
+      "start": 39,
+      "length": 2,
+      "picture": "X(2)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "pdf_chain_flg_reserved_for_future_use",
+      "label": "PDF-Chain-Flg (Reserved for future use)",
+      "start": 41,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_042_043",
+      "label": "Not Used",
+      "start": 42,
+      "length": 2,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "dtl_fund_id_funds_044",
+      "label": "DTL-Fund-ID (Funds)",
+      "start": 44,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "cntrb_flg_contr_earn_047",
+      "label": "Cntrb-Flg (Contr/Earn)",
+      "start": 47,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_exact_flg_exact_048",
+      "label": "DTL-Exact-Flg (Exact)",
+      "start": 48,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "disb_unsh_code_medium_049",
+      "label": "Disb-Unsh-Code (Medium)",
+      "start": 49,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "req_unsh_code_type_050",
+      "label": "Req-Unsh-Code (Type)",
+      "start": 50,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_amt_amt_shrs_variant_cash_051",
+      "label": "Dtl-Amt (Amt/%/Shrs) [variant cash]",
+      "start": 51,
+      "length": 11,
+      "picture": "9(9)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_amt_amt_shrs_variant_shares_annuity_or_051",
+      "label": "Dtl-Amt (Amt/%/Shrs) [variant shares/annuity OR]",
+      "start": 51,
+      "length": 11,
+      "picture": "9(7)V9(4)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_amt_amt_shrs_variant_percent_or_051",
+      "label": "Dtl-Amt (Amt/%/Shrs) [variant percent OR]",
+      "start": 51,
+      "length": 5,
+      "picture": "9(3)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_056_061",
+      "label": "Not Used [if variant percent]",
+      "start": 56,
+      "length": 6,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "chain_flg_link_prev_062",
+      "label": "Chain-Flg (Link Prev)",
+      "start": 62,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "pdf_index_reserved_for_future_use_063",
+      "label": "PDF-Index (Reserved for future use)",
+      "start": 63,
+      "length": 2,
+      "picture": "X(2)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "pdf_chain_flg_reserved_for_future_use_065",
+      "label": "PDF-Chain-Flg (Reserved for future use)",
+      "start": 65,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_066_080",
+      "label": "Not Used",
+      "start": 66,
+      "length": 15,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

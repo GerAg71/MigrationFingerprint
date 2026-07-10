@@ -1,0 +1,71 @@
+{
+  "card": "T600/09",
+  "process": "T600 Add a Plan",
+  "description": "T600/09",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code_key_data_seq_num",
+      "label": "Seq-Code (Key Data: Seq Num)",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "company_address_line_4_city",
+      "label": "Company Address Line 4-City",
+      "start": 9,
+      "length": 28,
+      "picture": "X(28)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "company_address_line_4_state",
+      "label": "Company Address Line 4-State",
+      "start": 37,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "company_address_line_4_zip_code",
+      "label": "Company Address Line 4-Zip Code",
+      "start": 40,
+      "length": 9,
+      "picture": "X(9)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_049_080",
+      "label": "Not Used",
+      "start": 49,
+      "length": 32,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

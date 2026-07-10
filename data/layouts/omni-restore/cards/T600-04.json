@@ -1,0 +1,53 @@
+{
+  "card": "T600/04",
+  "process": "T600 Add a Plan",
+  "description": "T600/04",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code_key_data_seq_num",
+      "label": "Seq-Code (Key Data: Seq Num)",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "company_name",
+      "label": "Company Name",
+      "start": 9,
+      "length": 32,
+      "picture": "X(32)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_041_080",
+      "label": "Not Used",
+      "start": 41,
+      "length": 40,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

@@ -1,0 +1,456 @@
+{
+  "source": "Omni_Format_Matrix_Complete.xlsx",
+  "discrepancies": [
+    "row 133 card T701/00 field 'Not Used': Length 15 disagrees with Columns 65-80 (16 positions); using the positions",
+    "row 165 card T801/00 field 'Not Used': Length 15 disagrees with Columns 65-80 (16 positions); using the positions",
+    "row 173 card T801/01 field 'Not Used': Length 62 disagrees with Columns 31-80 (50 positions); using the positions",
+    "row 186 card T813/00 field 'Not Used': Length 15 disagrees with Columns 65-80 (16 positions); using the positions",
+    "row 219 card T114/00 field 'Not Used': Length 15 disagrees with Columns 65-80 (16 positions); using the positions",
+    "row 276 card T384/00 field 'Not Used': Length 15 disagrees with Columns 65-80 (16 positions); using the positions",
+    "row 349 card T385/00 field 'Not Used': Length 15 disagrees with Columns 65-80 (16 positions); using the positions",
+    "row 386 card T404/00 field 'Not Used': Length 15 disagrees with Columns 65-80 (16 positions); using the positions",
+    "row 501 card T444/00 field 'Not Used': Length 15 disagrees with Columns 65-80 (16 positions); using the positions",
+    "row 570 card T444/03 field 'Not Used': Length 12 disagrees with Columns 6-19 (14 positions); using the positions",
+    "row 596 card T444/04-T444/09 field 'Not Used': Length 12 disagrees with Columns 6-19 (14 positions); using the positions",
+    "row 632 card T823/00 field 'Not Used': Length 15 disagrees with Columns 65-80 (16 positions); using the positions",
+    "row 657 card T903/00 field 'Not Used': Length 15 disagrees with Columns 65-80 (16 positions); using the positions",
+    "row 675 card T890/00 field 'Not Used': Length 15 disagrees with Columns 65-80 (16 positions); using the positions",
+    "row 700 card T891/00 field 'Not Used': Length 15 disagrees with Columns 65-80 (16 positions); using the positions"
+  ],
+  "notes": [
+    "row 373 card T385/01: T385 Ln Pay T385/01 T385/01 [NOTE] Source image shows T385/01 only through column 52; columns 53-80 not visible in source."
+  ],
+  "cards": [
+    {
+      "card": "T600/00",
+      "process": "T600 Add a Plan",
+      "fields": 13,
+      "record_length": 80,
+      "required_fields": 4,
+      "filler_fields": 4
+    },
+    {
+      "card": "T600/01",
+      "process": "T600 Add a Plan",
+      "fields": 10,
+      "record_length": 80,
+      "required_fields": 5,
+      "filler_fields": 2
+    },
+    {
+      "card": "T600/02",
+      "process": "T600 Add a Plan",
+      "fields": 5,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 2
+    },
+    {
+      "card": "T600/03",
+      "process": "T600 Add a Plan",
+      "fields": 5,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 2
+    },
+    {
+      "card": "T600/04",
+      "process": "T600 Add a Plan",
+      "fields": 5,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 2
+    },
+    {
+      "card": "T600/05",
+      "process": "T600 Add a Plan",
+      "fields": 5,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 2
+    },
+    {
+      "card": "T600/06",
+      "process": "T600 Add a Plan",
+      "fields": 5,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 2
+    },
+    {
+      "card": "T600/07",
+      "process": "T600 Add a Plan",
+      "fields": 5,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 2
+    },
+    {
+      "card": "T600/08",
+      "process": "T600 Add a Plan",
+      "fields": 5,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 2
+    },
+    {
+      "card": "T600/09",
+      "process": "T600 Add a Plan",
+      "fields": 7,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 2
+    },
+    {
+      "card": "T613/00",
+      "process": "T613 Pln Maint",
+      "fields": 13,
+      "record_length": 80,
+      "required_fields": 4,
+      "filler_fields": 4
+    },
+    {
+      "card": "T613/01",
+      "process": "T613 Pln Maint",
+      "fields": 8,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 2
+    },
+    {
+      "card": "T613/02-30",
+      "process": "T613 Pln Maint",
+      "fields": 7,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 3
+    },
+    {
+      "card": "T650/00",
+      "process": "T650 Prod Mstr",
+      "fields": 13,
+      "record_length": 80,
+      "required_fields": 4,
+      "filler_fields": 5
+    },
+    {
+      "card": "T650/01",
+      "process": "T650 Prod Mstr",
+      "fields": 7,
+      "record_length": 80,
+      "required_fields": 4,
+      "filler_fields": 2
+    },
+    {
+      "card": "T650/02",
+      "process": "T650 Prod Mstr",
+      "fields": 6,
+      "record_length": 80,
+      "required_fields": 4,
+      "filler_fields": 2
+    },
+    {
+      "card": "T701/00",
+      "process": "T701 FC",
+      "fields": 13,
+      "record_length": 80,
+      "required_fields": 5,
+      "filler_fields": 2
+    },
+    {
+      "card": "T701/01",
+      "process": "T701 FC",
+      "fields": 10,
+      "record_length": 80,
+      "required_fields": 3,
+      "filler_fields": 3
+    },
+    {
+      "card": "T701/02-T701/29",
+      "process": "T701 FC",
+      "fields": 9,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 4
+    },
+    {
+      "card": "T801/00",
+      "process": "T801 Ppt Create",
+      "fields": 13,
+      "record_length": 80,
+      "required_fields": 6,
+      "filler_fields": 2
+    },
+    {
+      "card": "T801/01",
+      "process": "T801 Ppt Create",
+      "fields": 8,
+      "record_length": 80,
+      "required_fields": 3,
+      "filler_fields": 3
+    },
+    {
+      "card": "T813/00",
+      "process": "T813 Ppt Hdr Maint",
+      "fields": 13,
+      "record_length": 80,
+      "required_fields": 4,
+      "filler_fields": 2
+    },
+    {
+      "card": "T813/01",
+      "process": "T813 Ppt Hdr Maint",
+      "fields": 11,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 2
+    },
+    {
+      "card": "T813/02-T813/99",
+      "process": "T813 Ppt Hdr Maint",
+      "fields": 9,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 3
+    },
+    {
+      "card": "T114/00",
+      "process": "T114 Cont",
+      "fields": 13,
+      "record_length": 80,
+      "required_fields": 6,
+      "filler_fields": 2
+    },
+    {
+      "card": "T114/01",
+      "process": "T114 Cont",
+      "fields": 26,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 3
+    },
+    {
+      "card": "T114/02-T114/03",
+      "process": "T114 Cont",
+      "fields": 18,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 2
+    },
+    {
+      "card": "T384/00",
+      "process": "T384 LN",
+      "fields": 13,
+      "record_length": 80,
+      "required_fields": 6,
+      "filler_fields": 2
+    },
+    {
+      "card": "T384/01",
+      "process": "T384 LN",
+      "fields": 26,
+      "record_length": 80,
+      "required_fields": 7,
+      "filler_fields": 3
+    },
+    {
+      "card": "T384/02",
+      "process": "T384 LN",
+      "fields": 19,
+      "record_length": 80,
+      "required_fields": 3,
+      "filler_fields": 6
+    },
+    {
+      "card": "T384/03-T384/12",
+      "process": "T384 LN",
+      "fields": 15,
+      "record_length": 80,
+      "required_fields": 8,
+      "filler_fields": 3
+    },
+    {
+      "card": "T385/00",
+      "process": "T385 Ln Pay",
+      "fields": 13,
+      "record_length": 80,
+      "required_fields": 6,
+      "filler_fields": 2
+    },
+    {
+      "card": "T385/01",
+      "process": "T385 Ln Pay",
+      "fields": 23,
+      "record_length": 52,
+      "required_fields": 2,
+      "filler_fields": 3
+    },
+    {
+      "card": "T404/00",
+      "process": "T404 Term",
+      "fields": 13,
+      "record_length": 80,
+      "required_fields": 6,
+      "filler_fields": 2
+    },
+    {
+      "card": "T404/01",
+      "process": "T404 Term",
+      "fields": 30,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 6
+    },
+    {
+      "card": "T404/02",
+      "process": "T404 Term",
+      "fields": 10,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 3
+    },
+    {
+      "card": "T404/03",
+      "process": "T404 Term",
+      "fields": 33,
+      "record_length": 80,
+      "required_fields": 3,
+      "filler_fields": 6
+    },
+    {
+      "card": "T404/04-T404/07",
+      "process": "T404 Term",
+      "fields": 29,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 5
+    },
+    {
+      "card": "T444/00",
+      "process": "T444 With",
+      "fields": 13,
+      "record_length": 80,
+      "required_fields": 6,
+      "filler_fields": 2
+    },
+    {
+      "card": "T444/01",
+      "process": "T444 With",
+      "fields": 37,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 7
+    },
+    {
+      "card": "T444/02",
+      "process": "T444 With",
+      "fields": 29,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 7
+    },
+    {
+      "card": "T444/03",
+      "process": "T444 With",
+      "fields": 26,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 6
+    },
+    {
+      "card": "T444/04-T444/09",
+      "process": "T444 With",
+      "fields": 26,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 6
+    },
+    {
+      "card": "T823/00",
+      "process": "T823 PF",
+      "fields": 13,
+      "record_length": 80,
+      "required_fields": 5,
+      "filler_fields": 2
+    },
+    {
+      "card": "T823/01",
+      "process": "T823 PF",
+      "fields": 12,
+      "record_length": 80,
+      "required_fields": 4,
+      "filler_fields": 4
+    },
+    {
+      "card": "T903/00",
+      "process": "T903 FC",
+      "fields": 13,
+      "record_length": 80,
+      "required_fields": 4,
+      "filler_fields": 3
+    },
+    {
+      "card": "T903/01",
+      "process": "T903 FC",
+      "fields": 5,
+      "record_length": 80,
+      "required_fields": 2,
+      "filler_fields": 2
+    },
+    {
+      "card": "T890/00",
+      "process": "T890 SC",
+      "fields": 13,
+      "record_length": 80,
+      "required_fields": 4,
+      "filler_fields": 2
+    },
+    {
+      "card": "T890/01",
+      "process": "T890 SC",
+      "fields": 6,
+      "record_length": 80,
+      "required_fields": 4,
+      "filler_fields": 2
+    },
+    {
+      "card": "T890/02",
+      "process": "T890 SC",
+      "fields": 6,
+      "record_length": 80,
+      "required_fields": 4,
+      "filler_fields": 2
+    },
+    {
+      "card": "T891/00",
+      "process": "T891 Ppt Source",
+      "fields": 13,
+      "record_length": 80,
+      "required_fields": 4,
+      "filler_fields": 2
+    },
+    {
+      "card": "T891/01",
+      "process": "T891 Ppt Source",
+      "fields": 6,
+      "record_length": 80,
+      "required_fields": 4,
+      "filler_fields": 2
+    },
+    {
+      "card": "T891/02",
+      "process": "T891 Ppt Source",
+      "fields": 6,
+      "record_length": 80,
+      "required_fields": 4,
+      "filler_fields": 2
+    }
+  ],
+  "totals": {
+    "processes": 15,
+    "cards": 53,
+    "fields": 710,
+    "required_fields": 182,
+    "filler_fields": 160
+  }
+}

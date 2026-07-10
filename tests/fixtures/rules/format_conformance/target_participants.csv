@@ -1,0 +1,3 @@
+plan_id,participant_id,ssn,first_name,last_name,address_1,address_2,city,state,zip,dob,hire_date,term_date,status,filler_442_448
+PLN001,P0001,900441207,Alice,Ng,12 Elm St,,Springfield,IL,62704,1980-01-15,2015-05-01,,ACTIVE,BR-EAST
+PLN001,P0002,900441208,Bob,Ray,9 Oak Ave,,Springfield,IL,62704,1975-06-30,2010-03-15,,ACTIVE,

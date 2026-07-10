@@ -1,0 +1,98 @@
+{
+  "card": "T701/01",
+  "process": "T701 FC",
+  "description": "T701/01",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "operation",
+      "label": "Operation",
+      "start": 9,
+      "length": 1,
+      "picture": "X(1)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "denum_data_elements_de",
+      "label": "Denum (Data Elements: DE#)",
+      "start": 10,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "val_internal_data_elements_value",
+      "label": "Val-Internal (Data Elements: Value)",
+      "start": 13,
+      "length": 50,
+      "picture": "X(50)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_063_063",
+      "label": "Not Used",
+      "start": 63,
+      "length": 1,
+      "picture": "X(1)",
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "calc_option",
+      "label": "Calc Option",
+      "start": 64,
+      "length": 1,
+      "picture": "X(1)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "report_option",
+      "label": "Report Option",
+      "start": 65,
+      "length": 1,
+      "picture": "X(1)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_066_080",
+      "label": "Not Used",
+      "start": 66,
+      "length": 15,
+      "picture": "X(15)",
+      "required": false,
+      "filler": true
+    }
+  ]
+}

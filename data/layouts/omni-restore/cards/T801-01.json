@@ -1,0 +1,80 @@
+{
+  "card": "T801/01",
+  "process": "T801 Ppt Create",
+  "description": "T801/01",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "function_function",
+      "label": "Function (Function)",
+      "start": 9,
+      "length": 15,
+      "picture": "X(15)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_024_025",
+      "label": "Not Used",
+      "start": 24,
+      "length": 2,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "location",
+      "label": "Location",
+      "start": 26,
+      "length": 4,
+      "picture": "X(4)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "override_calc_ind_validate_override",
+      "label": "Override Calc Ind (Validate Override)",
+      "start": 30,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_031_080",
+      "label": "Not Used",
+      "start": 31,
+      "length": 50,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

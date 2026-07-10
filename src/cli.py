@@ -519,6 +519,34 @@ def cmd_exceptions(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def cmd_compile_matrix(args: argparse.Namespace) -> int:
+    """Compile an Omni Format Matrix workbook into card layouts (+ optional
+    COBOL extract-deck skeletons) — the Omni→Omni restore toolchain."""
+    import zipfile
+
+    from src.ingest.matrix import MatrixError, compile_matrix, write_artifacts
+
+    try:
+        result = compile_matrix(args.workbook)
+        manifest = write_artifacts(result, args.out, decks=args.decks)
+    except (FileNotFoundError, MatrixError, zipfile.BadZipFile) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_RUNTIME
+    totals = manifest["totals"]
+    if args.json:
+        print(json.dumps(manifest, indent=2))
+        return EXIT_OK
+    print(f"compiled {args.workbook} -> {args.out}")
+    print(f"  {totals['processes']} processes, {totals['cards']} cards, "
+          f"{totals['fields']} fields")
+    print(f"  {totals['required_fields']} required, "
+          f"{totals['filler_fields']} 'Not Used' fillers materialized"
+          + ("; decks stamped" if args.decks else ""))
+    for note in manifest["discrepancies"]:
+        print(f"  WARNING: {note}")
+    return EXIT_OK
+
+
 def cmd_signoff(args: argparse.Namespace) -> int:
     from src.report.signoff import build_signoff_package
 
@@ -794,6 +822,17 @@ def build_parser() -> argparse.ArgumentParser:
     p_history.add_argument("--fingerprint-dir", default=str(DEFAULT_FINGERPRINT_DIR))
     p_history.add_argument("--json", action="store_true", help="JSON output")
     p_history.set_defaults(func=cmd_history)
+
+    p_matrix = sub.add_parser(
+        "compile-matrix",
+        help="Compile an Omni Format Matrix xlsx into card layouts and "
+             "extract-deck skeletons (Omni->Omni restore)")
+    p_matrix.add_argument("workbook")
+    p_matrix.add_argument("--out", required=True, help="output directory")
+    p_matrix.add_argument("--decks", action="store_true",
+                          help="also stamp COBOL extract-deck skeletons")
+    p_matrix.add_argument("--json", action="store_true", help="JSON output")
+    p_matrix.set_defaults(func=cmd_compile_matrix)
 
     p_signoff = sub.add_parser(
         "signoff", help="Assemble the sign-off package for a run (spec §13.4)")

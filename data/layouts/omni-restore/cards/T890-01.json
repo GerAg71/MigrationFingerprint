@@ -1,0 +1,62 @@
+{
+  "card": "T890/01",
+  "process": "T890 SC",
+  "description": "T890/01",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "action_function",
+      "label": "Action (Function)",
+      "start": 9,
+      "length": 1,
+      "picture": "X",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "rpt_opt_report_options",
+      "label": "Rpt-Opt (Report Options)",
+      "start": 10,
+      "length": 1,
+      "picture": "X",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_011_080",
+      "label": "Not Used",
+      "start": 11,
+      "length": 70,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

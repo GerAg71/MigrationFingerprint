@@ -1,0 +1,450 @@
+{
+  "fingerprint_id": "omni-zos-to-omni-linux-restore",
+  "platform_pair": {
+    "source": "OMNI_MAINFRAME_ZOS",
+    "target": "OMNI_LINUX_RHEL"
+  },
+  "version": "1.0.0",
+  "status": "published",
+  "updated_by": "conversion-team-seed",
+  "changelog": "Seed fingerprint for the Omni->Omni backup/restore conversion path (strategy: docs/Omni_to_Omni_Restore_Strategy.md). Same platform pair as omni-zos-to-omni-linux but a different methodology, so a different failure signature: restore-specific modes FM-101..FM-106 at tolerance zero. Format expectations compiled from docs/Omni_Format_Matrix_Complete.xlsx (data/layouts/omni-restore).",
+  "failure_modes": [
+    {
+      "id": "FM-101",
+      "name": "Custom code / script value drift",
+      "category": "CALCULATION",
+      "description": "The mainframe ran client-modified COBOL or Omni scripting whose outputs restore intact, but the vanilla Linux software recomputes those values by the stock formula. Recomputing derived values with the stock formula and comparing exposes every place custom logic existed - without reading a line of the source code.",
+      "probability": 0.7,
+      "impact": 0.9,
+      "data_domains": [
+        "VESTING",
+        "LOAN"
+      ],
+      "detection_rules": [
+        "RULE-RST-VEST-001"
+      ],
+      "sample_defect": "Source vesting shows 0.80 vested at 4.5 service years on a GRADED6 schedule; the stock schedule computes 0.60 - a custom rounding routine on the mainframe produced the extra 0.20.",
+      "remediation": "Identify the custom routine behind each drifted value; decide per finding whether to port it to the target or adopt the stock computation, and get client sign-off on the authoritative value before cutover.",
+      "history": {
+        "times_detected": 0,
+        "times_confirmed": 0,
+        "false_positives": 0
+      },
+      "origin": "seed:experience"
+    },
+    {
+      "id": "FM-102",
+      "name": "UDF definition gap",
+      "category": "PLAN",
+      "description": "User-defined fields exist on the source but were never defined on the target: restored values arrive with no definition to live in and are silently dropped or orphaned. Definitions and values are extracted as datasets on both sides so the loss is countable.",
+      "probability": 0.6,
+      "impact": 0.85,
+      "data_domains": [
+        "PLAN",
+        "PARTICIPANT",
+        "FORMAT"
+      ],
+      "detection_rules": [
+        "RULE-RST-UDF-001",
+        "RULE-RST-UDF-002"
+      ],
+      "sample_defect": "UDF-07 'Union Code' is defined on the mainframe with 214 participant values; after restore the Linux side has no UDF-07 definition and zero values.",
+      "remediation": "Re-key the missing UDF definitions on the target (corrective maintenance card deck stamped from the Format Matrix layouts), re-apply the values, and re-run to prove the counts reconcile.",
+      "history": {
+        "times_detected": 0,
+        "times_confirmed": 0,
+        "false_positives": 0
+      },
+      "origin": "seed:experience"
+    },
+    {
+      "id": "FM-103",
+      "name": "Off-label field usage",
+      "category": "FORMAT",
+      "description": "Decades of operation hide data where the software never intended it: values in 'Not Used' filler positions, letters in numeric Pictures, codes outside a field's domain. The restore copies the bytes faithfully - and the new software misreads them by the book. Detection validates every position against the Format Matrix expectation model.",
+      "probability": 0.55,
+      "impact": 0.7,
+      "data_domains": [
+        "FORMAT",
+        "PARTICIPANT"
+      ],
+      "detection_rules": [
+        "RULE-RST-FMT-001",
+        "RULE-RST-FMT-002"
+      ],
+      "sample_defect": "Branch code 'BR-EAST' stored in participant filler positions 442-448; an SSN carrying a letter in a 9(9) Picture.",
+      "remediation": "Map each off-label usage to a proper UDF on the target, document the crosswalk with the client, and migrate the hidden values explicitly rather than letting the restore carry them blind.",
+      "history": {
+        "times_detected": 0,
+        "times_confirmed": 0,
+        "false_positives": 0
+      },
+      "origin": "seed:experience"
+    },
+    {
+      "id": "FM-104",
+      "name": "Required-field regression",
+      "category": "FORMAT",
+      "description": "Fields the Format Matrix marks Required arriving blank after the restore - typically collateral damage of layout or version mismatches. Every Required position is asserted non-blank on the target.",
+      "probability": 0.45,
+      "impact": 0.8,
+      "data_domains": [
+        "PARTICIPANT",
+        "LOAN",
+        "FORMAT"
+      ],
+      "detection_rules": [
+        "RULE-RST-REQ-001",
+        "RULE-RST-REQ-002"
+      ],
+      "sample_defect": "Participant date-of-birth blank on the target for records that carried one on the mainframe.",
+      "remediation": "Corrective maintenance transactions repopulate the blanked fields from the source extract; if a whole region is affected, re-restore it and escalate the root cause to the vendor.",
+      "history": {
+        "times_detected": 0,
+        "times_confirmed": 0,
+        "false_positives": 0
+      },
+      "origin": "seed:methodology"
+    },
+    {
+      "id": "FM-105",
+      "name": "Restore truncation / record gaps",
+      "category": "BALANCING",
+      "description": "Whole records or record regions dropped or truncated by the restore. Counts reconcile per dataset per plan so a dropped region cannot hide inside a grand total.",
+      "probability": 0.5,
+      "impact": 0.95,
+      "data_domains": [
+        "PARTICIPANT",
+        "LOAN",
+        "TRANSACTION"
+      ],
+      "detection_rules": [
+        "RULE-RST-CNT-001",
+        "RULE-RST-CNT-002"
+      ],
+      "sample_defect": "Loan-payment history short by two rows for one plan after restore.",
+      "remediation": "Re-restore the affected region and escalate to the vendor with the exact record list from the drill-down; never hand-key missing history.",
+      "history": {
+        "times_detected": 0,
+        "times_confirmed": 0,
+        "false_positives": 0
+      },
+      "origin": "seed:experience"
+    },
+    {
+      "id": "FM-106",
+      "name": "Field value drift at tolerance zero",
+      "category": "BALANCING",
+      "description": "Same product on both sides means a clean restore is value-identical. Every field compares at tolerance 0.00 - any difference at all, money or text, is a finding. This is the catch-all net under the targeted modes.",
+      "probability": 0.65,
+      "impact": 0.85,
+      "data_domains": [
+        "BALANCE",
+        "LOAN",
+        "PARTICIPANT"
+      ],
+      "detection_rules": [
+        "RULE-RST-DIFF-001",
+        "RULE-RST-DIFF-002",
+        "RULE-RST-DIFF-003"
+      ],
+      "sample_defect": "An outstanding loan balance 25.00 lower on the target; a participant surname respelled.",
+      "remediation": "Trace each drifted value to its restore step; correct via maintenance transactions or re-restore, and record the authoritative side in the exception register.",
+      "history": {
+        "times_detected": 0,
+        "times_confirmed": 0,
+        "false_positives": 0
+      },
+      "origin": "seed:experience"
+    }
+  ],
+  "detection_rules": [
+    {
+      "rule_id": "RULE-RST-VEST-001",
+      "failure_mode": "FM-101",
+      "source_dataset": "vesting",
+      "target_dataset": "vesting",
+      "join_keys": [
+        "plan_id",
+        "participant_id"
+      ],
+      "severity": "HIGH",
+      "enabled": true,
+      "type": "derived_recompute",
+      "params": {
+        "recompute": "vested_pct",
+        "inputs": {
+          "schedule": "plan.provisions.vesting",
+          "service": "vesting.service_years"
+        },
+        "compare_field": "vested_pct",
+        "tolerance": "0.0000"
+      }
+    },
+    {
+      "rule_id": "RULE-RST-UDF-001",
+      "failure_mode": "FM-102",
+      "source_dataset": "udf_definitions",
+      "target_dataset": "udf_definitions",
+      "join_keys": [
+        "plan_id",
+        "udf_id"
+      ],
+      "severity": "CRITICAL",
+      "enabled": true,
+      "type": "referential",
+      "params": {}
+    },
+    {
+      "rule_id": "RULE-RST-UDF-002",
+      "failure_mode": "FM-102",
+      "source_dataset": "udf_values",
+      "target_dataset": "udf_values",
+      "severity": "HIGH",
+      "enabled": true,
+      "type": "count_balance",
+      "params": {
+        "aggregations": [
+          {
+            "measure": "*",
+            "op": "count",
+            "group_by": [
+              "plan_id",
+              "udf_id"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "rule_id": "RULE-RST-FMT-001",
+      "failure_mode": "FM-103",
+      "target_dataset": "participants",
+      "severity": "HIGH",
+      "enabled": true,
+      "type": "format_conformance",
+      "params": {
+        "side": "target",
+        "fields": [
+          {
+            "field": "filler_442_448",
+            "required": false,
+            "must_be_blank": true
+          }
+        ]
+      }
+    },
+    {
+      "rule_id": "RULE-RST-FMT-002",
+      "failure_mode": "FM-103",
+      "target_dataset": "participants",
+      "severity": "MEDIUM",
+      "enabled": true,
+      "type": "format_conformance",
+      "params": {
+        "side": "target",
+        "fields": [
+          {
+            "field": "ssn",
+            "picture": "9(9)",
+            "required": false,
+            "must_be_blank": false
+          },
+          {
+            "field": "state",
+            "picture": "X(2)",
+            "required": false,
+            "must_be_blank": false
+          },
+          {
+            "field": "status",
+            "required": false,
+            "must_be_blank": false,
+            "domain": [
+              "ACTIVE",
+              "TERMINATED",
+              "SUSPENDED",
+              "DECEASED"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "rule_id": "RULE-RST-REQ-001",
+      "failure_mode": "FM-104",
+      "target_dataset": "participants",
+      "severity": "HIGH",
+      "enabled": true,
+      "type": "format_conformance",
+      "params": {
+        "side": "target",
+        "fields": [
+          {
+            "field": "dob",
+            "required": true,
+            "must_be_blank": false
+          },
+          {
+            "field": "status",
+            "required": true,
+            "must_be_blank": false
+          }
+        ]
+      }
+    },
+    {
+      "rule_id": "RULE-RST-REQ-002",
+      "failure_mode": "FM-104",
+      "target_dataset": "loans",
+      "severity": "HIGH",
+      "enabled": true,
+      "type": "format_conformance",
+      "params": {
+        "side": "target",
+        "fields": [
+          {
+            "field": "origination_date",
+            "required": true,
+            "must_be_blank": false
+          },
+          {
+            "field": "origination_amount",
+            "picture": "9(7)V99",
+            "required": true,
+            "must_be_blank": false
+          }
+        ]
+      }
+    },
+    {
+      "rule_id": "RULE-RST-CNT-001",
+      "failure_mode": "FM-105",
+      "source_dataset": "participants",
+      "target_dataset": "participants",
+      "severity": "CRITICAL",
+      "enabled": true,
+      "type": "count_balance",
+      "params": {
+        "aggregations": [
+          {
+            "measure": "*",
+            "op": "count",
+            "group_by": [
+              "plan_id"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "rule_id": "RULE-RST-CNT-002",
+      "failure_mode": "FM-105",
+      "source_dataset": "loan_payments",
+      "target_dataset": "loan_payments",
+      "severity": "HIGH",
+      "enabled": true,
+      "type": "count_balance",
+      "params": {
+        "aggregations": [
+          {
+            "measure": "*",
+            "op": "count",
+            "group_by": [
+              "plan_id"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "rule_id": "RULE-RST-DIFF-001",
+      "failure_mode": "FM-106",
+      "source_dataset": "balances",
+      "target_dataset": "balances",
+      "join_keys": [
+        "plan_id",
+        "participant_id",
+        "money_type_code",
+        "investment_code"
+      ],
+      "severity": "CRITICAL",
+      "enabled": true,
+      "type": "field_compare",
+      "params": {
+        "compare": [
+          {
+            "field": "balance",
+            "kind": "money",
+            "tolerance": "0.00"
+          },
+          {
+            "field": "units",
+            "kind": "money",
+            "tolerance": "0.00"
+          }
+        ],
+        "validity": []
+      }
+    },
+    {
+      "rule_id": "RULE-RST-DIFF-002",
+      "failure_mode": "FM-106",
+      "source_dataset": "loans",
+      "target_dataset": "loans",
+      "join_keys": [
+        "plan_id",
+        "participant_id",
+        "loan_id"
+      ],
+      "severity": "HIGH",
+      "enabled": true,
+      "type": "field_compare",
+      "params": {
+        "compare": [
+          {
+            "field": "outstanding_balance",
+            "kind": "money",
+            "tolerance": "0.00"
+          },
+          {
+            "field": "payment_amount",
+            "kind": "money",
+            "tolerance": "0.00"
+          }
+        ],
+        "validity": []
+      }
+    },
+    {
+      "rule_id": "RULE-RST-DIFF-003",
+      "failure_mode": "FM-106",
+      "source_dataset": "participants",
+      "target_dataset": "participants",
+      "join_keys": [
+        "plan_id",
+        "participant_id"
+      ],
+      "severity": "MEDIUM",
+      "enabled": true,
+      "type": "field_compare",
+      "params": {
+        "compare": [
+          {
+            "field": "last_name",
+            "kind": "text"
+          },
+          {
+            "field": "first_name",
+            "kind": "text"
+          },
+          {
+            "field": "dob",
+            "kind": "date"
+          }
+        ],
+        "validity": []
+      }
+    }
+  ]
+}

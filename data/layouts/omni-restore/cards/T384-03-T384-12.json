@@ -1,0 +1,143 @@
+{
+  "card": "T384/03-T384/12",
+  "process": "T384 LN",
+  "description": "T384/03 through T384/12",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "fund_id2_fund_ids",
+      "label": "Fund-ID2 (Fund Ids)",
+      "start": 9,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "borrow_flag_amount_flag",
+      "label": "Borrow-Flag (Amount Flag)",
+      "start": 12,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_exact_flag",
+      "label": "Dtl-Exact-Flag",
+      "start": 13,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "borrow_amt_amount_percent_if_cash_variant_1",
+      "label": "Borrow-Amt (Amount/Percent, if cash) [variant 1]",
+      "start": 14,
+      "length": 8,
+      "picture": "9(6)V99",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "borrow_pct_amount_percent_if_percent_variant_2_or",
+      "label": "Borrow-Pct (Amount/Percent, if percent) [variant 2 OR]",
+      "start": 14,
+      "length": 8,
+      "picture": "9(4)V9(4)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_022_022",
+      "label": "Not Used",
+      "start": 22,
+      "length": 1,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "fund_id2_fund_ids_023",
+      "label": "Fund-ID2 (Fund Ids)",
+      "start": 23,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "borrow_flag_amount_flag_026",
+      "label": "Borrow-Flag (Amount Flag)",
+      "start": 26,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "dtl_exact_flag_027",
+      "label": "Dtl-Exact-Flag",
+      "start": 27,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "borrow_amt_amount_percent_if_cash_variant_1_028",
+      "label": "Borrow-Amt (Amount/Percent, if cash) [variant 1]",
+      "start": 28,
+      "length": 8,
+      "picture": "9(6)V99",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "borrow_pct_amount_percent_if_percent_variant_2_or_028",
+      "label": "Borrow-Pct (Amount/Percent, if percent) [variant 2 OR]",
+      "start": 28,
+      "length": 8,
+      "picture": "9(4)V9(4)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_036_080",
+      "label": "Not Used",
+      "start": 36,
+      "length": 45,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

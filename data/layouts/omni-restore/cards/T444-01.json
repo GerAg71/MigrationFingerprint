@@ -1,0 +1,341 @@
+{
+  "card": "T444/01",
+  "process": "T444 With",
+  "description": "T444/01",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_009",
+      "label": "Not Used",
+      "start": 6,
+      "length": 4,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "lump_sum_flg_lump_sum_payment",
+      "label": "Lump-Sum-Flg (Lump Sum Payment)",
+      "start": 10,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_011_011",
+      "label": "Not Used",
+      "start": 11,
+      "length": 1,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "exact_tot_flg_withdraw_exact_amount_given",
+      "label": "Exact-Tot-Flg (Withdraw EXACT Amount Given)",
+      "start": 12,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "tot_amt_amount",
+      "label": "Tot Amt (Amount)",
+      "start": 13,
+      "length": 9,
+      "picture": "9(7)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "max_omniscript_wdrlmax_omniscript_suffix",
+      "label": "Max-OmniScript (WDRLMAX OmniScript Suffix)",
+      "start": 22,
+      "length": 2,
+      "picture": "X(2)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "susp_omniscript_wdrlsusp_omniscript_suffix",
+      "label": "Susp-OmniScript (WDRLSUSP OmniScript Suffix)",
+      "start": 24,
+      "length": 2,
+      "picture": "X(2)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "forf_omniscript_wdrlforf_omniscript_suffix",
+      "label": "Forf-OmniScript (WDRLFORF OmniScript Suffix)",
+      "start": 26,
+      "length": 2,
+      "picture": "X(2)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "type_transaction_type",
+      "label": "Type (Transaction Type)",
+      "start": 28,
+      "length": 2,
+      "picture": "X(2)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "div_sub_location",
+      "label": "Div Sub (Location)",
+      "start": 30,
+      "length": 4,
+      "picture": "X(4)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "special_dist_opt_special_category",
+      "label": "Special-Dist-Opt (Special Category)",
+      "start": 34,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "reason_cd_withdrawal_reason",
+      "label": "Reason-Cd (Withdrawal Reason)",
+      "start": 35,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "qvec_reason_cd_qvec_reason",
+      "label": "QVEC-Reason-Cd (QVEC Reason)",
+      "start": 36,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "transaction_override",
+      "label": "Transaction-Override",
+      "start": 37,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "usage_code_1_usage_code_1",
+      "label": "Usage-Code-1 (Usage Code 1)",
+      "start": 38,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "tax_year_flag_tax_year",
+      "label": "Tax-Year-Flag (Tax Year)",
+      "start": 39,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "f_401k_wdr_flg_override_401k_withdrawal_limit",
+      "label": "401k-Wdr-Flg (Override 401k Withdrawal Limit)",
+      "start": 40,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "check_status_check_status",
+      "label": "Check-Status (Check Status)",
+      "start": 41,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_042_042",
+      "label": "Not Used",
+      "start": 42,
+      "length": 1,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "gadj_omniscript_flg_adjgrosspmt_omniscript_options",
+      "label": "Gadj-OmniScript-Flg (ADJGROSSPMT OmniScript Options)",
+      "start": 43,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_044_044",
+      "label": "Not Used",
+      "start": 44,
+      "length": 1,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "rollover_usage_rollover_usage_code",
+      "label": "Rollover-Usage (Rollover Usage Code)",
+      "start": 45,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "mand_whold_roll_mandatory_withholding_does_not_apply",
+      "label": "Mand-Whold-Roll (Mandatory Withholding does Not Apply)",
+      "start": 46,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_047_049",
+      "label": "Not Used",
+      "start": 47,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "usage_code_4_usage_code_4",
+      "label": "Usage-Code-4 (Usage Code 4)",
+      "start": 50,
+      "length": 4,
+      "picture": "X(4)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "disb_reason_special_disb_reason_special",
+      "label": "Disb-Reason-Special (Disb Reason Special)",
+      "start": 54,
+      "length": 2,
+      "picture": "X(2)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "apay_key_seq",
+      "label": "Apay-Key-Seq",
+      "start": 56,
+      "length": 3,
+      "picture": "9(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "old_inst_seq",
+      "label": "Old-Inst-Seq",
+      "start": 59,
+      "length": 1,
+      "picture": "9(1)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "inst_next_pay_date",
+      "label": "Inst-Next-Pay-Date",
+      "start": 60,
+      "length": 8,
+      "picture": "9(8)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_068_068",
+      "label": "Not Used",
+      "start": 68,
+      "length": 1,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "qual_expense_dist_flag",
+      "label": "Qual-Expense-Dist-Flag",
+      "start": 69,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "inst_global_payment",
+      "label": "Inst-Global-Payment",
+      "start": 70,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "inst_setup_transaction_seq",
+      "label": "Inst-Setup-Transaction-Seq",
+      "start": 71,
+      "length": 7,
+      "picture": "9(7)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "inst_seq",
+      "label": "Inst-Seq",
+      "start": 78,
+      "length": 2,
+      "picture": "9(2)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_080_080",
+      "label": "Source Age Restriction Override",
+      "start": 80,
+      "length": 1,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

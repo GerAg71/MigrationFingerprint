@@ -1,0 +1,98 @@
+{
+  "card": "T404/02",
+  "process": "T404 Term",
+  "description": "T404/02",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "rollover_usage_rollover_usage_code",
+      "label": "Rollover-Usage (Rollover Usage Code)",
+      "start": 9,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "mand_whold_roll_mandatory_withholding_does_not_apply",
+      "label": "Mand-Whold-Roll (Mandatory Withholding Does NOT Apply)",
+      "start": 10,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "inst_less_10_yrs",
+      "label": "Inst-Less-10-Yrs ()",
+      "start": 11,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "rec02_type_reserved_for_future_use",
+      "label": "Rec02-Type (Reserved for future use)",
+      "start": 12,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "payee_ind_reserved_for_future_use",
+      "label": "Payee-Ind (Reserved for future use)",
+      "start": 15,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_016_076",
+      "label": "Not Used",
+      "start": 16,
+      "length": 61,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "filler_077_080",
+      "label": "Not Used",
+      "start": 77,
+      "length": 4,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

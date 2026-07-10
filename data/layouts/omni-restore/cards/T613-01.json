@@ -1,0 +1,80 @@
+{
+  "card": "T613/01",
+  "process": "T613 Pln Maint",
+  "description": "T613/01",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "denum_data_elements_de",
+      "label": "Denum (Data Elements: DE#)",
+      "start": 9,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "val_internal_data_elements_value",
+      "label": "Val-Internal (Data Elements: Value)",
+      "start": 12,
+      "length": 40,
+      "picture": "X(40)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "rpt_opt",
+      "label": "Rpt-Opt",
+      "start": 52,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "override_calc_ind",
+      "label": "Override-Calc-Ind",
+      "start": 53,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_054_080",
+      "label": "Not Used",
+      "start": 54,
+      "length": 27,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

@@ -1,0 +1,242 @@
+{
+  "card": "T384/01",
+  "process": "T384 LN",
+  "description": "T384/01",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "f_1stpymt_date_dates_1st_payment_ccyymmdd",
+      "label": "1stpymt-Date (Dates: 1st Payment) [CCYYMMDD]",
+      "start": 9,
+      "length": 8,
+      "picture": "9(8)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "loan_amt_loan_amount",
+      "label": "Loan-Amt (Loan Amount)",
+      "start": 17,
+      "length": 9,
+      "picture": "9(7)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "int_rate_pct_interest_rate",
+      "label": "Int-Rate-Pct (Interest Rate)",
+      "start": 26,
+      "length": 7,
+      "picture": "9(3)V9(4)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "pmt_amt_payment_amount",
+      "label": "Pmt-Amt (Payment Amount)",
+      "start": 33,
+      "length": 9,
+      "picture": "9(7)V99",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "exact_target_flg_loan_amount_is_a_target_amount",
+      "label": "Exact-Target-Flg (Loan Amount is a Target Amount)",
+      "start": 42,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "num_pmts_number_of_payments",
+      "label": "Num-Pmts (Number of Payments)",
+      "start": 43,
+      "length": 4,
+      "picture": "9(4)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "pmt_freq_repayment_frequency",
+      "label": "Pmt-Freq (Repayment Frequency)",
+      "start": 47,
+      "length": 1,
+      "picture": "X",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "amt_ov_amount_override",
+      "label": "Amt-Ov (Amount Override)",
+      "start": 48,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "repay_opt_repay_options",
+      "label": "Repay-Opt (Repay Options)",
+      "start": 49,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "constant_day_indicator",
+      "label": "Constant Day Indicator",
+      "start": 50,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "loan_use_ind_this_is_a_principal_residence_loan",
+      "label": "Loan-Use-Ind (This is a Principal Residence Loan)",
+      "start": 51,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "int_bal_ind_do_not_calculate_up_front_interest",
+      "label": "Int-Bal-Ind (Do Not Calculate Up-Front Interest)",
+      "start": 52,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "spec_hand_code",
+      "label": "Spec-Hand-Code",
+      "start": 53,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "check_del_method",
+      "label": "Check-Del-Method",
+      "start": 54,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_055_056",
+      "label": "Not Used",
+      "start": 55,
+      "length": 2,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "amort_type_amort_type",
+      "label": "Amort-Type (Amort Type)",
+      "start": 57,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "max_omni_script_loanmax_omni_script_suffix",
+      "label": "Max-Omni Script (LOANMAX Omni Script Suffix)",
+      "start": 58,
+      "length": 2,
+      "picture": "X(2)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "gadj_omniscript_flag_adjgrosspmt_omni_script_options",
+      "label": "Gadj-OmniScript-Flag (ADJGROSSPMT Omni Script Options)",
+      "start": 60,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "check_status_check_status",
+      "label": "Check-Status (Check Status)",
+      "start": 61,
+      "length": 1,
+      "picture": "9",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "total_exp_int_total_expected_interest",
+      "label": "Total-Exp-Int (Total Expected Interest)",
+      "start": 62,
+      "length": 8,
+      "picture": "9(6)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "tot_exp_int_ovr_override_calculated_expected_interest",
+      "label": "Tot-Exp-Int-Ovr (Override Calculated Expected Interest)",
+      "start": 70,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "payroll_code_payroll_code",
+      "label": "Payroll-Code (Payroll Code)",
+      "start": 71,
+      "length": 8,
+      "picture": "X(8)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_079_080",
+      "label": "Not Used",
+      "start": 79,
+      "length": 2,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

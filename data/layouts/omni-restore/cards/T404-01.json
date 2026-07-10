@@ -1,0 +1,278 @@
+{
+  "card": "T404/01",
+  "process": "T404 Term",
+  "description": "T404/01",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "reason_cd_distribution_reason",
+      "label": "Reason-CD (Distribution Reason)",
+      "start": 9,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "div_sub_div_sub",
+      "label": "Div-Sub (Div/Sub)",
+      "start": 10,
+      "length": 4,
+      "picture": "X(4)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "qual_flg_immediate_payment_is_not_a_qualified_total_distribution",
+      "label": "Qual-Flg (Immediate Payment is NOT a Qualified Total Distribution)",
+      "start": 14,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "lump_sum_flg_distribution_is_a_non_lump_sum_installment_payment",
+      "label": "Lump-Sum-Flg (Distribution is a Non-Lump Sum Installment Payment)",
+      "start": 15,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_016_016",
+      "label": "Not Used",
+      "start": 16,
+      "length": 1,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "max_omni_script_wdrlmax_omni_script_suffix",
+      "label": "Max-Omni Script (WDRLMAX Omni Script Suffix)",
+      "start": 17,
+      "length": 2,
+      "picture": "X(2)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "forf_omni_script_wdrlforf_omni_script_suffix",
+      "label": "Forf-Omni Script (WDRLFORF Omni Script Suffix)",
+      "start": 19,
+      "length": 2,
+      "picture": "X(2)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "gadj_omniscript_flg_adjgrosspmt_omni_script_options",
+      "label": "Gadj-OmniScript-Flg (ADJGROSSPMT Omni Script Options)",
+      "start": 21,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "loan_default_ovr_loan_discharge_options",
+      "label": "Loan-Default-Ovr (Loan Discharge Options)",
+      "start": 22,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "alt_address_ind",
+      "label": "Alt-Address-Ind",
+      "start": 23,
+      "length": 3,
+      "picture": "9(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_026_028",
+      "label": "Not Used",
+      "start": 26,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "transaction_override",
+      "label": "Transaction-Override",
+      "start": 29,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_030_031",
+      "label": "Not Used",
+      "start": 30,
+      "length": 2,
+      "picture": "X",
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "defer_date_deferred_payments_date_ccyymmdd",
+      "label": "Defer-Date (Deferred Payments: Date) [CCYYMMDD]",
+      "start": 32,
+      "length": 8,
+      "picture": "9(8)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "defer_age_deferred_payments_age",
+      "label": "Defer-Age (Deferred Payments: Age)",
+      "start": 40,
+      "length": 2,
+      "picture": "9(2)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_042_054",
+      "label": "Not Used",
+      "start": 42,
+      "length": 13,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "qual_defer_pay_flag_deferred_payment_or_installment_is_a_qualified_total_distribution",
+      "label": "Qual-Defer-Pay-Flag (Deferred Payment or Installment is a Qualified Total Distribution)",
+      "start": 55,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "qvec_reason_cd_qvec_distribution_reason",
+      "label": "Qvec-Reason-Cd (QVEC Distribution Reason)",
+      "start": 56,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "qvec_qual_flg_payment_is_not_a_qvec_dist",
+      "label": "Qvec-Qual-Flg (Payment is not a QVEC Dist.)",
+      "start": 57,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "taxyear_flag_tax_year",
+      "label": "TaxYear-Flag (Tax Year)",
+      "start": 58,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "premature_dist_excep_premature_distribution_exception",
+      "label": "Premature-Dist-Excep (Premature Distribution Exception)",
+      "start": 59,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "usage_code_1_usage_code",
+      "label": "Usage-Code-1 (Usage Code)",
+      "start": 60,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "check_status_check_status",
+      "label": "Check-Status (Check Status)",
+      "start": 61,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "qual_expense_dist_flag",
+      "label": "Qual-Expense-Dist-Flag",
+      "start": 62,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "inst_setup_transaction_seq",
+      "label": "Inst-Setup-Transaction-Seq",
+      "start": 63,
+      "length": 7,
+      "picture": "9(7)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "source_age_restriction_override",
+      "label": "Source Age Restriction Override",
+      "start": 70,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_071_080",
+      "label": "Not Used",
+      "start": 71,
+      "length": 10,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

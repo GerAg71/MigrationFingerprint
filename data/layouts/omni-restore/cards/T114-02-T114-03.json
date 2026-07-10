@@ -1,0 +1,170 @@
+{
+  "card": "T114/02-T114/03",
+  "process": "T114 Cont",
+  "description": "T114/02 and T114/03",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code_transaction_code",
+      "label": "Tran-Code (Transaction Code)",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "cntrb_fund_id_fund_source",
+      "label": "Cntrb-Fund-ID (Fund/Source)",
+      "start": 9,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "catchup_option_cntb_cols_9_11",
+      "label": "Catchup Option (Cntb Cols 9-11)",
+      "start": 12,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "amt_us_amount",
+      "label": "Amt US (Amount)",
+      "start": 13,
+      "length": 11,
+      "picture": "9(9)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "cntrb_fund_id_fund_source_024",
+      "label": "Cntrb-Fund-ID (Fund/Source)",
+      "start": 24,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "catchup_option_cntb_cols_24_26",
+      "label": "Catchup Option (Cntb Cols 24-26)",
+      "start": 27,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "amt_us_amount_028",
+      "label": "Amt US (Amount)",
+      "start": 28,
+      "length": 11,
+      "picture": "9(9)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "cntrb_fund_id_fund_source_039",
+      "label": "Cntrb-Fund-ID (Fund/Source)",
+      "start": 39,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "catchup_option_cntb_cols_39_41",
+      "label": "Catchup Option (Cntb Cols 39-41)",
+      "start": 42,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "amt_us_amount_043",
+      "label": "Amt US (Amount)",
+      "start": 43,
+      "length": 11,
+      "picture": "9(9)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "cntrb_fund_id_fund_source_054",
+      "label": "Cntrb-Fund-ID (Fund/Source)",
+      "start": 54,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "catchup_option_cntb_cols_54_56",
+      "label": "Catchup Option (Cntb Cols 54-56)",
+      "start": 57,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "amt_us_amount_058",
+      "label": "Amt US (Amount)",
+      "start": 58,
+      "length": 11,
+      "picture": "9(9)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "st_taxed_401k",
+      "label": "St Taxed 401K",
+      "start": 69,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "as_of_percent_opt_as_of_percent_flag",
+      "label": "As-Of-Percent-Opt (As of Percent Flag)",
+      "start": 70,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_071_080",
+      "label": "Not Used",
+      "start": 71,
+      "length": 10,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

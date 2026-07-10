@@ -1,0 +1,179 @@
+{
+  "card": "T384/02",
+  "process": "T384 LN",
+  "description": "T384/02",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "old_fund_id",
+      "label": "Old-Fund-ID",
+      "start": 9,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "product_id",
+      "label": "Product-ID",
+      "start": 12,
+      "length": 6,
+      "picture": "X(6)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_018_036",
+      "label": "Not Used",
+      "start": 18,
+      "length": 19,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "usage_code_5",
+      "label": "Usage-Code-5",
+      "start": 37,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "issue_date_issue_ccyymmdd",
+      "label": "Issue-Date (Issue) [CCYYMMDD]",
+      "start": 38,
+      "length": 8,
+      "picture": "9(8)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_046_047",
+      "label": "Not Used",
+      "start": 46,
+      "length": 2,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "asof_pct_flag",
+      "label": "Asof-Pct-Flag",
+      "start": 48,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "type",
+      "label": "Type",
+      "start": 49,
+      "length": 4,
+      "picture": "X(4)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "refinance_flag_this_is_a_refinancing_loan",
+      "label": "Refinance-Flag (This is a Refinancing Loan)",
+      "start": 53,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_054_061",
+      "label": "Not Used",
+      "start": 54,
+      "length": 8,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "originator_loan_is_a_plan_loan",
+      "label": "Originator (Loan is a Plan Loan)",
+      "start": 62,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_063_063",
+      "label": "Not Used",
+      "start": 63,
+      "length": 1,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "addl_lien_value_additional_lien_value",
+      "label": "Addl-Lien-Value (Additional Lien Value)",
+      "start": 64,
+      "length": 11,
+      "picture": "9(9)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "refinance_loan_num_refinance_num",
+      "label": "Refinance-Loan-Num (Refinance Num)",
+      "start": 75,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "enforce_new_regs_enforce_deemed_distribution_regs",
+      "label": "Enforce-New Regs (Enforce Deemed Distribution Regs)",
+      "start": 78,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_079_080",
+      "label": "Not Used",
+      "start": 79,
+      "length": 2,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

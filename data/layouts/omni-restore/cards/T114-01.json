@@ -1,0 +1,242 @@
+{
+  "card": "T114/01",
+  "process": "T114 Cont",
+  "description": "T114/01",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code_transaction_code",
+      "label": "Tran-Code (Transaction Code)",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "format_flag",
+      "label": "Format Flag",
+      "start": 9,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "div_sub_location_code",
+      "label": "Div-Sub (Location Code)",
+      "start": 10,
+      "length": 4,
+      "picture": "X(4)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_014_017",
+      "label": "Not Used",
+      "start": 14,
+      "length": 4,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "cntrb_fund_id_1_fund_source",
+      "label": "Cntrb-Fund-ID (1) (Fund/Source)",
+      "start": 18,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "catchup_option_cntb_cols_18_20",
+      "label": "Catchup Option (Cntb Cols 18-20)",
+      "start": 21,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "amt_us_1_amount",
+      "label": "Amt US (1) (Amount)",
+      "start": 22,
+      "length": 11,
+      "picture": "9(9)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "cntrb_fund_id_2_fund_source",
+      "label": "Cntrb-Fund-ID (2) (Fund/Source)",
+      "start": 33,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "catchup_option_cntb_cols_33_35",
+      "label": "Catchup Option (Cntb Cols 33-35)",
+      "start": 36,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "amt_us_2_amount",
+      "label": "Amt US (2) (Amount)",
+      "start": 37,
+      "length": 11,
+      "picture": "9(9)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "cntrb_fund_id_3_fund_source",
+      "label": "Cntrb-Fund-ID (3) (Fund/Source)",
+      "start": 48,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "catchup_option_cntb_cols_48_50",
+      "label": "Catchup Option (Cntb Cols 48-50)",
+      "start": 51,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "amt_us_3_amount",
+      "label": "Amt US (3) (Amount)",
+      "start": 52,
+      "length": 11,
+      "picture": "9(9)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "st_taxed_401k_state_tax",
+      "label": "St-Taxed-401k (State Tax)",
+      "start": 63,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "susp_ov_suspension_override",
+      "label": "Susp-Ov (Suspension Override)",
+      "start": 64,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "usage_code_3",
+      "label": "Usage-Code-3",
+      "start": 65,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "alloc_method_allocation_method",
+      "label": "Alloc-Method (Allocation Method)",
+      "start": 68,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "purch_unshrs_flg_share_purchase_options",
+      "label": "Purch-Unshrs-Flg (Share Purchase Options)",
+      "start": 69,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "received_in_flg_contribution_amounts_are_shares_unit",
+      "label": "Received-In-Flg (Contribution Amounts are shares/unit)",
+      "start": 70,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "ee_pretax_lmt_ov_pretax_limit_override",
+      "label": "EE-Pretax-Lmt-Ov (Pretax Limit Override)",
+      "start": 71,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "f_415_lmt_ov_415_limit_override",
+      "label": "415-Lmt-Ov (415 Limit Override)",
+      "start": 72,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "override_calc_ind",
+      "label": "Override-CALC-Ind",
+      "start": 73,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "ira_limit_override",
+      "label": "IRA Limit Override",
+      "start": 74,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_075_080",
+      "label": "Not Used",
+      "start": 75,
+      "length": 6,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

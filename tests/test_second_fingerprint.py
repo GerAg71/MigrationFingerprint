@@ -82,6 +82,6 @@ def test_api_lists_both_pairs(tmp_path):
     client = TestClient(create_app(fingerprint_dir=store,
                                    runs_dir=tmp_path / "runs"))
     payload = client.get("/platform-pairs").json()
-    assert {p["pair_id"] for p in payload} == {ZOS_PAIR, TRAC_PAIR}
+    assert {p["pair_id"] for p in payload} >= {ZOS_PAIR, TRAC_PAIR}
     suite = client.get(f"/fingerprints/{TRAC_PAIR}/suite").json()
     assert suite["suite"][0]["rule_id"] == "RULE-VEST-PCT-001"

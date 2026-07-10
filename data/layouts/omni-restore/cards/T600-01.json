@@ -1,0 +1,98 @@
+{
+  "card": "T600/01",
+  "process": "T600 Add a Plan",
+  "description": "T600/01",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code_key_data_seq_num",
+      "label": "Seq-Code (Key Data: Seq Num)",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "plan_type_pl089",
+      "label": "Plan Type (PL089)",
+      "start": 9,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "plan_year_end_date_pl803",
+      "label": "Plan Year End Date (PL803)",
+      "start": 10,
+      "length": 4,
+      "picture": "X(4)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "company_irs_num_pl882_note_field_may_be_populated_with_zeroes_i_e_000000000",
+      "label": "Company IRS Num (PL882) [NOTE: Field may be populated with zeroes, i.e. 000000000]",
+      "start": 14,
+      "length": 9,
+      "picture": "9(9)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "administrator_id_num",
+      "label": "Administrator ID Num",
+      "start": 23,
+      "length": 6,
+      "picture": "X(6)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "administrator_name",
+      "label": "Administrator Name",
+      "start": 29,
+      "length": 30,
+      "picture": "X(30)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "new_plan_id",
+      "label": "New Plan ID",
+      "start": 59,
+      "length": 6,
+      "picture": "X(6)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_065_080",
+      "label": "Not Used",
+      "start": 65,
+      "length": 16,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

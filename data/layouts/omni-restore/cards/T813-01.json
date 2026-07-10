@@ -1,0 +1,107 @@
+{
+  "card": "T813/01",
+  "process": "T813 Ppt Hdr Maint",
+  "description": "T813/01",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "denum_old_data_elements_de",
+      "label": "Denum-Old (Data Elements: DE#)",
+      "start": 9,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "rpt_opt_report_options",
+      "label": "Rpt-Opt (Report Options)",
+      "start": 12,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "div_sub_div_sub",
+      "label": "Div-Sub (Div/Sub)",
+      "start": 13,
+      "length": 4,
+      "picture": "X(4)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "validate_override",
+      "label": "Validate Override",
+      "start": 17,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "calc_opt_calc_options",
+      "label": "Calc-Opt (Calc Options)",
+      "start": 18,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "val_internal_data_elements_value",
+      "label": "Val-Internal (Data Elements: Value)",
+      "start": 19,
+      "length": 50,
+      "picture": "X(50)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "denum_data_elements_de",
+      "label": "Denum (Data Elements: DE#)",
+      "start": 69,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_072_080",
+      "label": "Not Used",
+      "start": 72,
+      "length": 9,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

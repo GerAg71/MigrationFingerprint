@@ -28,6 +28,7 @@ from src.rules import (
     derived_recompute,
     encoding_check,
     field_compare,
+    format_conformance,
     referential,
     sort_order_check,
 )
@@ -42,6 +43,7 @@ EXECUTORS = {
     "derived_recompute": derived_recompute.execute,
     "encoding_check": encoding_check.execute,
     "sort_order_check": sort_order_check.execute,
+    "format_conformance": format_conformance.execute,
 }
 
 

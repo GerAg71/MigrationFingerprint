@@ -1,0 +1,125 @@
+{
+  "card": "T384/00",
+  "process": "T384 LN",
+  "description": "T384/00 Loan Issue",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "record_type_tihdr",
+      "label": "Record Type ($TIHDR)",
+      "start": 9,
+      "length": 7,
+      "picture": "X(7)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "plan_number",
+      "label": "Plan Number",
+      "start": 16,
+      "length": 6,
+      "picture": "X(6)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "participant_id",
+      "label": "Participant ID",
+      "start": 22,
+      "length": 17,
+      "picture": "X(17)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "fund_id",
+      "label": "Fund ID",
+      "start": 39,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "trade_date",
+      "label": "Trade Date",
+      "start": 42,
+      "length": 8,
+      "picture": "9(8)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "trade_time",
+      "label": "Trade Time",
+      "start": 50,
+      "length": 6,
+      "picture": "9(6)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "currency_code",
+      "label": "Currency Code",
+      "start": 56,
+      "length": 5,
+      "picture": "X(5)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "pass_sequence",
+      "label": "Pass Sequence",
+      "start": 61,
+      "length": 1,
+      "picture": "X(1)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "sub_pass_sequence",
+      "label": "Sub-Pass Sequence",
+      "start": 62,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_065_080",
+      "label": "Not Used",
+      "start": 65,
+      "length": 16,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

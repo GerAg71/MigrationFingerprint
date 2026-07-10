@@ -175,7 +175,10 @@ def test_ebcdic_seeded_pair_matches_manifest_exactly(tmp_path):
 def test_regeneration_is_byte_identical(tmp_path):
     """Spec §25.4: deterministic generator — regeneration reproduces the
     committed sample files exactly, CSV and EBCDIC alike."""
+    from tests.datagen.restore import write_restore_samples
+
     write_samples(tmp_path / "samples")
+    write_restore_samples(tmp_path / "samples")
     committed = sorted(
         p for pattern in ("*.csv", "*.dat", "*.json")
         for p in SAMPLES.rglob(pattern)

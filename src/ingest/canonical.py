@@ -124,5 +124,20 @@ CANONICAL_DATASETS: dict[str, DatasetSpec] = {
             ("investment_code", "key"), ("price_date", "date"),
             ("price", "money"),
         ),
+        # User-defined fields (Omni->Omni restore use case): a client's custom
+        # field definitions and the per-participant values that use them. A
+        # restore silently drops values whose definitions were never created
+        # on the target - these datasets make that loss detectable.
+        _spec(
+            "udf_definitions",
+            ("plan_id", "key"), ("udf_id", "key"), ("udf_name", "text"),
+            ("record_kind", "text"), ("data_type", "text"),
+            ("max_length", "integer"),
+        ),
+        _spec(
+            "udf_values",
+            ("plan_id", "key"), ("participant_id", "key"), ("udf_id", "key"),
+            ("value", "text"),
+        ),
     )
 }

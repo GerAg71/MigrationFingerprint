@@ -1,0 +1,53 @@
+{
+  "card": "T903/01",
+  "process": "T903 FC",
+  "description": "T903/01",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_011",
+      "label": "Not Used",
+      "start": 6,
+      "length": 6,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "output_opt_print_all_fields_valued_and_unvalued",
+      "label": "Output-Opt (Print All Fields (Valued and Unvalued))",
+      "start": 12,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_013_080",
+      "label": "Not Used",
+      "start": 13,
+      "length": 68,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

@@ -33,7 +33,23 @@ TYPE_FIXTURES = [
     ("derived_recompute", "RULE-VEST-PCT-001", "vesting"),
     ("encoding_check", "RULE-ENC-001", "participants"),
     ("sort_order_check", "RULE-SORT-001", "participants"),
+    ("format_conformance", "RULE-RST-FMT-001", "participants"),
 ]
+
+
+def _rule_library() -> dict:
+    """Seed rules plus the restore fingerprint's (format_conformance lives
+    in the Omni->Omni restore pair)."""
+    import json
+
+    from src.fingerprint.models import Fingerprint
+
+    rules = load_seed_rules()
+    restore = Fingerprint.model_validate(json.loads(
+        (REPO / "data" / "fingerprints" / "omni-zos-to-omni-linux-restore"
+         / "1.0.0" / "fingerprint.json").read_text(encoding="utf-8")))
+    rules.update({r.rule_id: r for r in restore.detection_rules})
+    return rules
 
 
 @pytest.mark.parametrize("rule_type,rule_id,dataset", TYPE_FIXTURES)
@@ -46,7 +62,7 @@ def test_every_rule_type_has_a_tripping_fixture(rule_type, rule_id, dataset):
             fixture_dir / f"{side}_{dataset}.csv",
             run_id=RUN_ID, side=side, dataset_name=dataset,
         ))
-    rule = load_seed_rules()[rule_id]
+    rule = _rule_library()[rule_id]
     assert rule.type == rule_type
     assert index.missing_for_rule(rule) == []
     outcome = execute(rule, RuleDatasets.from_index(index))
@@ -61,17 +77,22 @@ def test_fixture_coverage_matches_implemented_executors():
 
 def test_every_executor_docstring_names_its_failure_modes():
     """Ch. 24.5: docstring names the failure mode(s) the rule type serves."""
+    import re
+
     import src.rules.count_balance
     import src.rules.derived_recompute
     import src.rules.encoding_check
     import src.rules.field_compare
+    import src.rules.format_conformance
     import src.rules.referential
     import src.rules.sort_order_check
 
     for module in (src.rules.field_compare, src.rules.count_balance,
                    src.rules.referential, src.rules.derived_recompute,
-                   src.rules.encoding_check, src.rules.sort_order_check):
-        assert module.__doc__ and "FM-0" in module.__doc__, module.__name__
+                   src.rules.encoding_check, src.rules.sort_order_check,
+                   src.rules.format_conformance):
+        assert module.__doc__ and re.search(r"FM-\d", module.__doc__), \
+            module.__name__
 
 
 def test_perf_smoke_200_participants_under_60s(tmp_path):

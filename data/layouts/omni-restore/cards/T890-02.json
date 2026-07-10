@@ -1,0 +1,62 @@
+{
+  "card": "T890/02",
+  "process": "T890 SC",
+  "description": "T890/02",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "denum_data_elements_de",
+      "label": "DeNum (Data Elements: De#)",
+      "start": 9,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "deval_data_elements_value",
+      "label": "DeVal (Data Elements: Value)",
+      "start": 12,
+      "length": 50,
+      "picture": "X(50)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_062_080",
+      "label": "Not Used",
+      "start": 62,
+      "length": 19,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

@@ -198,6 +198,41 @@ class SortOrderCheckParams(StrictModel):
     collation: Literal["ascii", "ebcdic"]
 
 
+PICTURE_PATTERN = (
+    r"^(S?9(\(\d+\))?(V9?(\(\d+\))?9*)?|X(\(\d+\))?)$"
+)
+
+
+class FormatField(StrictModel):
+    """Expectation for one field, expressed in the Omni Format Matrix's own
+    vocabulary (COBOL Picture + Req/Opt + Not-Used)."""
+
+    field: str
+    picture: str | None = Field(default=None, pattern=PICTURE_PATTERN)
+    required: bool = False
+    must_be_blank: bool = False  # a "Not Used" position: data here = off-label
+    domain: list[str] | None = Field(default=None, min_length=1)
+
+    @model_validator(mode="after")
+    def _has_expectation(self) -> "FormatField":
+        if not (self.picture or self.required or self.must_be_blank
+                or self.domain):
+            raise ValueError(
+                "format field must declare picture, required, must_be_blank, "
+                "or domain")
+        if self.must_be_blank and (self.required or self.picture or self.domain):
+            raise ValueError("must_be_blank excludes other expectations")
+        return self
+
+
+class FormatConformanceParams(StrictModel):
+    """Validate a single dataset against the platform's format expectation
+    model (compiled from the Omni Format Matrix)."""
+
+    side: Literal["source", "target"] = "target"
+    fields: list[FormatField] = Field(min_length=1)
+
+
 # ---------------------------------------------------------------------------
 # Detection rule envelope — discriminated union on `type` (spec §5.4, 5.8)
 # ---------------------------------------------------------------------------
@@ -275,6 +310,20 @@ class SortOrderCheckRule(RuleBase):
     params: SortOrderCheckParams
 
 
+class FormatConformanceRule(RuleBase):
+    type: Literal["format_conformance"]
+    params: FormatConformanceParams
+
+    @model_validator(mode="after")
+    def _source_side_needs_source_dataset(self) -> "FormatConformanceRule":
+        # side="source" reads the source frame; declaring source_dataset keeps
+        # the dataset gate (REQ-021) aware that the source extract is needed
+        if self.params.side == "source" and self.source_dataset is None:
+            raise ValueError(
+                'format_conformance with side "source" requires source_dataset')
+        return self
+
+
 DetectionRule = Annotated[
     Union[
         FieldCompareRule,
@@ -283,6 +332,7 @@ DetectionRule = Annotated[
         DerivedRecomputeRule,
         EncodingCheckRule,
         SortOrderCheckRule,
+        FormatConformanceRule,
     ],
     Field(discriminator="type"),
 ]

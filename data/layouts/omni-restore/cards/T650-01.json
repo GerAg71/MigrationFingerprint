@@ -1,0 +1,71 @@
+{
+  "card": "T650/01",
+  "process": "T650 Prod Mstr",
+  "description": "T650/01",
+  "record_length": 80,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "action",
+      "label": "Action",
+      "start": 9,
+      "length": 1,
+      "picture": "X(1)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "report_option",
+      "label": "Report Option",
+      "start": 10,
+      "length": 1,
+      "picture": "X(1)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "product_id",
+      "label": "Product ID",
+      "start": 11,
+      "length": 6,
+      "picture": "X(6)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_017_080",
+      "label": "Not Used",
+      "start": 17,
+      "length": 64,
+      "picture": null,
+      "required": false,
+      "filler": true
+    }
+  ]
+}

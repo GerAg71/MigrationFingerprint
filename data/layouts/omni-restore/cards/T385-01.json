@@ -1,0 +1,215 @@
+{
+  "card": "T385/01",
+  "process": "T385 Ln Pay",
+  "description": "T385/01",
+  "record_length": 52,
+  "fields": [
+    {
+      "name": "tran_code",
+      "label": "Tran-Code",
+      "start": 1,
+      "length": 3,
+      "picture": "X(3)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "seq_code",
+      "label": "Seq-Code",
+      "start": 4,
+      "length": 2,
+      "picture": "X(2)",
+      "required": true,
+      "filler": false
+    },
+    {
+      "name": "filler_006_008",
+      "label": "Not Used",
+      "start": 6,
+      "length": 3,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "pmt_date_ov_accept_payment_even_if_date_does_not_agree_with_next_payment_date",
+      "label": "Pmt-Date-Ov (Accept Payment Even if Date Does Not Agree with Next Payment Date)",
+      "start": 9,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "loan_num_loan_number",
+      "label": "Loan-Num (Loan Number)",
+      "start": 10,
+      "length": 3,
+      "picture": "X(3)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "pmt_freq_payment_frequency",
+      "label": "Pmt-Freq (Payment Frequency)",
+      "start": 13,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "pmt_amt_payment_amount",
+      "label": "Pmt-Amt (Payment Amount)",
+      "start": 14,
+      "length": 9,
+      "picture": "9(7)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "princ_amt_ov_apply_entire_payment_to_principal",
+      "label": "Princ-Amt-Ov (Apply Entire Payment to Principal)",
+      "start": 23,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "int_amt_additional_interest",
+      "label": "Int-Amt (Additional Interest)",
+      "start": 24,
+      "length": 9,
+      "picture": "9(7)V99",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "pmt_ov_payment_match_options",
+      "label": "Pmt-Ov (Payment Match Options)",
+      "start": 33,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "asof_pct_opt_as_of_allocation_flag",
+      "label": "Asof-Pct-Opt (As Of Allocation Flag)",
+      "start": 34,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "require_loan_num_loan_number_required",
+      "label": "Require-Loan-Num (Loan Number Required)",
+      "start": 35,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "usage_code_5",
+      "label": "Usage-Code-5",
+      "start": 36,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_037_040",
+      "label": "Not Used",
+      "start": 37,
+      "length": 4,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "payment_ind_discharge_the_loan",
+      "label": "Payment-Ind (Discharge the Loan)",
+      "start": 41,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "pay_er_first_ind_apply_payment_to_employer_funds_first",
+      "label": "Pay-ER-First-Ind (Apply Payment to Employer Funds First)",
+      "start": 42,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "shr_purch_ind_auto_purchase_options",
+      "label": "Shr-Purch-Ind (Auto Purchase Options)",
+      "start": 43,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "fund_list_fund_sequence_list",
+      "label": "Fund-List (Fund Sequence List)",
+      "start": 44,
+      "length": 2,
+      "picture": "X(2)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "pmt_type_codes_type",
+      "label": "Pmt-Type (Codes: Type)",
+      "start": 46,
+      "length": 2,
+      "picture": "X(2)",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "filler_048_049",
+      "label": "Not Used",
+      "start": 48,
+      "length": 2,
+      "picture": null,
+      "required": false,
+      "filler": true
+    },
+    {
+      "name": "msg_arrears_loan_in_arrears",
+      "label": "Msg-Arrears (Loan in Arrears)",
+      "start": 50,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "msg_back_pmts_back_payments_made",
+      "label": "Msg-Back-Pmts (Back Payments Made)",
+      "start": 51,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    },
+    {
+      "name": "msg_adv_pmts_advance_payments_made",
+      "label": "Msg-Adv-Pmts (Advance Payments Made)",
+      "start": 52,
+      "length": 1,
+      "picture": "X",
+      "required": false,
+      "filler": false
+    }
+  ]
+}

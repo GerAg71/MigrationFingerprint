@@ -1,0 +1,7 @@
+plan_id,udf_id,udf_name,record_kind,data_type,max_length
+PLN-R001,UDF-01,union_code,PARTICIPANT,X(7),7
+PLN-R001,UDF-02,branch_code,PARTICIPANT,X(7),7
+PLN-R001,UDF-03,review_date,PARTICIPANT,9(8),8
+PLN-R002,UDF-01,union_code,PARTICIPANT,X(7),7
+PLN-R002,UDF-02,branch_code,PARTICIPANT,X(7),7
+PLN-R002,UDF-03,review_date,PARTICIPANT,9(8),8

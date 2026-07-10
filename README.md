@@ -34,6 +34,7 @@ Session rules for Claude Code: `CLAUDE.md`.
 | Phase 4.1 | Exception workflow (Ch. 15): assign/comment/resolve/close, audit trail, exception register | ✅ done |
 | Phase 4.2 | AI Orchestration Layer (Ch. 8/27) with local stub provider; `explain` CLI/API/UI | ✅ done |
 | Phase 4.3 | Sign-off package (§13.4): certification + metrics vs §2.6 targets + closure evidence, zip + manifest | ✅ done |
+| Phase 4.4 | Omni→Omni restore use case: `compile-matrix` (Format Matrix → card layouts + COBOL decks), `format_conformance` rule type, UDF datasets, restore fingerprint + sample pairs | ✅ done |
 
 ## Setup
 
@@ -49,6 +50,11 @@ CLI (CLI_SPEC.md; exit codes 0 ok / 1 runtime / 3 validation refusal):
 ```
 uv run fingerprint validate data/fingerprints/omni-zos-to-omni-linux/1.0.0/fingerprint.json
 uv run fingerprint suite --pair omni-zos-to-omni-linux [--version 1.0.0] [--json]
+uv run fingerprint compile-matrix docs/Omni_Format_Matrix_Complete.xlsx \
+    --out data/layouts/omni-restore --decks   # Omni->Omni restore toolchain
+uv run fingerprint run --pair omni-zos-to-omni-linux-restore \
+    --source-dir data/samples/source/PLN-REST-SEED-01 \
+    --target-dir data/samples/target/PLN-REST-SEED-01
 uv run fingerprint run --pair omni-zos-to-omni-linux \
     --source-dir data/samples/source/PLN-SEED-01 \
     --target-dir data/samples/target/PLN-SEED-01 \
