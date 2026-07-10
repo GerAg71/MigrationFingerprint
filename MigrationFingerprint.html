@@ -620,6 +620,8 @@ const cues = chapters.map((c,i)=>{
   return a;
 });
 let audioOn = true;
+const GAP_MS = 450;   /* breather between sections once narration ends */
+let gapUntil = 0;
 function playCue(i, offsetMs=0){
   cues.forEach(a=>a.pause());
   if(!audioOn || !playing || i<0) return;
@@ -648,7 +650,7 @@ let t=0, playing=false, speed=1, curCh=-1, fired=new Set(), pending=[], last=0;
 function clearPending(){ pending.forEach(clearTimeout); pending=[]; }
 
 function enterChapter(i){
-  curCh=i; clearPending(); fired=new Set();
+  curCh=i; clearPending(); fired=new Set(); gapUntil=0;
   toast.classList.remove('show');
   chapters[i].build();
   document.getElementById('scenelabel').textContent = chapters[i].label.toUpperCase();
@@ -661,6 +663,24 @@ function tick(now){
   const dt = Math.min(now-last, 120); last=now;
   if(!playing) return;
   t += dt*speed;
+
+  /* audio-gated transitions: never cut a cue mid-sentence. If the clock
+     reaches a chapter boundary while its narration is still playing
+     (e.g. the file started late over the network), hold the last frame
+     until the cue ends — then breathe for GAP_MS before moving on. */
+  if(curCh>=0 && audioOn){
+    const bound = starts[curCh]+chapters[curCh].dur;
+    if(t >= bound-1){
+      const a = cues[curCh];
+      if(a && !a.ended && !a.paused){
+        t = bound-1; gapUntil = 0;          /* still talking — hold */
+      } else if(a && a.ended){
+        if(!gapUntil) gapUntil = now + GAP_MS;
+        if(now < gapUntil) t = bound-1;      /* short pause after the cue */
+      }
+    }
+  }
+
   if(t>=TOTAL){ t=TOTAL; setPlaying(false); }
 
   // chapter boundary
