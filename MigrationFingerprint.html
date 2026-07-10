@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAPTIVA™ Migration Fingerprint™ — Guided UI Demo</title>
+<style>
+  :root{
+    --navy:#0D2440; --deep:#081A30; --teal:#1F8A7D; --mint:#7FD4C4;
+    --paper:#F4F7FB; --card:#FFFFFF; --ink:#16324F; --slate:#5B7086;
+    --line:#DCE5EF; --pass:#1E9E6A; --fail:#D64545;
+    --sev-crit:#B91C1C; --sev-high:#EA580C; --sev-med:#D97E06; --sev-low:#94A3B8;
+    --mono:ui-monospace,'Cascadia Code','SF Mono',Consolas,monospace;
+    --sans:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:radial-gradient(1200px 700px at 70% -10%, #14304F 0%, var(--deep) 55%);
+    font-family:var(--sans); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; padding:22px;
+  }
+  .theater{width:min(1180px,100%);}
+
+  .marquee{display:flex;align-items:center;gap:12px;color:#C9D6E8;margin:0 4px 12px}
+  .marquee svg{width:30px;height:30px;flex:none}
+  .marquee .t{font-size:13px;letter-spacing:.14em;font-family:var(--mono);color:var(--mint)}
+  .marquee .s{font-size:12.5px;color:#8FA6C2;margin-left:auto;font-family:var(--mono)}
+
+  /* ===== screen ===== */
+  .screen{
+    position:relative; background:var(--paper); border-radius:14px; overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08);
+    aspect-ratio:16/9.6; min-height:560px;
+  }
+  .app{position:absolute; inset:0; display:grid; grid-template-columns:196px 1fr; grid-template-rows:46px 1fr;}
+
+  .topbar{grid-column:1/3; background:var(--navy); color:#fff; display:flex; align-items:center; gap:10px; padding:0 16px;}
+  .topbar svg{width:22px;height:22px}
+  .topbar .brand{font-size:13px;letter-spacing:.06em}
+  .topbar .brand b{color:var(--mint);font-weight:600}
+  .topbar .env{margin-left:auto;font-family:var(--mono);font-size:10.5px;background:rgba(127,212,196,.14);color:var(--mint);padding:3px 9px;border-radius:99px}
+  .topbar .user{width:26px;height:26px;border-radius:50%;background:var(--teal);display:grid;place-items:center;font-size:11px;font-weight:600}
+
+  .sidenav{background:#0F2B4C;color:#B9C8DC;padding:14px 0;font-size:12.5px}
+  .sidenav .nav{display:flex;align-items:center;gap:9px;padding:9px 18px;cursor:default;border-left:3px solid transparent;transition:all .3s}
+  .sidenav .nav .dot{width:7px;height:7px;border-radius:2px;background:#40628C;flex:none;transition:background .3s}
+  .sidenav .nav.on{background:rgba(127,212,196,.10);color:#fff;border-left-color:var(--mint)}
+  .sidenav .nav.on .dot{background:var(--mint)}
+
+  .stage{position:relative;overflow:hidden}
+  .pane{position:absolute;inset:0;padding:20px 24px;opacity:0;transform:translateY(10px);transition:opacity .45s,transform .45s;overflow:hidden}
+  .pane.show{opacity:1;transform:none}
+
+  .crumb{font-family:var(--mono);font-size:10.5px;color:var(--slate);letter-spacing:.08em;margin-bottom:4px}
+  .ptitle{font-size:19px;color:var(--navy);font-weight:650;display:flex;align-items:center;gap:10px}
+  .vbadge{font-family:var(--mono);font-size:10.5px;background:#E4EEF9;color:#28527F;padding:3px 9px;border-radius:99px;transition:all .3s}
+  .vbadge.bump{background:#DDF3EA;color:var(--pass);transform:scale(1.12)}
+  .psub{font-size:12.5px;color:var(--slate);margin-top:3px}
+
+  /* library cards */
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+  .pcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;transition:all .3s;opacity:0;transform:translateY(12px)}
+  .pcard.in{opacity:1;transform:none}
+  .pcard.hot{border-color:var(--teal);box-shadow:0 8px 24px rgba(31,138,125,.18);transform:translateY(-2px)}
+  .pcard .pair{font-size:14.5px;font-weight:650;color:var(--navy);display:flex;align-items:center;gap:8px}
+  .pcard .arr{color:var(--teal);font-weight:700}
+  .pcard .meta{display:flex;gap:14px;margin-top:10px;font-family:var(--mono);font-size:10.5px;color:var(--slate)}
+  .pcard .meta b{color:var(--ink);font-size:13px;display:block;margin-bottom:1px}
+  .pcard .foot{margin-top:12px;display:flex;align-items:center;gap:8px}
+  .btn{font-size:11.5px;font-weight:600;padding:6px 13px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);transition:all .2s}
+  .btn.pri{background:var(--teal);border-color:var(--teal);color:#fff}
+  .btn.flash{box-shadow:0 0 0 4px rgba(31,138,125,.25)}
+
+  /* suite table */
+  .tbl{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-top:14px;overflow:hidden}
+  .trow{display:grid;grid-template-columns:34px 150px 1fr 140px 76px 70px;gap:10px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--line);font-size:12px;opacity:0;transform:translateX(-14px);transition:opacity .4s,transform .4s,background .3s}
+  .trow.in{opacity:1;transform:none}
+  .trow.head{opacity:1;transform:none;background:#F0F5FB;font-family:var(--mono);font-size:10px;color:var(--slate);letter-spacing:.08em;padding:7px 14px}
+  .trow:last-child{border-bottom:none}
+  .ord{font-family:var(--mono);font-size:11px;color:var(--teal);font-weight:700}
+  .rid{font-family:var(--mono);font-size:10.5px;color:var(--slate)}
+  .fmname{color:var(--ink);font-weight:600}
+  .fmname small{display:block;font-weight:400;color:var(--slate);font-size:10.5px}
+  .bar{height:7px;border-radius:99px;background:#EAF0F7;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--mint));border-radius:99px;transition:width .9s cubic-bezier(.2,.7,.2,1)}
+  .score{font-family:var(--mono);font-size:11.5px;color:var(--navy);font-weight:700;text-align:right}
+  .sev{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;padding:3px 8px;border-radius:99px;text-align:center;color:#fff}
+  .sev.HIGH{background:var(--sev-high)}.sev.MEDIUM{background:var(--sev-med)}.sev.CRITICAL{background:var(--sev-crit)}.sev.LOW{background:var(--sev-low)}
+  .outc{font-family:var(--mono);font-size:10.5px;font-weight:700;text-align:center;border-radius:6px;padding:3px 0;background:#EEF3F9;color:#93A7BC;transition:all .3s}
+  .outc.run{background:#FFF6E0;color:#B07A00}
+  .outc.pass{background:#DDF3EA;color:var(--pass)}
+  .outc.fail{background:#FBE3E3;color:var(--fail)}
+
+  /* scoreboard */
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 16px;opacity:0;transform:translateY(10px);transition:all .4s}
+  .tile.in{opacity:1;transform:none}
+  .tile .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--slate)}
+  .tile b{display:block;font-size:26px;margin-top:2px;color:var(--navy);font-variant-numeric:tabular-nums}
+  .tile.g b{color:var(--pass)} .tile.r b{color:var(--fail)}
+  .sevmix{display:flex;height:9px;border-radius:99px;overflow:hidden;margin-top:12px;background:#EAF0F7}
+  .sevmix i{display:block;height:100%;width:0;transition:width .8s}
+
+  /* findings */
+  .frow{display:grid;grid-template-columns:88px 1fr 92px 110px 150px;gap:10px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--line);font-size:12px;opacity:0;transform:translateX(-14px);transition:all .4s;background:#fff}
+  .frow.in{opacity:1;transform:none}
+  .frow.hot{background:#F2FAF8;box-shadow:inset 3px 0 0 var(--teal)}
+  .fid{font-family:var(--mono);font-size:10.5px;color:var(--slate)}
+  .rec{font-family:var(--mono);font-size:11.5px;text-align:right;color:var(--navy);font-weight:700}
+  .acts{display:flex;gap:6px;justify-content:flex-end}
+  .chip{font-size:10px;font-weight:700;padding:4px 9px;border-radius:7px;border:1px solid var(--line);background:#fff;color:var(--slate);transition:all .25s}
+  .chip.ok.on{background:var(--pass);border-color:var(--pass);color:#fff}
+  .chip.fp.on{background:#8393A6;border-color:#8393A6;color:#fff}
+  .status{font-family:var(--mono);font-size:9.5px;font-weight:700;padding:3px 8px;border-radius:99px;background:#FFF6E0;color:#B07A00;text-align:center;transition:all .3s}
+  .status.confirmed{background:#DDF3EA;color:var(--pass)}
+  .status.falsepos{background:#EDF1F6;color:#7B8DA3}
+
+  /* drill-down */
+  .drill{background:var(--card);border:1px solid var(--teal);border-radius:12px;margin-top:12px;padding:14px 16px;opacity:0;transform:translateY(12px);transition:all .45s}
+  .drill.in{opacity:1;transform:none}
+  .drill h4{font-size:13px;color:var(--navy)}
+  .drill .rem{font-size:11.5px;color:var(--slate);margin-top:4px}
+  .mini{width:100%;border-collapse:collapse;margin-top:10px;font-family:var(--mono);font-size:11px}
+  .mini th{text-align:left;font-size:9.5px;letter-spacing:.08em;color:var(--slate);padding:5px 8px;background:#F0F5FB;font-weight:600}
+  .mini td{padding:6px 8px;border-top:1px solid var(--line);color:var(--ink)}
+  .mini td.neg{color:var(--fail);font-weight:700}
+
+  /* learning history */
+  .lgrid{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-top:14px}
+  .lcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;opacity:0;transform:translateY(10px);transition:all .4s}
+  .lcard.in{opacity:1;transform:none}
+  .lcard h4{font-size:12.5px;color:var(--navy);margin-bottom:8px}
+  .levent{display:flex;align-items:center;gap:9px;font-size:11.5px;padding:7px 0;border-top:1px solid var(--line);opacity:0;transition:opacity .4s}
+  .levent.in{opacity:1}
+  .levent .lk{font-family:var(--mono);font-size:10px;color:var(--slate);width:62px;flex:none}
+  .levent .delta{margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:700}
+  .up{color:var(--pass)} .dn{color:#7B8DA3}
+  .spark{stroke:var(--teal);stroke-width:2;fill:none;stroke-dasharray:300;stroke-dashoffset:300;transition:stroke-dashoffset 1.4s ease}
+  .spark.go{stroke-dashoffset:0}
+
+  /* toast */
+  .toast{position:absolute;right:20px;top:16px;background:var(--navy);color:#fff;border-radius:10px;padding:11px 15px;font-size:12px;box-shadow:0 14px 34px rgba(0,0,0,.35);opacity:0;transform:translateY(-8px);transition:all .35s;max-width:320px;z-index:40}
+  .toast.show{opacity:1;transform:none}
+  .toast b{color:var(--mint)}
+  .toast .tt{font-family:var(--mono);font-size:10px;color:#9FB4CE;letter-spacing:.08em;margin-bottom:3px}
+
+  /* full-screen cards (intro / outro) */
+  .cover{position:absolute;inset:0;background:linear-gradient(150deg,#0F2B4C 0%,var(--navy) 60%,#0A1E38 100%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;opacity:0;transition:opacity .6s;z-index:30;pointer-events:none}
+  .cover.show{opacity:1}
+  .cover svg{width:88px;height:88px;margin-bottom:18px;opacity:.95}
+  .cover .eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;color:var(--mint)}
+  .cover h1{font-size:30px;font-weight:650;margin-top:10px;max-width:20ch;line-height:1.25}
+  .cover p{color:#B9C8DC;font-size:14px;margin-top:12px;max-width:56ch}
+  .cover .recap{font-family:var(--mono);font-size:12px;color:#D7E3F4;margin-top:16px;line-height:2;text-align:left}
+  .cover .recap b{color:var(--mint)}
+
+  /* cursor */
+  #cursor{position:absolute;width:22px;height:22px;z-index:60;pointer-events:none;left:50%;top:60%;transition:left 1s cubic-bezier(.3,.7,.3,1),top 1s cubic-bezier(.3,.7,.3,1),opacity .3s;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+  #cursor.hide{opacity:0}
+  .ripple{position:absolute;width:36px;height:36px;border:2.5px solid var(--mint);border-radius:50%;z-index:59;pointer-events:none;animation:rip .55s ease-out forwards}
+  @keyframes rip{from{transform:scale(.25);opacity:.95}to{transform:scale(1.5);opacity:0}}
+
+  /* caption + player */
+  .caption{position:absolute;left:0;right:0;bottom:56px;display:flex;justify-content:center;z-index:45;pointer-events:none}
+  .caption span{background:rgba(8,26,48,.88);color:#fff;font-size:13.5px;padding:9px 18px;border-radius:99px;box-shadow:0 8px 24px rgba(0,0,0,.3);opacity:0;transform:translateY(8px);transition:all .35s;max-width:86%}
+  .caption span.show{opacity:1;transform:none}
+  .caption b{color:var(--mint);font-weight:600}
+
+  .player{position:absolute;left:0;right:0;bottom:0;height:56px;background:rgba(8,26,48,.94);backdrop-filter:blur(6px);display:flex;align-items:center;gap:14px;padding:0 18px;z-index:50}
+  .pbtn{width:34px;height:34px;border-radius:50%;border:none;background:var(--teal);color:#fff;font-size:14px;cursor:pointer;display:grid;place-items:center;flex:none;transition:transform .15s}
+  .pbtn:hover{transform:scale(1.07)}
+  .pbtn.ghost{background:rgba(255,255,255,.12);font-size:12px}
+  .track{flex:1;display:flex;flex-direction:column;gap:5px}
+  .rail{position:relative;height:6px;background:rgba(255,255,255,.14);border-radius:99px;cursor:pointer}
+  .rail .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--teal),var(--mint));border-radius:99px}
+  .rail .tick{position:absolute;top:-2px;width:2px;height:10px;background:rgba(255,255,255,.4);border-radius:1px}
+  .chaps{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:#8FA6C2;letter-spacing:.04em}
+  .chaps span{cursor:pointer;transition:color .2s;white-space:nowrap}
+  .chaps span:hover,.chaps span.on{color:var(--mint)}
+  .clock{font-family:var(--mono);font-size:11px;color:#C9D6E8;flex:none;min-width:86px;text-align:right}
+  .spd{border:1px solid rgba(255,255,255,.2);background:transparent;color:#C9D6E8;font-family:var(--mono);font-size:10.5px;border-radius:7px;padding:5px 8px;cursor:pointer;flex:none}
+
+  @media (max-width:860px){
+    .app{grid-template-columns:56px 1fr}
+    .sidenav .nav span.lbl{display:none}
+    .cards{grid-template-columns:1fr}
+    .trow{grid-template-columns:26px 1fr 90px 60px}
+    .trow .rid,.trow .barwrap{display:none}
+    .frow{grid-template-columns:70px 1fr 70px 100px}
+    .frow .acts{display:none}
+    .tiles{grid-template-columns:repeat(2,1fr)}
+    .lgrid{grid-template-columns:1fr}
+    .chaps span:nth-child(even){display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition-duration:.01ms !important;animation-duration:.01ms !important}
+  }
+</style>
+</head>
+<body>
+<div class="theater">
+  <div class="marquee">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="#7FD4C4" stroke-width="4" stroke-linecap="round"><path d="M50 88 C 26 88 14 68 14 50 C 14 28 30 12 50 12 C 70 12 86 28 86 50"/><path d="M50 76 C 34 76 26 62 26 50 C 26 35 37 24 50 24 C 63 24 74 35 74 50 C 74 58 70 64 63 64"/><path d="M50 64 C 42 64 38 57 38 50 C 38 42 43 36 50 36 C 57 36 62 42 62 50"/></g></svg>
+    <span class="t">MAPTIVA™ · MIGRATION FINGERPRINT™ · GUIDED UI DEMO</span>
+    <span class="s" id="scenelabel">—</span>
+  </div>
+
+  <div class="screen" id="screen">
+    <div class="app">
+      <div class="topbar">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="#7FD4C4" stroke-width="5" stroke-linecap="round"><path d="M50 88 C 26 88 14 68 14 50 C 14 28 30 12 50 12 C 70 12 86 28 86 50"/><path d="M50 76 C 34 76 26 62 26 50 C 26 35 37 24 50 24 C 63 24 74 35 74 50 C 74 58 70 64 63 64"/></g></svg>
+        <span class="brand">MAPTIVA <b>Migration Fingerprint</b></span>
+        <span class="env">POC · LOCAL</span>
+        <span class="user">AK</span>
+      </div>
+      <nav class="sidenav" id="sidenav">
+        <div class="nav" data-n="dash"><span class="dot"></span><span class="lbl">Dashboard</span></div>
+        <div class="nav" data-n="lib"><span class="dot"></span><span class="lbl">Fingerprint Library</span></div>
+        <div class="nav" data-n="runs"><span class="dot"></span><span class="lbl">Runs</span></div>
+        <div class="nav" data-n="find"><span class="dot"></span><span class="lbl">Findings Queue</span></div>
+        <div class="nav" data-n="rep"><span class="dot"></span><span class="lbl">Reports</span></div>
+        <div class="nav" data-n="learn"><span class="dot"></span><span class="lbl">Learning History</span></div>
+        <div class="nav" data-n="admin"><span class="dot"></span><span class="lbl">Admin</span></div>
+      </nav>
+      <div class="stage" id="stage"></div>
+    </div>
+
+    <div class="cover" id="cover"></div>
+    <div class="toast" id="toast"></div>
+
+    <svg id="cursor" viewBox="0 0 24 24"><path d="M4 2 L20 12 L12.5 13.5 L9 21 Z" fill="#fff" stroke="#0D2440" stroke-width="1.6" stroke-linejoin="round"/></svg>
+
+    <div class="caption"><span id="cap"></span></div>
+
+    <div class="player">
+      <button class="pbtn ghost" id="restart" title="Restart" aria-label="Restart">⟲</button>
+      <button class="pbtn" id="play" title="Play / pause" aria-label="Play or pause">▶</button>
+      <div class="track">
+        <div class="rail" id="rail"><div class="fill" id="fill"></div></div>
+        <div class="chaps" id="chaps"></div>
+      </div>
+      <button class="spd" id="spd">1×</button>
+      <span class="clock" id="clock">0:00 / 0:00</span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   MAPTIVA Migration Fingerprint — self-playing UI demo
+   A master-clock timeline drives scene builds, cursor motion,
+   captions and UI state changes. Chapters are seekable.
+   ============================================================ */
+
+const stage  = document.getElementById('stage');
+const cover  = document.getElementById('cover');
+const cap    = document.getElementById('cap');
+const toast  = document.getElementById('toast');
+const cursor = document.getElementById('cursor');
+const screenEl = document.getElementById('screen');
+
+/* ---------- data ---------- */
+const SUITE_ZOS = [
+  ['RULE-LOAN-BAL-001','FM-001','Loan balance carry-over','LOANS',0.63,'HIGH'],
+  ['RULE-VEST-PCT-001','FM-002','Vesting schedule mapping','VESTING',0.55,'HIGH'],
+  ['RULE-PKD-DEC-001','FM-006','Packed-field decode','ENCODING',0.47,'HIGH'],
+  ['RULE-CALC-PROV-001','FM-003','Custom calculated fields','PLAN',0.41,'MEDIUM'],
+  ['RULE-PROV-MAT-001','FM-004','Plan-provision mismatches','PLAN',0.40,'MEDIUM'],
+  ['RULE-ENC-ART-001','FM-005','EBCDIC sort & encoding','ENCODING',0.33,'MEDIUM'],
+];
+const SUITE_TRAC = [
+  ['RULE-PROV-MAP-101','FM-101','Provision model translation','PLAN',0.58,'HIGH'],
+  ['RULE-MONEY-TYP-101','FM-102','Money-type mapping','BALANCES',0.52,'HIGH'],
+  ['RULE-STAT-MAP-101','FM-103','Participant status mapping','PARTICIPANT',0.44,'MEDIUM'],
+  ['RULE-SRC-SPLIT-101','FM-104','Contribution source split','CONTRIB',0.38,'MEDIUM'],
+  ['RULE-INV-MAP-101','FM-105','Investment lineup mapping','INVEST',0.31,'MEDIUM'],
+];
+const FINDINGS = [
+  ['F-0001','FM-001','Loan balance carry-over',247,'HIGH'],
+  ['F-0002','FM-002','Vesting schedule mapping',58,'HIGH'],
+  ['F-0003','FM-006','Packed-field decode',312,'HIGH'],
+  ['F-0004','FM-003','Custom calculated fields',41,'MEDIUM'],
+  ['F-0005','FM-004','Plan-provision mismatches',9,'MEDIUM'],
+  ['F-0006','FM-005','EBCDIC sort & encoding',842,'MEDIUM'],
+];
+
+/* ---------- render helpers ---------- */
+const fmt = n => n.toLocaleString('en-US');
+
+function setNav(key){
+  document.querySelectorAll('#sidenav .nav').forEach(n=>n.classList.toggle('on', n.dataset.n===key));
+}
+
+function paneOpen(html){
+  stage.innerHTML = '<div class="pane">'+html+'</div>';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>stage.firstChild.classList.add('show')));
+}
+
+function suiteRows(suite, withOutcome){
+  return suite.map((r,i)=>`
+    <div class="trow" data-i="${i}">
+      <span class="ord">${String(i+1).padStart(2,'0')}</span>
+      <span class="rid">${r[0]}</span>
+      <span class="fmname">${r[2]}<small>${r[1]} · ${r[3]}</small></span>
+      <span class="barwrap"><span class="bar"><i data-w="${r[4]*100}"></i></span></span>
+      <span class="score">${r[4].toFixed(2)}</span>
+      ${withOutcome ? `<span class="outc" data-o="${i}">QUEUED</span>` : `<span class="sev ${r[5]}">${r[5]}</span>`}
+    </div>`).join('');
+}
+
+function sceneLibrary(){
+  setNav('lib');
+  paneOpen(`
+    <div class="crumb">FINGERPRINT LIBRARY</div>
+    <div class="ptitle">Platform pairs</div>
+    <div class="psub">Every pair carries its own versioned fingerprint — the codified failure signature of that migration.</div>
+    <div class="cards">
+      <div class="pcard" id="card-zos">
+        <div class="pair">Omni z/OS <span class="arr">→</span> Omni Linux</div>
+        <div class="meta"><span><b>v1.0.0</b>fingerprint</span><span><b>18</b>failure modes</span><span><b>23</b>detection rules</span></div>
+        <div class="foot"><button class="btn pri" id="btn-open-zos">Open fingerprint</button><button class="btn">New run</button></div>
+      </div>
+      <div class="pcard" id="card-trac">
+        <div class="pair">Omni <span class="arr">→</span> TRAC</div>
+        <div class="meta"><span><b>v0.9.0</b>fingerprint</span><span><b>12</b>failure modes</span><span><b>15</b>detection rules</span></div>
+        <div class="foot"><button class="btn pri" id="btn-open-trac">Open fingerprint</button><button class="btn">New run</button></div>
+      </div>
+    </div>`);
+}
+
+function sceneSuite(pair, suite, ver){
+  setNav('lib');
+  paneOpen(`
+    <div class="crumb">FINGERPRINT LIBRARY / ${pair.toUpperCase()} / PRIORITIZED SUITE</div>
+    <div class="ptitle">${pair} <span class="vbadge" id="vb">${ver}</span></div>
+    <div class="psub">The suite orders itself by probability × impact — <b>targeted, not generic</b>. Frozen as an immutable snapshot with every run.</div>
+    <div class="tbl">
+      <div class="trow head"><span>#</span><span>RULE</span><span>FAILURE MODE</span><span>PRIORITY</span><span class="score">SCORE</span><span style="text-align:center">SEVERITY</span></div>
+      ${suiteRows(suite,false)}
+    </div>`);
+}
+
+function sceneRun(runId, kind){
+  setNav('runs');
+  paneOpen(`
+    <div class="crumb">RUNS / ${runId}</div>
+    <div class="ptitle">${runId} <span class="vbadge">v1.0.0</span></div>
+    <div class="psub">Omni z/OS → Omni Linux · ${kind} plan pair · datasets registered & content-hashed on both sides</div>
+    <div class="tiles">
+      <div class="tile" id="t-run"><span class="k">RULES RUN</span><b id="n-run">0</b></div>
+      <div class="tile g" id="t-pass"><span class="k">PASSED</span><b id="n-pass">0</b></div>
+      <div class="tile r" id="t-fail"><span class="k">FAILED</span><b id="n-fail">0</b></div>
+      <div class="tile" id="t-rec"><span class="k">RECORDS AFFECTED</span><b id="n-rec">0</b></div>
+    </div>
+    <div class="sevmix" id="sevmix">
+      <i style="background:var(--sev-high)"></i><i style="background:var(--sev-med)"></i><i style="background:var(--pass)"></i>
+    </div>
+    <div class="tbl">
+      <div class="trow head"><span>#</span><span>RULE</span><span>FAILURE MODE</span><span>PRIORITY</span><span class="score">SCORE</span><span style="text-align:center">OUTCOME</span></div>
+      ${suiteRows(SUITE_ZOS,true)}
+    </div>`);
+}
+
+function sceneFindings(){
+  setNav('find');
+  paneOpen(`
+    <div class="crumb">RUNS / RUN-2026-07-09-0002 / FINDINGS</div>
+    <div class="ptitle">Findings — priority order <span class="vbadge">6 open</span></div>
+    <div class="psub">Every finding carries record-level drill-down, remediation guidance, and review actions.</div>
+    <div class="tbl" id="ftbl">
+      ${FINDINGS.map((f,i)=>`
+      <div class="frow" data-f="${i}">
+        <span class="fid">${f[0]}<br>${f[1]}</span>
+        <span class="fmname">${f[2]}</span>
+        <span class="rec">${fmt(f[3])}</span>
+        <span class="status" data-s="${i}">OPEN</span>
+        <span class="acts"><button class="chip ok" data-ok="${i}">Confirm</button><button class="chip fp" data-fp="${i}">False +</button></span>
+      </div>`).join('')}
+    </div>
+    <div class="drill" id="drill">
+      <h4>F-0001 · Loan balance carry-over · RULE-LOAN-BAL-001 · <span style="color:var(--sev-high)">HIGH</span> · 247 records</h4>
+      <div class="rem">Remediation: recompute amortization from origination; verify payment-application order and accrual basis.</div>
+      <table class="mini">
+        <tr><th>PLAN</th><th>PARTICIPANT</th><th>LOAN</th><th>SOURCE</th><th>TARGET</th><th>DELTA</th></tr>
+        <tr><td>PLN-4402</td><td>900-41-8827</td><td>L-01</td><td>12,847.63</td><td>12,791.02</td><td class="neg">−56.61</td></tr>
+        <tr><td>PLN-4402</td><td>900-77-3140</td><td>L-02</td><td>6,420.19</td><td>6,388.54</td><td class="neg">−31.65</td></tr>
+        <tr><td>PLN-4415</td><td>900-23-5561</td><td>L-01</td><td>18,002.40</td><td>17,940.87</td><td class="neg">−61.53</td></tr>
+      </table>
+    </div>`);
+}
+
+function sceneLearning(){
+  setNav('learn');
+  paneOpen(`
+    <div class="crumb">LEARNING HISTORY / OMNI Z/OS → OMNI LINUX</div>
+    <div class="ptitle">The fingerprint just got smarter <span class="vbadge" id="vb">v1.0.0</span></div>
+    <div class="psub">Reviews write back to the fingerprint. Probabilities move, a new version publishes, and every learning event is replayable.</div>
+    <div class="lgrid">
+      <div class="lcard" id="lc1">
+        <h4>Learning events — RUN-2026-07-09-0002</h4>
+        <div class="levent" data-e="0"><span class="lk">FM-001</span><span>Confirmed · Loan balance carry-over</span><span class="delta up">0.70 → 0.72 ▲</span></div>
+        <div class="levent" data-e="1"><span class="lk">FM-002</span><span>Confirmed · Vesting schedule mapping</span><span class="delta up">0.65 → 0.67 ▲</span></div>
+        <div class="levent" data-e="2"><span class="lk">FM-005</span><span>False positive · EBCDIC sort & encoding</span><span class="delta dn">0.60 → 0.56 ▼</span></div>
+      </div>
+      <div class="lcard" id="lc2">
+        <h4>FM-001 probability over time</h4>
+        <svg viewBox="0 0 260 90" width="100%" height="90">
+          <line x1="0" y1="80" x2="260" y2="80" stroke="#DCE5EF"/>
+          <path class="spark" id="spark" d="M8 46 L60 46 L110 44 L160 44 L210 40 L250 30"/>
+          <circle cx="250" cy="30" r="4" fill="#1F8A7D"/>
+          <text x="216" y="20" font-size="10" font-family="var(--mono)" fill="#1E9E6A">0.72</text>
+        </svg>
+        <div class="levent in" style="border-top:none"><span class="lk">VERSION</span><span>Patch published from review session</span><span class="delta up" id="verline">v1.0.0 → v1.0.1</span></div>
+      </div>
+    </div>`);
+}
+
+/* ---------- cursor & effects ---------- */
+function cursorTo(sel, dur=900, dx=0, dy=0){
+  const el = typeof sel==='string' ? document.querySelector(sel) : sel;
+  if(!el) return;
+  const r = el.getBoundingClientRect(), s = screenEl.getBoundingClientRect();
+  cursor.style.transitionDuration = dur+'ms, '+dur+'ms, .3s';
+  cursor.style.left = (r.left - s.left + r.width/2 + dx)+'px';
+  cursor.style.top  = (r.top  - s.top  + r.height/2 + dy)+'px';
+}
+function clickFx(){
+  const rip = document.createElement('div');
+  rip.className='ripple';
+  rip.style.left = (parseFloat(cursor.style.left||'0')-18)+'px';
+  rip.style.top  = (parseFloat(cursor.style.top ||'0')-18)+'px';
+  screenEl.appendChild(rip);
+  setTimeout(()=>rip.remove(),600);
+}
+function say(html){
+  cap.classList.remove('show');
+  setTimeout(()=>{ cap.innerHTML = html; cap.classList.add('show'); },180);
+}
+function toastMsg(title, html, ms=2600){
+  toast.innerHTML = '<div class="tt">'+title+'</div>'+html;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'), ms);
+}
+function coverShow(html){ cover.innerHTML = html; cover.classList.add('show'); }
+function coverHide(){ cover.classList.remove('show'); }
+function countTo(id, target, steps=8){
+  const el = document.getElementById(id); if(!el) return;
+  let i=0; const iv=setInterval(()=>{ i++; el.textContent = fmt(Math.round(target*i/steps)); if(i>=steps) clearInterval(iv); }, 70);
+}
+
+const LOGO = '<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="#7FD4C4" stroke-width="3.5" stroke-linecap="round"><path d="M50 88 C 26 88 14 68 14 50 C 14 28 30 12 50 12 C 70 12 86 28 86 50"/><path d="M50 76 C 34 76 26 62 26 50 C 26 35 37 24 50 24 C 63 24 74 35 74 50 C 74 58 70 64 63 64"/><path d="M50 64 C 42 64 38 57 38 50 C 38 42 43 36 50 36 C 57 36 62 42 62 50"/></g></svg>';
+
+/* ---------- chapters (relative-time events) ---------- */
+const chapters = [
+{ id:'intro', label:'Intro', dur:5200, build(){
+    setNav('dash'); stage.innerHTML=''; cursor.classList.add('hide'); say('');
+    coverShow(`${LOGO}<div class="eyebrow">MAPTIVA™ · MIGRATION FINGERPRINT™</div>
+      <h1>Every migration has a fingerprint. Watch this application read one.</h1>
+      <p>A guided walk through the five-step demo — from fingerprint library to a learning loop that makes the next conversion safer than the last.</p>`);
+  }, ev:[
+    [4400, ()=>coverHide()],
+  ]},
+
+{ id:'library', label:'1 · Library', dur:11000, build(){
+    sceneLibrary(); cursor.classList.remove('hide');
+  }, ev:[
+    [300,  ()=>say('<b>Step 1 — the Fingerprint Library.</b> Every platform pair carries its own versioned failure signature.')],
+    [600,  ()=>document.getElementById('card-zos')?.classList.add('in')],
+    [900,  ()=>document.getElementById('card-trac')?.classList.add('in')],
+    [2200, ()=>cursorTo('#card-zos',1100)],
+    [3400, ()=>document.getElementById('card-zos')?.classList.add('hot')],
+    [4200, ()=>say('Omni z/OS → Omni Linux: <b>18 failure modes, 23 detection rules</b>, learned from real conversions.')],
+    [7200, ()=>cursorTo('#btn-open-zos',800)],
+    [8200, ()=>{ clickFx(); document.getElementById('btn-open-zos')?.classList.add('flash'); }],
+  ]},
+
+{ id:'suite', label:'2 · Suite', dur:12500, build(){
+    sceneSuite('Omni z/OS → Omni Linux', SUITE_ZOS, 'v1.0.0');
+  }, ev:[
+    [300,  ()=>say('<b>The prioritized suite</b> — ordered by what <b>this</b> migration actually breaks. Targeted, not generic.')],
+    [600,  ()=>stagger('.trow[data-i]', 160, el=>el.classList.add('in'))],
+    [1800, ()=>document.querySelectorAll('.bar i').forEach(b=>b.style.width=b.dataset.w+'%')],
+    [4600, ()=>cursorTo('.trow[data-i="0"]',900)],
+    [5800, ()=>say('Loan balance carry-over runs first — the defect most likely, and most expensive, on a z/OS exit.')],
+    [9200, ()=>say('The ordering is frozen as an immutable snapshot with every run — auditable, not anecdotal.')],
+  ]},
+
+{ id:'clean', label:'3 · Clean run', dur:14500, build(){
+    sceneRun('RUN-2026-07-09-0001','clean');
+  }, ev:[
+    [300,  ()=>say('<b>Step 2 — run the clean plan pair.</b> A correct conversion should produce a green board and zero noise.')],
+    [500,  ()=>stagger('.tile', 140, el=>el.classList.add('in'))],
+    [700,  ()=>stagger('.trow[data-i]', 100, el=>el.classList.add('in'))],
+    [1500, ()=>document.querySelectorAll('.bar i').forEach(b=>b.style.width=b.dataset.w+'%')],
+    [2200, ()=>runOutcomes([0,1,2,3,4,5], 900, ()=> 'pass')],
+    [2400, ()=>{ countTo('n-run',23); }],
+    [3000, ()=>{ countTo('n-pass',23); }],
+    [8600, ()=>{ const m=document.querySelectorAll('#sevmix i'); if(m[2]) m[2].style.width='100%'; }],
+    [9200, ()=>say('<b>23 rules · 23 passed · 0 findings.</b> Zero false noise — the engine stays quiet when nothing is wrong.')],
+    [12800,()=>toastMsg('RUN COMPLETE','findings.json + findings.html written · <b>RUN-2026-07-09-0001</b>')],
+  ]},
+
+{ id:'seeded', label:'4 · Seeded run', dur:19000, build(){
+    sceneRun('RUN-2026-07-09-0002','seeded');
+  }, ev:[
+    [300,  ()=>say('<b>Step 3 — the seeded pair.</b> Known defects were planted in the data. Every one must surface, in priority order.')],
+    [500,  ()=>stagger('.tile', 140, el=>el.classList.add('in'))],
+    [700,  ()=>stagger('.trow[data-i]', 100, el=>el.classList.add('in'))],
+    [1500, ()=>document.querySelectorAll('.bar i').forEach(b=>b.style.width=b.dataset.w+'%')],
+    [2200, ()=>runOutcomes([0,1,2,3,4,5], 900, ()=> 'fail')],
+    [2400, ()=>countTo('n-run',23)],
+    [3000, ()=>countTo('n-pass',17)],
+    [3600, ()=>countTo('n-fail',6)],
+    [4200, ()=>countTo('n-rec',1509)],
+    [8600, ()=>{ const m=document.querySelectorAll('#sevmix i'); if(m[0])m[0].style.width='41%'; if(m[1])m[1].style.width='59%'; }],
+    [9400, ()=>say('<b>Every planted defect fired.</b> 6 rules tripped, 1,509 records flagged — highest-risk first.')],
+    [12600,()=>sceneFindings()],
+    [12900,()=>stagger('.frow', 130, el=>el.classList.add('in'))],
+    [13400,()=>say('Each finding drills to the record level: keys, source value, target value, delta — plus a full CSV.')],
+    [14400,()=>cursorTo('.frow[data-f="0"]',900)],
+    [15400,()=>{ clickFx(); document.querySelector('.frow[data-f="0"]')?.classList.add('hot'); }],
+    [15700,()=>document.getElementById('drill')?.classList.add('in')],
+  ]},
+
+{ id:'learn', label:'5 · Learning', dur:17500, build(){
+    sceneFindings();
+    document.querySelectorAll('.frow').forEach(el=>el.classList.add('in'));
+    document.querySelector('.frow[data-f="0"]')?.classList.add('hot');
+    document.getElementById('drill')?.classList.add('in');
+  }, ev:[
+    [300,  ()=>say('<b>Step 4 — the learning loop.</b> An analyst confirms real defects and rejects noise. The fingerprint listens.')],
+    [1200, ()=>cursorTo('[data-ok="0"]',900)],
+    [2200, ()=>{ clickFx(); review(0,'ok'); toastMsg('LEARNING EVENT','FM-001 confirmed · probability <b>0.70 → 0.72</b>'); }],
+    [4600, ()=>cursorTo('[data-ok="1"]',800)],
+    [5500, ()=>{ clickFx(); review(1,'ok'); toastMsg('LEARNING EVENT','FM-002 confirmed · probability <b>0.65 → 0.67</b>'); }],
+    [7900, ()=>cursorTo('[data-fp="5"]',900)],
+    [8900, ()=>{ clickFx(); review(5,'fp'); toastMsg('LEARNING EVENT','FM-005 false positive · probability <b>0.60 → 0.56</b>'); }],
+    [11200,()=>sceneLearning()],
+    [11500,()=>{ document.getElementById('lc1')?.classList.add('in'); document.getElementById('lc2')?.classList.add('in'); }],
+    [11900,()=>stagger('.levent[data-e]', 350, el=>el.classList.add('in'))],
+    [12600,()=>document.getElementById('spark')?.classList.add('go')],
+    [13600,()=>{ const vb=document.getElementById('vb'); if(vb){ vb.textContent='v1.0.1'; vb.classList.add('bump'); } }],
+    [13900,()=>say('Probabilities moved, history recorded, and <b>v1.0.1 published</b>. The next run starts smarter.')],
+  ]},
+
+{ id:'switch', label:'6 · Pair switch', dur:13500, build(){
+    sceneLibrary();
+    document.querySelectorAll('.pcard').forEach(el=>el.classList.add('in'));
+  }, ev:[
+    [300,  ()=>say('<b>Step 5 — switch the platform pair.</b> Does the concept generalize beyond one migration?')],
+    [1400, ()=>cursorTo('#card-trac',1000)],
+    [2500, ()=>document.getElementById('card-trac')?.classList.add('hot')],
+    [3300, ()=>cursorTo('#btn-open-trac',700)],
+    [4100, ()=>{ clickFx(); document.getElementById('btn-open-trac')?.classList.add('flash'); }],
+    [4800, ()=>sceneSuite('Omni → TRAC', SUITE_TRAC, 'v0.9.0')],
+    [5100, ()=>stagger('.trow[data-i]', 160, el=>el.classList.add('in'))],
+    [6200, ()=>document.querySelectorAll('.bar i').forEach(b=>b.style.width=b.dataset.w+'%')],
+    [6800, ()=>say('A <b>different fingerprint loads a different suite</b> — provision translation and money-type mapping lead here, not loans.')],
+    [10600,()=>say('One engine. One methodology. A fingerprint for every migration.')],
+  ]},
+
+{ id:'outro', label:'Recap', dur:8000, build(){
+    cursor.classList.add('hide'); say('');
+    coverShow(`${LOGO}<div class="eyebrow">THE FIVE-MINUTE DEMO · COMPLETE</div>
+      <h1>Targeted, not generic.</h1>
+      <div class="recap">
+        <b>1</b>&nbsp; Load the fingerprint → the suite orders itself by real risk<br>
+        <b>2</b>&nbsp; Clean pair → green scoreboard, zero false noise<br>
+        <b>3</b>&nbsp; Seeded pair → every planted defect surfaces, in priority order<br>
+        <b>4</b>&nbsp; Review findings → probabilities move, a new version publishes<br>
+        <b>5</b>&nbsp; Switch pairs → a different fingerprint, a different suite
+      </div>
+      <p>MAPTIVA™ Migration Fingerprint™ · Companion to Solution Specification v1.0</p>`);
+  }, ev:[]},
+];
+
+/* helpers used inside events */
+function stagger(sel, gap, fn){
+  document.querySelectorAll(sel).forEach((el,i)=>setTimeout(()=>fn(el), i*gap));
+}
+function runOutcomes(order, gap, verdict){
+  order.forEach((idx,i)=>{
+    setTimeout(()=>{
+      const o = document.querySelector('.outc[data-o="'+idx+'"]'); if(!o) return;
+      o.textContent='RUNNING'; o.className='outc run';
+      setTimeout(()=>{
+        const v = verdict(idx);
+        o.textContent = v==='pass' ? 'PASS ✓' : 'FAIL ✗';
+        o.className = 'outc '+v;
+      }, gap*0.6);
+    }, i*gap);
+  });
+}
+function review(i, kind){
+  const s = document.querySelector('.status[data-s="'+i+'"]');
+  const b = document.querySelector(kind==='ok' ? '[data-ok="'+i+'"]' : '[data-fp="'+i+'"]');
+  if(b) b.classList.add('on');
+  if(s){ s.textContent = kind==='ok' ? 'CONFIRMED' : 'FALSE +'; s.className = 'status '+(kind==='ok'?'confirmed':'falsepos'); }
+}
+
+/* ---------- master clock engine ---------- */
+let starts=[], TOTAL=0;
+chapters.forEach(c=>{ starts.push(TOTAL); TOTAL+=c.dur; });
+
+let t=0, playing=false, speed=1, curCh=-1, fired=new Set(), pending=[], last=0;
+
+function clearPending(){ pending.forEach(clearTimeout); pending=[]; }
+
+function enterChapter(i){
+  curCh=i; clearPending(); fired=new Set();
+  toast.classList.remove('show');
+  chapters[i].build();
+  document.getElementById('scenelabel').textContent = chapters[i].label.toUpperCase();
+  document.querySelectorAll('#chaps span').forEach((s,j)=>s.classList.toggle('on', j===i));
+}
+
+function tick(now){
+  requestAnimationFrame(tick);
+  const dt = Math.min(now-last, 120); last=now;
+  if(!playing) return;
+  t += dt*speed;
+  if(t>=TOTAL){ t=TOTAL; setPlaying(false); }
+
+  // chapter boundary
+  let ci = chapters.length-1;
+  for(let i=0;i<chapters.length;i++){ if(t < starts[i]+chapters[i].dur){ ci=i; break; } }
+  if(ci!==curCh) enterChapter(ci);
+
+  // fire due events (they run instantly; internal setTimeouts are cosmetic)
+  const rel = t - starts[curCh];
+  chapters[curCh].ev.forEach((e,idx)=>{
+    if(rel>=e[0] && !fired.has(idx)){ fired.add(idx); e[1](); }
+  });
+
+  // progress + clock
+  document.getElementById('fill').style.width = (t/TOTAL*100)+'%';
+  document.getElementById('clock').textContent = mmss(t)+' / '+mmss(TOTAL);
+}
+function mmss(ms){ const s=Math.floor(ms/1000); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+
+function setPlaying(p){
+  playing=p;
+  document.getElementById('play').textContent = p ? '❚❚' : '▶';
+  if(p && t>=TOTAL){ t=0; curCh=-1; }
+}
+function seekChapter(i){
+  t = starts[i]; enterChapter(i);
+  document.getElementById('fill').style.width=(t/TOTAL*100)+'%';
+  if(!playing) setPlaying(true);
+}
+
+/* ---------- controls ---------- */
+document.getElementById('play').addEventListener('click', ()=>setPlaying(!playing));
+document.getElementById('restart').addEventListener('click', ()=>{ t=0; curCh=-1; setPlaying(true); });
+document.getElementById('spd').addEventListener('click', e=>{
+  speed = speed===1 ? 1.5 : speed===1.5 ? 2 : 1;
+  e.target.textContent = speed+'×';
+});
+document.getElementById('rail').addEventListener('click', e=>{
+  const r=e.currentTarget.getBoundingClientRect();
+  const frac=(e.clientX-r.left)/r.width, target=frac*TOTAL;
+  let ci=chapters.length-1;
+  for(let i=0;i<chapters.length;i++){ if(target < starts[i]+chapters[i].dur){ ci=i; break; } }
+  seekChapter(ci);
+});
+document.addEventListener('keydown', e=>{
+  if(e.code==='Space'){ e.preventDefault(); setPlaying(!playing); }
+  if(e.code==='ArrowRight' && curCh<chapters.length-1) seekChapter(curCh+1);
+  if(e.code==='ArrowLeft'  && curCh>0) seekChapter(curCh-1);
+});
+
+/* chapter labels + rail ticks */
+const chapsEl=document.getElementById('chaps'), railEl=document.getElementById('rail');
+chapters.forEach((c,i)=>{
+  const s=document.createElement('span'); s.textContent=c.label; s.addEventListener('click',()=>seekChapter(i)); chapsEl.appendChild(s);
+  if(i>0){ const k=document.createElement('div'); k.className='tick'; k.style.left=(starts[i]/TOTAL*100)+'%'; railEl.appendChild(k); }
+});
+
+/* go */
+enterChapter(0);
+setPlaying(true);
+requestAnimationFrame(now=>{ last=now; requestAnimationFrame(tick); });
+</script>
+</body>
+</html>
