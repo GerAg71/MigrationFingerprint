@@ -181,6 +181,12 @@
   .clock{font-family:var(--mono);font-size:11px;color:#C9D6E8;flex:none;min-width:86px;text-align:right}
   .spd{border:1px solid rgba(255,255,255,.2);background:transparent;color:#C9D6E8;font-family:var(--mono);font-size:10.5px;border-radius:7px;padding:5px 8px;cursor:pointer;flex:none}
 
+  /* start gate (browser autoplay policy requires a gesture before audio) */
+  .startgate{position:absolute;inset:0;z-index:70;background:rgba(8,26,48,.72);backdrop-filter:blur(3px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+  .startgate button{font-size:16px;font-weight:600;padding:14px 30px;border-radius:99px;border:none;background:var(--teal);color:#fff;cursor:pointer;box-shadow:0 12px 34px rgba(0,0,0,.4);transition:transform .15s}
+  .startgate button:hover{transform:scale(1.05)}
+  .startgate span{font-family:var(--mono);font-size:11px;color:#C9D6E8}
+
   @media (max-width:860px){
     .app{grid-template-columns:56px 1fr}
     .sidenav .nav span.lbl{display:none}
@@ -241,7 +247,13 @@
         <div class="chaps" id="chaps"></div>
       </div>
       <button class="spd" id="spd">1×</button>
+      <button class="spd" id="mute" title="Narration on/off" aria-label="Narration on or off">🔊</button>
       <span class="clock" id="clock">0:00 / 0:00</span>
+    </div>
+
+    <div class="startgate" id="startgate">
+      <button id="startbtn">▶&nbsp; Play with narration</button>
+      <span>1:41 · GUIDED WALKTHROUGH · AUDIO</span>
     </div>
   </div>
 </div>
@@ -599,6 +611,34 @@ function review(i, kind){
   if(s){ s.textContent = kind==='ok' ? 'CONFIRMED' : 'FALSE +'; s.className = 'status '+(kind==='ok'?'confirmed':'falsepos'); }
 }
 
+/* ---------- narration (cue-01..08.mp3, one per chapter) ----------
+   Chapter durations mirror the VO script's cue windows, so each cue
+   simply starts when its chapter does. Pause/seek/speed stay synced. */
+const cues = chapters.map((c,i)=>{
+  const a = new Audio('cue-'+String(i+1).padStart(2,'0')+'.mp3');
+  a.preload = 'auto';
+  return a;
+});
+let audioOn = true;
+function playCue(i, offsetMs=0){
+  cues.forEach(a=>a.pause());
+  if(!audioOn || !playing || i<0) return;
+  const a = cues[i];
+  a.playbackRate = speed;
+  try{ a.currentTime = Math.max(0, offsetMs/1000); }catch(err){}
+  a.play().catch(()=>{});
+}
+function unlockAudio(){
+  /* prime every element inside the user gesture so later programmatic
+     play() calls are allowed by autoplay policies */
+  cues.forEach((a,i)=>{
+    if(i===0) return; /* cue 0 plays for real right after this */
+    a.muted = true;
+    a.play().then(()=>{ a.pause(); a.currentTime=0; a.muted=false; })
+            .catch(()=>{ a.muted=false; });
+  });
+}
+
 /* ---------- master clock engine ---------- */
 let starts=[], TOTAL=0;
 chapters.forEach(c=>{ starts.push(TOTAL); TOTAL+=c.dur; });
@@ -613,6 +653,7 @@ function enterChapter(i){
   chapters[i].build();
   document.getElementById('scenelabel').textContent = chapters[i].label.toUpperCase();
   document.querySelectorAll('#chaps span').forEach((s,j)=>s.classList.toggle('on', j===i));
+  playCue(i, Math.max(0, t - starts[i]));
 }
 
 function tick(now){
@@ -643,6 +684,8 @@ function setPlaying(p){
   playing=p;
   document.getElementById('play').textContent = p ? '❚❚' : '▶';
   if(p && t>=TOTAL){ t=0; curCh=-1; }
+  if(!p){ cues.forEach(a=>a.pause()); }
+  else if(curCh>=0){ playCue(curCh, Math.max(0, t - starts[curCh])); }
 }
 function seekChapter(i){
   t = starts[i]; enterChapter(i);
@@ -656,6 +699,13 @@ document.getElementById('restart').addEventListener('click', ()=>{ t=0; curCh=-1
 document.getElementById('spd').addEventListener('click', e=>{
   speed = speed===1 ? 1.5 : speed===1.5 ? 2 : 1;
   e.target.textContent = speed+'×';
+  cues.forEach(a=>a.playbackRate=speed);
+});
+document.getElementById('mute').addEventListener('click', e=>{
+  audioOn = !audioOn;
+  e.target.textContent = audioOn ? '🔊' : '🔇';
+  if(!audioOn) cues.forEach(a=>a.pause());
+  else if(playing && curCh>=0) playCue(curCh, Math.max(0, t - starts[curCh]));
 });
 document.getElementById('rail').addEventListener('click', e=>{
   const r=e.currentTarget.getBoundingClientRect();
@@ -677,9 +727,15 @@ chapters.forEach((c,i)=>{
   if(i>0){ const k=document.createElement('div'); k.className='tick'; k.style.left=(starts[i]/TOTAL*100)+'%'; railEl.appendChild(k); }
 });
 
-/* go */
+/* go — build the first scene paused; the start gate provides the user
+   gesture browsers require before audio may play */
 enterChapter(0);
-setPlaying(true);
+document.getElementById('clock').textContent = '0:00 / '+mmss(TOTAL);
+document.getElementById('startbtn').addEventListener('click', ()=>{
+  document.getElementById('startgate').remove();
+  unlockAudio();
+  setPlaying(true);
+});
 requestAnimationFrame(now=>{ last=now; requestAnimationFrame(tick); });
 </script>
 </body>
