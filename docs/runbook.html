@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAPTIVA&trade; Migration Fingerprint&trade; &mdash; Technical Runbook</title>
+<style>
+  :root{--navy:#0D2440;--teal:#1F8A7D;--mint:#7FD4C4;--paper:#F4F7FB;
+    --card:#fff;--ink:#16324F;--slate:#5B7086;--line:#DCE5EF;
+    --mono:ui-monospace,'Cascadia Code',Consolas,monospace;
+    --sans:'Segoe UI',system-ui,sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);
+    line-height:1.55;font-size:14.5px}
+  header{background:var(--navy);color:#fff;padding:22px 28px;position:sticky;
+    top:0;z-index:20;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+  header .t{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    color:var(--mint)}
+  header h1{font-size:20px;margin-top:3px}
+  #q{margin-top:12px;width:100%;max-width:640px;padding:10px 15px;
+    border-radius:10px;border:none;font-size:14.5px;font-family:var(--sans)}
+  #qcount{font-family:var(--mono);font-size:11px;color:#9FB4CE;
+    margin-left:12px}
+  .layout{display:grid;grid-template-columns:230px 1fr;max-width:1240px;
+    margin:0 auto;gap:26px;padding:24px 28px}
+  nav{position:sticky;top:130px;align-self:start;font-size:13px;
+    display:flex;flex-direction:column;gap:2px;max-height:calc(100vh - 150px);
+    overflow-y:auto}
+  nav a{color:var(--ink);text-decoration:none;padding:6px 10px;
+    border-radius:7px;border-left:3px solid transparent}
+  nav a:hover{background:#E8F0F9;border-left-color:var(--teal)}
+  nav .grp{font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+    color:var(--slate);margin:10px 0 3px 10px}
+  section{margin-bottom:34px;scroll-margin-top:150px}
+  h2{color:var(--navy);font-size:20px;margin-bottom:6px;display:flex;
+    align-items:center;gap:9px;flex-wrap:wrap}
+  h3{color:var(--navy);font-size:15.5px;margin:18px 0 8px}
+  .lead{color:var(--slate);max-width:88ch;margin-bottom:8px}
+  .card{background:var(--card);border:1.5px solid var(--line);
+    border-radius:11px;padding:13px 16px;margin-bottom:10px;
+    scroll-margin-top:150px}
+  .card.hit{border-color:var(--teal);box-shadow:0 0 0 3px rgba(31,138,125,.15)}
+  .cardhead{display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+    margin-bottom:5px}
+  .cardhead h4{font-size:14.5px;color:var(--navy)}
+  .fmid,.ruleid{font-family:var(--mono);font-size:12px;font-weight:700;
+    color:var(--teal)}
+  .chip{font-family:var(--mono);font-size:10px;background:#E4EEF9;
+    color:#28527F;padding:3px 9px;border-radius:99px;white-space:nowrap}
+  .chip.ghost{background:#F0F5FB;color:var(--slate)}
+  .chip.type{background:var(--navy);color:var(--mint)}
+  .sev{font-family:var(--mono);font-size:9.5px;font-weight:700;color:#fff;
+    padding:3px 9px;border-radius:99px;letter-spacing:.05em}
+  .bar{display:inline-block;width:130px;height:8px;background:#EAF0F7;
+    border-radius:99px;overflow:hidden;vertical-align:middle}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,
+    var(--teal),var(--mint))}
+  .scorerow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    font-size:12.5px;color:var(--slate);margin-bottom:7px}
+  .xref{font-family:var(--mono);font-size:11.5px;color:var(--teal);
+    text-decoration:none;margin-right:8px}
+  .xref:hover{text-decoration:underline}
+  p{margin-bottom:6px;max-width:96ch}
+  code{font-family:var(--mono);font-size:.92em;background:#EFF4FA;
+    padding:1px 5px;border-radius:5px}
+  code.cmd{background:var(--navy);color:var(--mint);padding:5px 11px;
+    border-radius:8px;font-size:12px}
+  .src{font-family:var(--mono);font-size:11px;color:var(--slate)}
+  .formula{background:var(--navy);color:#EAF4FF;border-radius:11px;
+    padding:15px 18px;font-family:var(--mono);font-size:13px;margin:9px 0;
+    overflow-x:auto}
+  .formula b{color:var(--mint)}
+  table.flow{border-collapse:collapse;width:100%;margin:8px 0;font-size:13px}
+  table.flow td,table.flow th{border:1px solid var(--line);padding:7px 11px;
+    text-align:left;background:#fff}
+  table.flow th{background:#F0F5FB;font-family:var(--mono);font-size:11px}
+  mark{background:#FFE9A8;border-radius:3px;padding:0 2px}
+  .hidden{display:none}
+  footer{text-align:center;color:var(--slate);font-size:11.5px;
+    padding:22px}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}
+    nav{position:static;max-height:none;flex-direction:row;flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<header>
+  <div class="t">MAPTIVA&trade; &middot; MIGRATION FINGERPRINT&trade; &middot; TECHNICAL RUNBOOK</div>
+  <h1>How this application works &mdash; every mode, rule, score, and source</h1>
+  <input id="q" type="search"
+    placeholder="Search anything&hellip; FM-101, loan, tolerance, severity, UDF, picture, sign-off"
+    autocomplete="off"><span id="qcount"></span>
+</header>
+<div class="layout">
+<nav>
+  <div class="grp">CONCEPTS</div>
+  <a href="#overview">What this application is</a>
+  <a href="#run">How a run works</a>
+  <a href="#scoring">How the score is calculated</a>
+  <a href="#severity">Severity: what the colors mean</a>
+  <a href="#learning">The learning-loop math</a>
+  <div class="grp">REFERENCE</div>
+  <a href="#ruletypes">The seven rule types</a>
+  <a href="#catalog-omni-to-trac">omni-to-trac</a><a href="#catalog-omni-zos-to-omni-linux">omni-zos-to-omni-linux</a><a href="#catalog-omni-zos-to-omni-linux-restore">omni-zos-to-omni-linux-restore</a>
+  <div class="grp">OPERATIONS</div>
+  <a href="#cli">CLI reference</a>
+  <a href="#provenance">Where the specs come from</a>
+  <a href="#glossary">Glossary</a>
+</nav>
+<main>
+
+<section id="overview">
+  <h2>What this application is</h2>
+  <p class="lead">Every platform pair fails in patterns. This application
+  stores those patterns as a <b>fingerprint</b> &mdash; a versioned library of
+  failure modes bound to executable detection rules &mdash; runs a validation
+  suite ordered by where <em>this</em> migration is statistically most likely
+  to break (<b>targeted, not generic</b>), drills every finding to the exact
+  records affected, and writes every analyst decision back into the
+  fingerprint so the next conversion starts smarter. Across the whole engine:
+  money is exact decimal (never floating point), runs are deterministic
+  (same inputs = byte-identical results), and passes are reported as
+  explicitly as failures.</p>
+  <p>The store currently holds <b>3 fingerprints</b> totalling
+  <b>40 failure modes</b> and <b>54 detection rules</b>
+  &mdash; every one documented on this page, generated from the same JSON the
+  engine executes.</p>
+</section>
+
+<section id="run">
+  <h2>How a run works</h2>
+  <table class="flow">
+    <tr><th>Stage</th><th>What happens</th><th>What can stop it</th></tr>
+    <tr><td>1 &middot; Ingest</td><td>Source and target extract folders are
+      read (CSV, or fixed-width/EBCDIC via LayoutSpecs). Values are typed at
+      the boundary: money becomes exact Decimal, zero/blank dates become
+      null, malformed rows are quarantined with reasons.</td>
+      <td>A partially-delivered file halts that dataset (REQ-022).</td></tr>
+    <tr><td>2 &middot; Register</td><td>Every dataset gets a content hash
+      (SHA-256) recorded in the run &mdash; the audit anchor tying results to
+      exact inputs.</td><td>&mdash;</td></tr>
+    <tr><td>3 &middot; Gate</td><td>Every dataset required by any enabled
+      rule must be present on both sides.</td><td>Missing extracts refuse
+      the whole run with a list of what's missing (REQ-021) &mdash; rules
+      are never silently skipped.</td></tr>
+    <tr><td>4 &middot; Snapshot</td><td>The prioritized suite is frozen to
+      suite_snapshot.json before execution &mdash; the ordering is auditable,
+      not anecdotal.</td><td>&mdash;</td></tr>
+    <tr><td>5 &middot; Execute</td><td>Rules run in priority order. A rule
+      that finds nothing records an explicit PASS; a rule that trips builds
+      a finding: severity, records affected, up to 25 sample records inline,
+      a full drill-down CSV, and the failure mode's remediation text.</td>
+      <td>&mdash;</td></tr>
+    <tr><td>6 &middot; Report</td><td>findings.json (deterministic),
+      findings.html (self-contained), reconciliation.json plus five
+      client-facing reconciliation reports, drill-down CSVs.</td>
+      <td>&mdash;</td></tr>
+  </table>
+  <p>After the run: findings are adjudicated (<code>review</code>), worked
+  through the exception workflow (<code>assign &rarr; resolve &rarr;
+  close</code> with evidence), and certified (<code>signoff</code>).</p>
+</section>
+
+<section id="scoring">
+  <h2>How the score is calculated</h2>
+  <div class="formula">score = <b>probability</b> &times; <b>impact</b><br><br>
+probability &mdash; how likely this failure mode is for THIS platform pair
+(0.05&ndash;0.99). Seeded by the conversion team, then moved by evidence:
+every confirmed finding raises it, every false positive lowers it.<br>
+impact &mdash; how much it hurts if it happens (0&ndash;1). Human judgment:
+participant-money modes score high. Never auto-adjusted.</div>
+  <p><b>Worked example</b> (top of the restore suite): FM-101 &ldquo;Custom
+  code / script value drift&rdquo; has probability 0.70 and impact 0.90
+  &rarr; score <b>0.63</b>. Its rule RULE-RST-VEST-001 therefore runs first.
+  Every rule inherits its failure mode's score &mdash; that's why the three
+  FM-106 rules all show 0.5525 (0.65 &times; 0.85).</p>
+  <p><b>Tie-breaking</b> is deterministic (spec &sect;12.2): equal scores
+  order by severity (CRITICAL &gt; HIGH &gt; MEDIUM &gt; LOW), then by
+  failure-mode id. That's why RULE-RST-DIFF-001 (CRITICAL) sits above
+  DIFF-002 (HIGH) above DIFF-003 (MEDIUM) in your screenshot &mdash; same
+  score, severity breaks the tie.</p>
+  <p>The suite is frozen with every run, and the &ldquo;compare against a
+  generic ordering&rdquo; toggle on the suite screen shows exactly how much
+  effort an alphabetical checklist would waste.</p>
+</section>
+
+<section id="severity">
+  <h2>Severity: what the levels mean</h2>
+  <p class="lead">Severity is assigned per detection rule by the fingerprint
+  author (stored in the fingerprint JSON, versioned like everything else).
+  It answers &ldquo;how bad is a finding from this rule&rdquo; &mdash;
+  distinct from probability (&ldquo;how likely&rdquo;) and impact
+  (&ldquo;how costly is the mode overall&rdquo;). It is used three ways:
+  tie-breaking the suite order, the severity mix on the run scoreboard, and
+  prioritizing the findings queue.</p>
+  <div class="card"><div class="cardhead"><span class="sev" style="background:#b91c1c">CRITICAL</span></div><p>Participant money or record counts are wrong. A finding at this level blocks sign-off until resolved - there is no acceptable error rate when the data is someone&#x27;s retirement account.</p></div><div class="card"><div class="cardhead"><span class="sev" style="background:#ea580c">HIGH</span></div><p>Values that must be remediated before cutover - balances, derived amounts, required fields. Wrong today, visible to the client tomorrow.</p></div><div class="card"><div class="cardhead"><span class="sev" style="background:#d97e06">MEDIUM</span></div><p>Provisions, formats, and mappings that need analyst review. May be acceptable with documentation, never silently.</p></div><div class="card"><div class="cardhead"><span class="sev" style="background:#64748b">LOW</span></div><p>Cosmetic or monitoring-level issues. Tracked so nothing is invisible, prioritized last.</p></div>
+</section>
+
+<section id="learning">
+  <h2>The learning-loop math</h2>
+  <p class="lead">Analyst reviews are not just record-keeping &mdash; they
+  retune the fingerprint. The write-back is a Beta-style nudge anchored to
+  the seed probability (spec &sect;14.2):</p>
+  <div class="formula">k = 10&nbsp;&nbsp;(evidence weight of the prior)<br>
+&alpha;&#8320; = p_seed &times; k<br>
+p_new = (&alpha;&#8320; + confirmed) / (k + confirmed + false_positives)<br>
+clamped to [0.05, 0.99], rounded half-even to 3 decimals</div>
+  <p><b>Worked example:</b> FM-001 seeds at 0.70, so &alpha;&#8320; = 7.
+  One confirmed finding: p = (7+1)/(10+1) = <b>0.727</b> &mdash; the mode
+  rises in the next suite. One false positive instead:
+  p = 7/11 = <b>0.636</b> &mdash; noise sinks. Ten confirmations:
+  p = 17/20 = 0.850 &mdash; evidence accumulates but never saturates to
+  certainty. The clamp means no mode is ever fully trusted (0.99 max) or
+  fully dismissed (0.05 min) &mdash; dismissed checks still run, just last.</p>
+  <p>Every event is recorded in an append-only log and replayable: the
+  current probability is always recomputable from the seed plus the
+  history counters. Publishing freezes the draft as the next version;
+  past runs stay pinned to the version they ran against.</p>
+</section>
+
+<section id="ruletypes">
+  <h2>The seven rule types</h2>
+  <p class="lead">The engine knows exactly seven generic check types
+  (spec Ch. 11); everything specific lives in fingerprint JSON. This is a
+  hard rule (REQ-012) &mdash; it's why one rule library can serve every
+  platform pair.</p>
+  <div class="card" id="type-field_compare"><div class="cardhead"><span class="ruleid">field_compare</span><h4>Field compare</h4></div><p>The workhorse. Joins source and target rows on key fields and compares chosen columns value by value - money at an exact Decimal tolerance (0.00 unless a rule says otherwise), text and dates by strict equality. Can also run one-sided validity checks (not-null, length, pattern, ranges, cross-field rules like term_date >= hire_date). Unmatched rows are deliberately NOT its job - that's referential's.</p></div><div class="card" id="type-count_balance"><div class="cardhead"><span class="ruleid">count_balance</span><h4>Count / balance reconciliation</h4></div><p>Proves completeness with totals: row counts and money sums per grouping level (plan, money type, investment, participant), source vs target, exact equality required. Coarse variances automatically carry the finer-level contributing groups, which is the 'drill down behind any variance' behavior on the reconciliation reports.</p></div><div class="card" id="type-referential"><div class="cardhead"><span class="ruleid">referential</span><h4>Referential integrity</h4></div><p>Every record on one side must trace to the other side, in both directions. Also enforces key uniqueness (duplicate SSNs, duplicate IDs) and can flag target values with no mapping-rule provenance.</p></div><div class="card" id="type-derived_recompute"><div class="cardhead"><span class="ruleid">derived_recompute</span><h4>Derived-value recompute</h4></div><p>Recomputes what the software SHOULD produce - vested percent from the schedule and service years, loan balances by re-amortizing from origination with half-even rounding per period - and compares to what is stored. This is how custom code on a source system is detected without ever reading it: the stored value disagrees with the stock formula.</p></div><div class="card" id="type-encoding_check"><div class="cardhead"><span class="ruleid">encoding_check</span><h4>Encoding check</h4></div><p>Finds the fingerprints of a bad EBCDIC-to-ASCII conversion: characters outside the allowed set and mojibake signatures (Jos&Atilde;&copy; instead of Jos&eacute;). Catches wrong-codepage decodes even when the bytes are printable.</p></div><div class="card" id="type-sort_order_check"><div class="cardhead"><span class="ruleid">sort_order_check</span><h4>Sort-order check</h4></div><p>EBCDIC and ASCII disagree about whether digits sort before letters. Extracts that were resorted on the wrong platform betray themselves at digit/letter boundaries; this rule reports adjacent ordering inversions under the declared collation.</p></div><div class="card" id="type-format_conformance"><div class="cardhead"><span class="ruleid">format_conformance</span><h4>Format conformance</h4></div><p>Validates a dataset against the platform's format dictionary (compiled from the Omni Format Matrix): COBOL Picture domains, Required flags, enumerated code domains, and 'Not Used' filler positions that must stay blank - data hiding in a filler is off-label usage no restore will ever report. Runs one-sided, so the same rules can profile the source before cutover (Pass A) or audit the target after restore (Pass B).</p></div>
+</section>
+
+
+<section id="catalog-omni-to-trac">
+  <h2>omni-to-trac <span class="chip">v1.0.0</span>
+    <span class="chip ghost">16 failure modes &middot;
+    19 rules</span></h2>
+  <p class="lead">A cross-product migration: Omni to TRAC. Placeholder fingerprint - the mainframe-transition modes are absent and cross-platform mapping risks (vesting, money types, provisions) lead the suite.</p>
+  <h3>Failure modes (in priority order)</h3>
+  
+<div class="card" id="omni-to-trac--FM-002">
+  <div class="cardhead"><span class="fmid">FM-002</span>
+    <h4>Participant-level vesting schedule mapping</h4>
+    <span class="chip">VESTING</span></div>
+  <div class="scorerow">probability <b>0.80</b> &times;
+    impact <b>0.85</b> = <span class="bar"><i style="width:68%"></i></span> <b>0.68</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: VESTING, PARTICIPANT</span></div>
+  <p>Vested percentages drift because service-counting method (elapsed time vs. hours) and schedule mapping differ; entry-date handling compounds the drift.</p>
+  <p><b>Example defect:</b> Participant P0017 vested 60% in target while canonical schedule plus service recomputes to 80%.</p>
+  <p><b>How to correct it:</b> Reconcile schedule definitions and service-computation method before re-mapping participant service.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-VEST-PCT-001">RULE-VEST-PCT-001</a><a class="xref" href="#omni-to-trac--RULE-VEST-SCHED-001">RULE-VEST-SCHED-001</a></p>
+</div>
+<div class="card" id="omni-to-trac--FM-007">
+  <div class="cardhead"><span class="fmid">FM-007</span>
+    <h4>Balance / count-balance totals</h4>
+    <span class="chip">BALANCE</span></div>
+  <div class="scorerow">probability <b>0.70</b> &times;
+    impact <b>0.95</b> = <span class="bar"><i style="width:66%"></i></span> <b>0.665</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: BALANCE</span></div>
+  <p>Sums and counts fail to reconcile at plan, fund, or participant level. The master reconciliation mode; a coarse-level variance is always decomposable to finer levels.</p>
+  <p><b>Example defect:</b> Plan-level PRETAX total off by 0.01 across 120 participants.</p>
+  <p><b>How to correct it:</b> Drill from plan variance to money type to investment to participant to isolate the contributing records.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-BAL-TOTALS-001">RULE-BAL-TOTALS-001</a></p>
+</div>
+<div class="card" id="omni-to-trac--FM-012">
+  <div class="cardhead"><span class="fmid">FM-012</span>
+    <h4>Balance mismatch by money type</h4>
+    <span class="chip">BALANCE</span></div>
+  <div class="scorerow">probability <b>0.60</b> &times;
+    impact <b>0.95</b> = <span class="bar"><i style="width:57%"></i></span> <b>0.57</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: BALANCE</span></div>
+  <p>Money-type subtotals fail to reconcile, commonly from crosswalk gaps or source combinations mapped into the wrong target bucket.</p>
+  <p><b>Example defect:</b> ROTH subtotal variance of 250.00 on one plan while the plan total reconciles (offsetting PRETAX variance).</p>
+  <p><b>How to correct it:</b> Audit the money-type crosswalk; drill the variance to participant level within the affected money type.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-BAL-MT-001">RULE-BAL-MT-001</a></p>
+</div>
+<div class="card" id="omni-to-trac--FM-013">
+  <div class="cardhead"><span class="fmid">FM-013</span>
+    <h4>Balance mismatch by investment option</h4>
+    <span class="chip">BALANCE</span></div>
+  <div class="scorerow">probability <b>0.60</b> &times;
+    impact <b>0.95</b> = <span class="bar"><i style="width:57%"></i></span> <b>0.57</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: BALANCE</span></div>
+  <p>Investment-level subtotals fail to reconcile, commonly from fund-mapping gaps, share-class consolidation, or price-date misalignment.</p>
+  <p><b>Example defect:</b> Fund F03 subtotal variance; units correct but valued at the wrong price date.</p>
+  <p><b>How to correct it:</b> Audit the investment crosswalk and pricing as-of dates; drill to participant positions in the affected fund.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-BAL-INV-001">RULE-BAL-INV-001</a></p>
+</div>
+<div class="card" id="omni-to-trac--FM-003">
+  <div class="cardhead"><span class="fmid">FM-003</span>
+    <h4>Custom calculated-field dependencies</h4>
+    <span class="chip">PLAN</span></div>
+  <div class="scorerow">probability <b>0.75</b> &times;
+    impact <b>0.75</b> = <span class="bar"><i style="width:56%"></i></span> <b>0.5625</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: PLAN, FORMAT</span></div>
+  <p>Source-side scripted/derived fields (e.g., OmniScript logic) have no target equivalent; target values appear with no mapping-rule provenance.</p>
+  <p><b>Example defect:</b> Target field svc_points populated with values traceable to no mapping rule in the workbook.</p>
+  <p><b>How to correct it:</b> Inventory source scripts; re-implement or retire each derived field explicitly.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-DERIVED-TRACE-001">RULE-DERIVED-TRACE-001</a></p>
+</div>
+<div class="card" id="omni-to-trac--FM-004">
+  <div class="cardhead"><span class="fmid">FM-004</span>
+    <h4>Plan-provision mismatches</h4>
+    <span class="chip">PLAN</span></div>
+  <div class="scorerow">probability <b>0.70</b> &times;
+    impact <b>0.80</b> = <span class="bar"><i style="width:56%"></i></span> <b>0.56</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: PLAN</span></div>
+  <p>Provision configuration (safe harbor, catch-up eligibility, auto-enrollment/auto-increase parameters) maps imperfectly into the target&#x27;s provision model.</p>
+  <p><b>Example defect:</b> Safe-harbor flag dropped on one plan; catch-up eligibility inverted.</p>
+  <p><b>How to correct it:</b> Provision-by-provision review against the plan document; correct target plan setup, not the data.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-PROV-MATRIX-001">RULE-PROV-MATRIX-001</a></p>
+</div>
+<div class="card" id="omni-to-trac--FM-001">
+  <div class="cardhead"><span class="fmid">FM-001</span>
+    <h4>Loan outstanding-balance carry-over</h4>
+    <span class="chip">LOANS</span></div>
+  <div class="scorerow">probability <b>0.60</b> &times;
+    impact <b>0.90</b> = <span class="bar"><i style="width:54%"></i></span> <b>0.54</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: LOAN</span></div>
+  <p>Converted loan balances diverge from source because payment-application order, accrual basis, and per-period rounding rules differ between platforms.</p>
+  <p><b>Example defect:</b> Loan L2 target outstanding balance 10398.55 vs source 10432.17 (delta -33.62) after a payment was applied out of order.</p>
+  <p><b>How to correct it:</b> Recompute amortization from origination; verify payment application order and accrual basis on the target.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-LOAN-BAL-001">RULE-LOAN-BAL-001</a><a class="xref" href="#omni-to-trac--RULE-LOAN-RECOMP-001">RULE-LOAN-RECOMP-001</a></p>
+</div>
+<div class="card" id="omni-to-trac--FM-009">
+  <div class="cardhead"><span class="fmid">FM-009</span>
+    <h4>Participant count mismatch by status</h4>
+    <span class="chip">PARTICIPANT</span></div>
+  <div class="scorerow">probability <b>0.50</b> &times;
+    impact <b>0.90</b> = <span class="bar"><i style="width:45%"></i></span> <b>0.45</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: PARTICIPANT</span></div>
+  <p>Participant counts by canonical status differ between source and target, usually from status-code crosswalk gaps or dropped records.</p>
+  <p><b>Example defect:</b> One TERMINATED participant counted ACTIVE in target; ACTIVE 87 vs 88, TERMINATED 25 vs 24.</p>
+  <p><b>How to correct it:</b> Audit the status crosswalk; trace each variance to its participant via the referential orphan report.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-PCOUNT-001">RULE-PCOUNT-001</a></p>
+</div>
+<div class="card" id="omni-to-trac--FM-015">
+  <div class="cardhead"><span class="fmid">FM-015</span>
+    <h4>Contribution &amp; distribution totals</h4>
+    <span class="chip">CONTRIBUTION</span></div>
+  <div class="scorerow">probability <b>0.50</b> &times;
+    impact <b>0.80</b> = <span class="bar"><i style="width:40%"></i></span> <b>0.4</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: CONTRIBUTION</span></div>
+  <p>Employee/employer contribution totals for the last payroll cycle, or recent distribution totals, fail to reconcile.</p>
+  <p><b>Example defect:</b> Employer match total for the final pre-conversion payroll cycle off by one participant&#x27;s contribution.</p>
+  <p><b>How to correct it:</b> Verify cutover-period transaction inclusion rules (trade date vs. payroll date) on both extracts.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-CONTRIB-001">RULE-CONTRIB-001</a></p>
+</div>
+<div class="card" id="omni-to-trac--FM-010">
+  <div class="cardhead"><span class="fmid">FM-010</span>
+    <h4>Missing key fields</h4>
+    <span class="chip">PARTICIPANT</span></div>
+  <div class="scorerow">probability <b>0.40</b> &times;
+    impact <b>0.80</b> = <span class="bar"><i style="width:32%"></i></span> <b>0.32</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: PARTICIPANT</span></div>
+  <p>Required identity fields (SSN, DOB, plan ID) arrive null or blank on the target, blocking downstream processing.</p>
+  <p><b>Example defect:</b> One target participant with blank SSN.</p>
+  <p><b>How to correct it:</b> Trace to source: distinguish genuinely missing source data (cleanup item) from values dropped in transform (mapping fix).</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-KEYS-001">RULE-KEYS-001</a></p>
+</div>
+<div class="card" id="omni-to-trac--FM-014">
+  <div class="cardhead"><span class="fmid">FM-014</span>
+    <h4>Loan count / missing repayment terms</h4>
+    <span class="chip">LOANS</span></div>
+  <div class="scorerow">probability <b>0.40</b> &times;
+    impact <b>0.75</b> = <span class="bar"><i style="width:30%"></i></span> <b>0.3</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: LOAN</span></div>
+  <p>Loan counts differ, or converted loans arrive without repayment schedule, payment amount, or maturity date.</p>
+  <p><b>Example defect:</b> Loan count 5 vs 6 on one plan; one converted loan missing its maturity date.</p>
+  <p><b>How to correct it:</b> Reconcile the loan extract row-by-row; verify paid-off/deemed loans are filtered consistently on both sides.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-LOAN-CNT-001">RULE-LOAN-CNT-001</a><a class="xref" href="#omni-to-trac--RULE-LOAN-TERMS-001">RULE-LOAN-TERMS-001</a></p>
+</div>
+<div class="card" id="omni-to-trac--FM-011">
+  <div class="cardhead"><span class="fmid">FM-011</span>
+    <h4>Duplicate participant IDs / SSNs</h4>
+    <span class="chip">PARTICIPANT</span></div>
+  <div class="scorerow">probability <b>0.35</b> &times;
+    impact <b>0.85</b> = <span class="bar"><i style="width:30%"></i></span> <b>0.2975</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: PARTICIPANT</span></div>
+  <p>Duplicate participant IDs or SSNs within a plan on the target, typically from merge logic or rehire-history handling.</p>
+  <p><b>Example defect:</b> Two target participants share SSN 900-44-1207 within the same plan.</p>
+  <p><b>How to correct it:</b> Resolve identity: merge true duplicates, re-key false ones; review rehire-history load logic.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-DUP-001">RULE-DUP-001</a></p>
+</div>
+<div class="card" id="omni-to-trac--FM-016">
+  <div class="cardhead"><span class="fmid">FM-016</span>
+    <h4>Field-length violations &amp; invalid characters</h4>
+    <span class="chip">FORMAT</span></div>
+  <div class="scorerow">probability <b>0.55</b> &times;
+    impact <b>0.50</b> = <span class="bar"><i style="width:28%"></i></span> <b>0.275</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: FORMAT, PARTICIPANT</span></div>
+  <p>Values exceed target field limits or contain characters the target rejects; truncation corrupts names and addresses silently.</p>
+  <p><b>Example defect:</b> 41-character address loaded into a 35-character field; &#x27;#&#x27; present in a name field.</p>
+  <p><b>How to correct it:</b> Apply documented truncation/substitution rules in transform; never let the target platform truncate implicitly.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-LEN-001">RULE-LEN-001</a></p>
+</div>
+<div class="card" id="omni-to-trac--FM-008">
+  <div class="cardhead"><span class="fmid">FM-008</span>
+    <h4>Date and format drift</h4>
+    <span class="chip">FORMAT</span></div>
+  <div class="scorerow">probability <b>0.45</b> &times;
+    impact <b>0.60</b> = <span class="bar"><i style="width:27%"></i></span> <b>0.27</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: FORMAT, PARTICIPANT</span></div>
+  <p>Century-window expansion errors, Julian-to-Gregorian conversion faults, and inconsistent zero/blank-date semantics shift or invent dates.</p>
+  <p><b>Example defect:</b> DOB 1897-03-12 produced by a wrong century window; a zero date mapped to 0001-01-01 instead of null.</p>
+  <p><b>How to correct it:</b> Define null-date semantics per field in the layout spec; correct windowing rules in extract or transform.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-DATE-001">RULE-DATE-001</a></p>
+</div>
+<div class="card" id="omni-to-trac--FM-018">
+  <div class="cardhead"><span class="fmid">FM-018</span>
+    <h4>Unexpected negative balances</h4>
+    <span class="chip">BALANCE</span></div>
+  <div class="scorerow">probability <b>0.30</b> &times;
+    impact <b>0.85</b> = <span class="bar"><i style="width:26%"></i></span> <b>0.255</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: BALANCE</span></div>
+  <p>Negative balances on the target with no explaining loan or adjustment context, often from sign-handling or reversal-ordering faults.</p>
+  <p><b>Example defect:</b> Negative MATCH balance of -412.06 for one participant with no offsetting adjustment.</p>
+  <p><b>How to correct it:</b> Trace the contributing transactions; check reversal ordering and sign handling in the load.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-NEG-001">RULE-NEG-001</a></p>
+</div>
+<div class="card" id="omni-to-trac--FM-017">
+  <div class="cardhead"><span class="fmid">FM-017</span>
+    <h4>Invalid / future dates</h4>
+    <span class="chip">FORMAT</span></div>
+  <div class="scorerow">probability <b>0.45</b> &times;
+    impact <b>0.55</b> = <span class="bar"><i style="width:25%"></i></span> <b>0.2475</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: FORMAT, PARTICIPANT</span></div>
+  <p>Logically impossible dates: DOB in the future, termination before hire, dates outside plausible ranges.</p>
+  <p><b>Example defect:</b> Termination date 2019-05-01 precedes hire date 2021-03-15 for one participant.</p>
+  <p><b>How to correct it:</b> Trace to source vs. transform origin; fix windowing or field-swap defects; route true source errors to cleanup.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-to-trac--RULE-DATEVAL-001">RULE-DATEVAL-001</a></p>
+</div>
+  <h3>Detection rules</h3>
+  
+<div class="card" id="omni-to-trac--RULE-LOAN-BAL-001">
+  <div class="cardhead"><span class="ruleid">RULE-LOAN-BAL-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-to-trac--FM-001">
+      FM-001</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: loans &rarr; loans</span>
+    </div>
+  <p><b>What it checks:</b> Matches source and target rows on <code>plan_id, participant_id, loan_id</code> and compares outstanding_balance (tolerance 0.00) field by field. A value on one side and blank on the other always counts as a mismatch.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-LOAN-RECOMP-001">
+  <div class="cardhead"><span class="ruleid">RULE-LOAN-RECOMP-001</span>
+    <span class="chip type">derived_recompute</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-to-trac--FM-001">
+      FM-001</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: loans &rarr; loans</span>
+    </div>
+  <p><b>What it checks:</b> Recomputes <code>loan_balance</code> from its inputs using the engine's stock formula and compares the result to the stored <code>outstanding_balance</code> at tolerance 0.00. Where the stored value disagrees with the stock computation, custom logic produced it - detected without reading any source code.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-VEST-PCT-001">
+  <div class="cardhead"><span class="ruleid">RULE-VEST-PCT-001</span>
+    <span class="chip type">derived_recompute</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-to-trac--FM-002">
+      FM-002</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: vesting &rarr; vesting</span>
+    </div>
+  <p><b>What it checks:</b> Recomputes <code>vested_pct</code> from its inputs using the engine's stock formula and compares the result to the stored <code>vested_pct</code> at tolerance 0.0000. Where the stored value disagrees with the stock computation, custom logic produced it - detected without reading any source code.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-VEST-SCHED-001">
+  <div class="cardhead"><span class="ruleid">RULE-VEST-SCHED-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#d97e06">MEDIUM</span>
+    <a class="xref" href="#omni-to-trac--FM-002">
+      FM-002</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: vesting &rarr; vesting</span>
+    </div>
+  <p><b>What it checks:</b> Matches source and target rows on <code>plan_id, participant_id</code> and compares schedule_id field by field. A value on one side and blank on the other always counts as a mismatch.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-DERIVED-TRACE-001">
+  <div class="cardhead"><span class="ruleid">RULE-DERIVED-TRACE-001</span>
+    <span class="chip type">referential</span>
+    <span class="sev" style="background:#d97e06">MEDIUM</span>
+    <a class="xref" href="#omni-to-trac--FM-003">
+      FM-003</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: participants &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Every <code>plan_id, participant_id</code> present on one side must exist on the other; orphans are reported in both directions (missing_in_target / unexpected_in_target). Flags target values that no mapping rule accounts for (untraceable derived data).</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-PROV-MATRIX-001">
+  <div class="cardhead"><span class="ruleid">RULE-PROV-MATRIX-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-to-trac--FM-004">
+      FM-004</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: plans &rarr; plans</span>
+    </div>
+  <p><b>What it checks:</b> Matches source and target rows on <code>plan_id</code> and compares safe_harbor_flag, catch_up_eligible, auto_enroll_flag, auto_enroll_rate (tolerance 0.0000), auto_increase_rate (tolerance 0.0000) field by field. A value on one side and blank on the other always counts as a mismatch.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-BAL-TOTALS-001">
+  <div class="cardhead"><span class="ruleid">RULE-BAL-TOTALS-001</span>
+    <span class="chip type">count_balance</span>
+    <span class="sev" style="background:#b91c1c">CRITICAL</span>
+    <a class="xref" href="#omni-to-trac--FM-007">
+      FM-007</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: balances &rarr; balances</span>
+    </div>
+  <p><b>What it checks:</b> Totals both sides and requires exact equality: sum of balance per plan_id; row count per plan_id; sum of balance per plan_id, participant_id. A variance at a coarse level automatically attaches the finer-level breakdown, so you can see which group moved.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-DATE-001">
+  <div class="cardhead"><span class="ruleid">RULE-DATE-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#d97e06">MEDIUM</span>
+    <a class="xref" href="#omni-to-trac--FM-008">
+      FM-008</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: participants &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Matches source and target rows on <code>plan_id, participant_id</code> and compares dob, hire_date, term_date field by field. A value on one side and blank on the other always counts as a mismatch. Also validates target values on their own: dob: min 1900-01-01.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-PCOUNT-001">
+  <div class="cardhead"><span class="ruleid">RULE-PCOUNT-001</span>
+    <span class="chip type">count_balance</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-to-trac--FM-009">
+      FM-009</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: participants &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Totals both sides and requires exact equality: row count per plan_id, status. A variance at a coarse level automatically attaches the finer-level breakdown, so you can see which group moved.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-KEYS-001">
+  <div class="cardhead"><span class="ruleid">RULE-KEYS-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-to-trac--FM-010">
+      FM-010</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Also validates target values on their own: ssn: not_null, pattern ^[0-9]{9}$; dob: not_null; plan_id: not_null.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-DUP-001">
+  <div class="cardhead"><span class="ruleid">RULE-DUP-001</span>
+    <span class="chip type">referential</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-to-trac--FM-011">
+      FM-011</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: participants &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Every <code>plan_id, participant_id</code> present on one side must exist on the other; orphans are reported in both directions (missing_in_target / unexpected_in_target). Also enforces uniqueness of plan_id, ssn on each side - every row of a duplicate group is reported.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-BAL-MT-001">
+  <div class="cardhead"><span class="ruleid">RULE-BAL-MT-001</span>
+    <span class="chip type">count_balance</span>
+    <span class="sev" style="background:#b91c1c">CRITICAL</span>
+    <a class="xref" href="#omni-to-trac--FM-012">
+      FM-012</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: balances &rarr; balances</span>
+    </div>
+  <p><b>What it checks:</b> Totals both sides and requires exact equality: sum of balance per plan_id, money_type_code. A variance at a coarse level automatically attaches the finer-level breakdown, so you can see which group moved.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-BAL-INV-001">
+  <div class="cardhead"><span class="ruleid">RULE-BAL-INV-001</span>
+    <span class="chip type">count_balance</span>
+    <span class="sev" style="background:#b91c1c">CRITICAL</span>
+    <a class="xref" href="#omni-to-trac--FM-013">
+      FM-013</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: balances &rarr; balances</span>
+    </div>
+  <p><b>What it checks:</b> Totals both sides and requires exact equality: sum of balance per plan_id, investment_code. A variance at a coarse level automatically attaches the finer-level breakdown, so you can see which group moved.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-LOAN-CNT-001">
+  <div class="cardhead"><span class="ruleid">RULE-LOAN-CNT-001</span>
+    <span class="chip type">count_balance</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-to-trac--FM-014">
+      FM-014</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: loans &rarr; loans</span>
+    </div>
+  <p><b>What it checks:</b> Totals both sides and requires exact equality: row count per plan_id; sum of outstanding_balance per plan_id. A variance at a coarse level automatically attaches the finer-level breakdown, so you can see which group moved.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-LOAN-TERMS-001">
+  <div class="cardhead"><span class="ruleid">RULE-LOAN-TERMS-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#d97e06">MEDIUM</span>
+    <a class="xref" href="#omni-to-trac--FM-014">
+      FM-014</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; loans</span>
+    </div>
+  <p><b>What it checks:</b> Also validates target values on their own: maturity_date: not_null; payment_amount: not_null; payment_frequency: not_null.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-CONTRIB-001">
+  <div class="cardhead"><span class="ruleid">RULE-CONTRIB-001</span>
+    <span class="chip type">count_balance</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-to-trac--FM-015">
+      FM-015</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: contributions &rarr; contributions</span>
+    </div>
+  <p><b>What it checks:</b> Totals both sides and requires exact equality: sum of amount per plan_id, money_type_code. A variance at a coarse level automatically attaches the finer-level breakdown, so you can see which group moved.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-LEN-001">
+  <div class="cardhead"><span class="ruleid">RULE-LEN-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#d97e06">MEDIUM</span>
+    <a class="xref" href="#omni-to-trac--FM-016">
+      FM-016</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Also validates target values on their own: first_name: max_length; last_name: max_length; address_1: max_length; address_2: max_length; city: max_length.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-DATEVAL-001">
+  <div class="cardhead"><span class="ruleid">RULE-DATEVAL-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#d97e06">MEDIUM</span>
+    <a class="xref" href="#omni-to-trac--FM-017">
+      FM-017</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Also validates target values on their own: dob: max today; term_date: gte_field hire_date.</p>
+</div>
+<div class="card" id="omni-to-trac--RULE-NEG-001">
+  <div class="cardhead"><span class="ruleid">RULE-NEG-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-to-trac--FM-018">
+      FM-018</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; balances</span>
+    </div>
+  <p><b>What it checks:</b> Also validates target values on their own: balance: min 0.00.</p>
+</div>
+</section>
+<section id="catalog-omni-zos-to-omni-linux">
+  <h2>omni-zos-to-omni-linux <span class="chip">v1.0.0</span>
+    <span class="chip ghost">18 failure modes &middot;
+    23 rules</span></h2>
+  <p class="lead">The transformation path: Omni on the mainframe to Omni on Linux via extract-and-load. 18 seed failure modes - FM-001..FM-008 from real conversion experience, FM-009..FM-018 from the standard validation methodology catalog.</p>
+  <h3>Failure modes (in priority order)</h3>
+  
+<div class="card" id="omni-zos-to-omni-linux--FM-007">
+  <div class="cardhead"><span class="fmid">FM-007</span>
+    <h4>Balance / count-balance totals</h4>
+    <span class="chip">BALANCE</span></div>
+  <div class="scorerow">probability <b>0.75</b> &times;
+    impact <b>0.95</b> = <span class="bar"><i style="width:71%"></i></span> <b>0.7125</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: BALANCE</span></div>
+  <p>Sums and counts fail to reconcile at plan, fund, or participant level. The master reconciliation mode; a coarse-level variance is always decomposable to finer levels.</p>
+  <p><b>Example defect:</b> Plan-level PRETAX total off by 0.01 across 120 participants.</p>
+  <p><b>How to correct it:</b> Drill from plan variance to money type to investment to participant to isolate the contributing records.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-BAL-TOTALS-001">RULE-BAL-TOTALS-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-001">
+  <div class="cardhead"><span class="fmid">FM-001</span>
+    <h4>Loan outstanding-balance carry-over</h4>
+    <span class="chip">LOANS</span></div>
+  <div class="scorerow">probability <b>0.70</b> &times;
+    impact <b>0.90</b> = <span class="bar"><i style="width:63%"></i></span> <b>0.63</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: LOAN</span></div>
+  <p>Converted loan balances diverge from source because payment-application order, accrual basis, and per-period rounding rules differ between platforms.</p>
+  <p><b>Example defect:</b> Loan L2 target outstanding balance 10398.55 vs source 10432.17 (delta -33.62) after a payment was applied out of order.</p>
+  <p><b>How to correct it:</b> Recompute amortization from origination; verify payment application order and accrual basis on the target.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-LOAN-BAL-001">RULE-LOAN-BAL-001</a><a class="xref" href="#omni-zos-to-omni-linux--RULE-LOAN-RECOMP-001">RULE-LOAN-RECOMP-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-012">
+  <div class="cardhead"><span class="fmid">FM-012</span>
+    <h4>Balance mismatch by money type</h4>
+    <span class="chip">BALANCE</span></div>
+  <div class="scorerow">probability <b>0.65</b> &times;
+    impact <b>0.95</b> = <span class="bar"><i style="width:62%"></i></span> <b>0.6175</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: BALANCE</span></div>
+  <p>Money-type subtotals fail to reconcile, commonly from crosswalk gaps or source combinations mapped into the wrong target bucket.</p>
+  <p><b>Example defect:</b> ROTH subtotal variance of 250.00 on one plan while the plan total reconciles (offsetting PRETAX variance).</p>
+  <p><b>How to correct it:</b> Audit the money-type crosswalk; drill the variance to participant level within the affected money type.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-BAL-MT-001">RULE-BAL-MT-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-013">
+  <div class="cardhead"><span class="fmid">FM-013</span>
+    <h4>Balance mismatch by investment option</h4>
+    <span class="chip">BALANCE</span></div>
+  <div class="scorerow">probability <b>0.65</b> &times;
+    impact <b>0.95</b> = <span class="bar"><i style="width:62%"></i></span> <b>0.6175</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: BALANCE</span></div>
+  <p>Investment-level subtotals fail to reconcile, commonly from fund-mapping gaps, share-class consolidation, or price-date misalignment.</p>
+  <p><b>Example defect:</b> Fund F03 subtotal variance; units correct but valued at the wrong price date.</p>
+  <p><b>How to correct it:</b> Audit the investment crosswalk and pricing as-of dates; drill to participant positions in the affected fund.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-BAL-INV-001">RULE-BAL-INV-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-002">
+  <div class="cardhead"><span class="fmid">FM-002</span>
+    <h4>Participant-level vesting schedule mapping</h4>
+    <span class="chip">VESTING</span></div>
+  <div class="scorerow">probability <b>0.65</b> &times;
+    impact <b>0.85</b> = <span class="bar"><i style="width:55%"></i></span> <b>0.5525</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: VESTING, PARTICIPANT</span></div>
+  <p>Vested percentages drift because service-counting method (elapsed time vs. hours) and schedule mapping differ; entry-date handling compounds the drift.</p>
+  <p><b>Example defect:</b> Participant P0017 vested 60% in target while canonical schedule plus service recomputes to 80%.</p>
+  <p><b>How to correct it:</b> Reconcile schedule definitions and service-computation method before re-mapping participant service.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-VEST-PCT-001">RULE-VEST-PCT-001</a><a class="xref" href="#omni-zos-to-omni-linux--RULE-VEST-SCHED-001">RULE-VEST-SCHED-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-009">
+  <div class="cardhead"><span class="fmid">FM-009</span>
+    <h4>Participant count mismatch by status</h4>
+    <span class="chip">PARTICIPANT</span></div>
+  <div class="scorerow">probability <b>0.55</b> &times;
+    impact <b>0.90</b> = <span class="bar"><i style="width:50%"></i></span> <b>0.495</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: PARTICIPANT</span></div>
+  <p>Participant counts by canonical status differ between source and target, usually from status-code crosswalk gaps or dropped records.</p>
+  <p><b>Example defect:</b> One TERMINATED participant counted ACTIVE in target; ACTIVE 87 vs 88, TERMINATED 25 vs 24.</p>
+  <p><b>How to correct it:</b> Audit the status crosswalk; trace each variance to its participant via the referential orphan report.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-PCOUNT-001">RULE-PCOUNT-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-006">
+  <div class="cardhead"><span class="fmid">FM-006</span>
+    <h4>Packed/binary field handling</h4>
+    <span class="chip">ENCODING</span></div>
+  <div class="scorerow">probability <b>0.55</b> &times;
+    impact <b>0.85</b> = <span class="bar"><i style="width:47%"></i></span> <b>0.4675</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: ENCODING, FORMAT, BALANCE, LOAN</span></div>
+  <p>COMP-3 packed-decimal fields decoded with the wrong implied-decimal position or sign-nibble convention produce powers-of-ten errors and flipped signs.</p>
+  <p><b>Example defect:</b> One packed amount decoded x100 (implied decimal lost); one sign nibble read F as D flipping the amount negative.</p>
+  <p><b>How to correct it:</b> Correct the copybook layout (decimals, sign convention) and re-ingest; cross-check the file control total.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-PACKED-001">RULE-PACKED-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-003">
+  <div class="cardhead"><span class="fmid">FM-003</span>
+    <h4>Custom calculated-field dependencies</h4>
+    <span class="chip">PLAN</span></div>
+  <div class="scorerow">probability <b>0.55</b> &times;
+    impact <b>0.75</b> = <span class="bar"><i style="width:41%"></i></span> <b>0.4125</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: PLAN, FORMAT</span></div>
+  <p>Source-side scripted/derived fields (e.g., OmniScript logic) have no target equivalent; target values appear with no mapping-rule provenance.</p>
+  <p><b>Example defect:</b> Target field svc_points populated with values traceable to no mapping rule in the workbook.</p>
+  <p><b>How to correct it:</b> Inventory source scripts; re-implement or retire each derived field explicitly.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-DERIVED-TRACE-001">RULE-DERIVED-TRACE-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-004">
+  <div class="cardhead"><span class="fmid">FM-004</span>
+    <h4>Plan-provision mismatches</h4>
+    <span class="chip">PLAN</span></div>
+  <div class="scorerow">probability <b>0.50</b> &times;
+    impact <b>0.80</b> = <span class="bar"><i style="width:40%"></i></span> <b>0.4</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: PLAN</span></div>
+  <p>Provision configuration (safe harbor, catch-up eligibility, auto-enrollment/auto-increase parameters) maps imperfectly into the target&#x27;s provision model.</p>
+  <p><b>Example defect:</b> Safe-harbor flag dropped on one plan; catch-up eligibility inverted.</p>
+  <p><b>How to correct it:</b> Provision-by-provision review against the plan document; correct target plan setup, not the data.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-PROV-MATRIX-001">RULE-PROV-MATRIX-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-010">
+  <div class="cardhead"><span class="fmid">FM-010</span>
+    <h4>Missing key fields</h4>
+    <span class="chip">PARTICIPANT</span></div>
+  <div class="scorerow">probability <b>0.50</b> &times;
+    impact <b>0.80</b> = <span class="bar"><i style="width:40%"></i></span> <b>0.4</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: PARTICIPANT</span></div>
+  <p>Required identity fields (SSN, DOB, plan ID) arrive null or blank on the target, blocking downstream processing.</p>
+  <p><b>Example defect:</b> One target participant with blank SSN.</p>
+  <p><b>How to correct it:</b> Trace to source: distinguish genuinely missing source data (cleanup item) from values dropped in transform (mapping fix).</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-KEYS-001">RULE-KEYS-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-015">
+  <div class="cardhead"><span class="fmid">FM-015</span>
+    <h4>Contribution &amp; distribution totals</h4>
+    <span class="chip">CONTRIBUTION</span></div>
+  <div class="scorerow">probability <b>0.45</b> &times;
+    impact <b>0.80</b> = <span class="bar"><i style="width:36%"></i></span> <b>0.36</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: CONTRIBUTION</span></div>
+  <p>Employee/employer contribution totals for the last payroll cycle, or recent distribution totals, fail to reconcile.</p>
+  <p><b>Example defect:</b> Employer match total for the final pre-conversion payroll cycle off by one participant&#x27;s contribution.</p>
+  <p><b>How to correct it:</b> Verify cutover-period transaction inclusion rules (trade date vs. payroll date) on both extracts.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-CONTRIB-001">RULE-CONTRIB-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-008">
+  <div class="cardhead"><span class="fmid">FM-008</span>
+    <h4>Date and format drift</h4>
+    <span class="chip">FORMAT</span></div>
+  <div class="scorerow">probability <b>0.60</b> &times;
+    impact <b>0.60</b> = <span class="bar"><i style="width:36%"></i></span> <b>0.36</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: FORMAT, PARTICIPANT</span></div>
+  <p>Century-window expansion errors, Julian-to-Gregorian conversion faults, and inconsistent zero/blank-date semantics shift or invent dates.</p>
+  <p><b>Example defect:</b> DOB 1897-03-12 produced by a wrong century window; a zero date mapped to 0001-01-01 instead of null.</p>
+  <p><b>How to correct it:</b> Define null-date semantics per field in the layout spec; correct windowing rules in extract or transform.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-DATE-001">RULE-DATE-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-011">
+  <div class="cardhead"><span class="fmid">FM-011</span>
+    <h4>Duplicate participant IDs / SSNs</h4>
+    <span class="chip">PARTICIPANT</span></div>
+  <div class="scorerow">probability <b>0.40</b> &times;
+    impact <b>0.85</b> = <span class="bar"><i style="width:34%"></i></span> <b>0.34</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: PARTICIPANT</span></div>
+  <p>Duplicate participant IDs or SSNs within a plan on the target, typically from merge logic or rehire-history handling.</p>
+  <p><b>Example defect:</b> Two target participants share SSN 900-44-1207 within the same plan.</p>
+  <p><b>How to correct it:</b> Resolve identity: merge true duplicates, re-key false ones; review rehire-history load logic.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-DUP-001">RULE-DUP-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-014">
+  <div class="cardhead"><span class="fmid">FM-014</span>
+    <h4>Loan count / missing repayment terms</h4>
+    <span class="chip">LOANS</span></div>
+  <div class="scorerow">probability <b>0.45</b> &times;
+    impact <b>0.75</b> = <span class="bar"><i style="width:34%"></i></span> <b>0.3375</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: LOAN</span></div>
+  <p>Loan counts differ, or converted loans arrive without repayment schedule, payment amount, or maturity date.</p>
+  <p><b>Example defect:</b> Loan count 5 vs 6 on one plan; one converted loan missing its maturity date.</p>
+  <p><b>How to correct it:</b> Reconcile the loan extract row-by-row; verify paid-off/deemed loans are filtered consistently on both sides.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-LOAN-CNT-001">RULE-LOAN-CNT-001</a><a class="xref" href="#omni-zos-to-omni-linux--RULE-LOAN-TERMS-001">RULE-LOAN-TERMS-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-005">
+  <div class="cardhead"><span class="fmid">FM-005</span>
+    <h4>Sort order / encoding sensitivity (EBCDIC vs. ASCII)</h4>
+    <span class="chip">ENCODING</span></div>
+  <div class="scorerow">probability <b>0.60</b> &times;
+    impact <b>0.55</b> = <span class="bar"><i style="width:33%"></i></span> <b>0.33</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: ENCODING, PARTICIPANT</span></div>
+  <p>EBCDIC-to-ASCII transitions garble extended characters (mojibake) and silently change collation: EBCDIC sorts digits after letters, ASCII the reverse.</p>
+  <p><b>Example defect:</b> Target name renders &#x27;JosÃ© RamÃ­rez&#x27;; an ordered extract diverges at the first digit-vs-letter boundary.</p>
+  <p><b>How to correct it:</b> Normalize collation explicitly in extract jobs; never rely on platform-default sort. Re-decode affected fields with the correct codepage.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-ENC-001">RULE-ENC-001</a><a class="xref" href="#omni-zos-to-omni-linux--RULE-SORT-001">RULE-SORT-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-018">
+  <div class="cardhead"><span class="fmid">FM-018</span>
+    <h4>Unexpected negative balances</h4>
+    <span class="chip">BALANCE</span></div>
+  <div class="scorerow">probability <b>0.35</b> &times;
+    impact <b>0.85</b> = <span class="bar"><i style="width:30%"></i></span> <b>0.2975</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: BALANCE</span></div>
+  <p>Negative balances on the target with no explaining loan or adjustment context, often from sign-handling or reversal-ordering faults.</p>
+  <p><b>Example defect:</b> Negative MATCH balance of -412.06 for one participant with no offsetting adjustment.</p>
+  <p><b>How to correct it:</b> Trace the contributing transactions; check reversal ordering and sign handling in the load.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-NEG-001">RULE-NEG-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-016">
+  <div class="cardhead"><span class="fmid">FM-016</span>
+    <h4>Field-length violations &amp; invalid characters</h4>
+    <span class="chip">FORMAT</span></div>
+  <div class="scorerow">probability <b>0.50</b> &times;
+    impact <b>0.50</b> = <span class="bar"><i style="width:25%"></i></span> <b>0.25</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: FORMAT, PARTICIPANT</span></div>
+  <p>Values exceed target field limits or contain characters the target rejects; truncation corrupts names and addresses silently.</p>
+  <p><b>Example defect:</b> 41-character address loaded into a 35-character field; &#x27;#&#x27; present in a name field.</p>
+  <p><b>How to correct it:</b> Apply documented truncation/substitution rules in transform; never let the target platform truncate implicitly.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-LEN-001">RULE-LEN-001</a><a class="xref" href="#omni-zos-to-omni-linux--RULE-CHAR-001">RULE-CHAR-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--FM-017">
+  <div class="cardhead"><span class="fmid">FM-017</span>
+    <h4>Invalid / future dates</h4>
+    <span class="chip">FORMAT</span></div>
+  <div class="scorerow">probability <b>0.45</b> &times;
+    impact <b>0.55</b> = <span class="bar"><i style="width:25%"></i></span> <b>0.2475</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: FORMAT, PARTICIPANT</span></div>
+  <p>Logically impossible dates: DOB in the future, termination before hire, dates outside plausible ranges.</p>
+  <p><b>Example defect:</b> Termination date 2019-05-01 precedes hire date 2021-03-15 for one participant.</p>
+  <p><b>How to correct it:</b> Trace to source vs. transform origin; fix windowing or field-swap defects; route true source errors to cleanup.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux--RULE-DATEVAL-001">RULE-DATEVAL-001</a></p>
+</div>
+  <h3>Detection rules</h3>
+  
+<div class="card" id="omni-zos-to-omni-linux--RULE-LOAN-BAL-001">
+  <div class="cardhead"><span class="ruleid">RULE-LOAN-BAL-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-001">
+      FM-001</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: loans &rarr; loans</span>
+    </div>
+  <p><b>What it checks:</b> Matches source and target rows on <code>plan_id, participant_id, loan_id</code> and compares outstanding_balance (tolerance 0.00) field by field. A value on one side and blank on the other always counts as a mismatch.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-LOAN-RECOMP-001">
+  <div class="cardhead"><span class="ruleid">RULE-LOAN-RECOMP-001</span>
+    <span class="chip type">derived_recompute</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-001">
+      FM-001</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: loans &rarr; loans</span>
+    </div>
+  <p><b>What it checks:</b> Recomputes <code>loan_balance</code> from its inputs using the engine's stock formula and compares the result to the stored <code>outstanding_balance</code> at tolerance 0.00. Where the stored value disagrees with the stock computation, custom logic produced it - detected without reading any source code.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-VEST-PCT-001">
+  <div class="cardhead"><span class="ruleid">RULE-VEST-PCT-001</span>
+    <span class="chip type">derived_recompute</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-002">
+      FM-002</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: vesting &rarr; vesting</span>
+    </div>
+  <p><b>What it checks:</b> Recomputes <code>vested_pct</code> from its inputs using the engine's stock formula and compares the result to the stored <code>vested_pct</code> at tolerance 0.0000. Where the stored value disagrees with the stock computation, custom logic produced it - detected without reading any source code.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-VEST-SCHED-001">
+  <div class="cardhead"><span class="ruleid">RULE-VEST-SCHED-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#d97e06">MEDIUM</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-002">
+      FM-002</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: vesting &rarr; vesting</span>
+    </div>
+  <p><b>What it checks:</b> Matches source and target rows on <code>plan_id, participant_id</code> and compares schedule_id field by field. A value on one side and blank on the other always counts as a mismatch.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-DERIVED-TRACE-001">
+  <div class="cardhead"><span class="ruleid">RULE-DERIVED-TRACE-001</span>
+    <span class="chip type">referential</span>
+    <span class="sev" style="background:#d97e06">MEDIUM</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-003">
+      FM-003</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: participants &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Every <code>plan_id, participant_id</code> present on one side must exist on the other; orphans are reported in both directions (missing_in_target / unexpected_in_target). Flags target values that no mapping rule accounts for (untraceable derived data).</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-PROV-MATRIX-001">
+  <div class="cardhead"><span class="ruleid">RULE-PROV-MATRIX-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-004">
+      FM-004</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: plans &rarr; plans</span>
+    </div>
+  <p><b>What it checks:</b> Matches source and target rows on <code>plan_id</code> and compares safe_harbor_flag, catch_up_eligible, auto_enroll_flag, auto_enroll_rate (tolerance 0.0000), auto_increase_rate (tolerance 0.0000) field by field. A value on one side and blank on the other always counts as a mismatch.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-ENC-001">
+  <div class="cardhead"><span class="ruleid">RULE-ENC-001</span>
+    <span class="chip type">encoding_check</span>
+    <span class="sev" style="background:#d97e06">MEDIUM</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-005">
+      FM-005</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Scans first_name, last_name, address_1, address_2, city for characters outside the allowed set (<code>ascii</code>) and for mojibake signatures (the Ã/Â/&#65533; artifacts of a wrong-codepage decode) even when characters are technically representable.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-SORT-001">
+  <div class="cardhead"><span class="ruleid">RULE-SORT-001</span>
+    <span class="chip type">sort_order_check</span>
+    <span class="sev" style="background:#64748b">LOW</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-005">
+      FM-005</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Checks that rows ordered by last_name, first_name follow <code>ascii</code> collation; adjacent inversions are reported. EBCDIC sorts digits after letters - the opposite of ASCII - so resorted extracts betray themselves at digit/letter boundaries.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-PACKED-001">
+  <div class="cardhead"><span class="ruleid">RULE-PACKED-001</span>
+    <span class="chip type">derived_recompute</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-006">
+      FM-006</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: loans &rarr; loans</span>
+    </div>
+  <p><b>What it checks:</b> Recomputes <code>packed_decode_control_total</code> from its inputs using the engine's stock formula and compares the result to the stored <code>outstanding_balance</code> at tolerance 0.00. Where the stored value disagrees with the stock computation, custom logic produced it - detected without reading any source code.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-BAL-TOTALS-001">
+  <div class="cardhead"><span class="ruleid">RULE-BAL-TOTALS-001</span>
+    <span class="chip type">count_balance</span>
+    <span class="sev" style="background:#b91c1c">CRITICAL</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-007">
+      FM-007</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: balances &rarr; balances</span>
+    </div>
+  <p><b>What it checks:</b> Totals both sides and requires exact equality: sum of balance per plan_id; row count per plan_id; sum of balance per plan_id, participant_id. A variance at a coarse level automatically attaches the finer-level breakdown, so you can see which group moved.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-DATE-001">
+  <div class="cardhead"><span class="ruleid">RULE-DATE-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#d97e06">MEDIUM</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-008">
+      FM-008</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: participants &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Matches source and target rows on <code>plan_id, participant_id</code> and compares dob, hire_date, term_date field by field. A value on one side and blank on the other always counts as a mismatch. Also validates target values on their own: dob: min 1900-01-01.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-PCOUNT-001">
+  <div class="cardhead"><span class="ruleid">RULE-PCOUNT-001</span>
+    <span class="chip type">count_balance</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-009">
+      FM-009</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: participants &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Totals both sides and requires exact equality: row count per plan_id, status. A variance at a coarse level automatically attaches the finer-level breakdown, so you can see which group moved.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-KEYS-001">
+  <div class="cardhead"><span class="ruleid">RULE-KEYS-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-010">
+      FM-010</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Also validates target values on their own: ssn: not_null, pattern ^[0-9]{9}$; dob: not_null; plan_id: not_null.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-DUP-001">
+  <div class="cardhead"><span class="ruleid">RULE-DUP-001</span>
+    <span class="chip type">referential</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-011">
+      FM-011</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: participants &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Every <code>plan_id, participant_id</code> present on one side must exist on the other; orphans are reported in both directions (missing_in_target / unexpected_in_target). Also enforces uniqueness of plan_id, ssn on each side - every row of a duplicate group is reported.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-BAL-MT-001">
+  <div class="cardhead"><span class="ruleid">RULE-BAL-MT-001</span>
+    <span class="chip type">count_balance</span>
+    <span class="sev" style="background:#b91c1c">CRITICAL</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-012">
+      FM-012</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: balances &rarr; balances</span>
+    </div>
+  <p><b>What it checks:</b> Totals both sides and requires exact equality: sum of balance per plan_id, money_type_code. A variance at a coarse level automatically attaches the finer-level breakdown, so you can see which group moved.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-BAL-INV-001">
+  <div class="cardhead"><span class="ruleid">RULE-BAL-INV-001</span>
+    <span class="chip type">count_balance</span>
+    <span class="sev" style="background:#b91c1c">CRITICAL</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-013">
+      FM-013</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: balances &rarr; balances</span>
+    </div>
+  <p><b>What it checks:</b> Totals both sides and requires exact equality: sum of balance per plan_id, investment_code. A variance at a coarse level automatically attaches the finer-level breakdown, so you can see which group moved.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-LOAN-CNT-001">
+  <div class="cardhead"><span class="ruleid">RULE-LOAN-CNT-001</span>
+    <span class="chip type">count_balance</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-014">
+      FM-014</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: loans &rarr; loans</span>
+    </div>
+  <p><b>What it checks:</b> Totals both sides and requires exact equality: row count per plan_id; sum of outstanding_balance per plan_id. A variance at a coarse level automatically attaches the finer-level breakdown, so you can see which group moved.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-LOAN-TERMS-001">
+  <div class="cardhead"><span class="ruleid">RULE-LOAN-TERMS-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#d97e06">MEDIUM</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-014">
+      FM-014</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; loans</span>
+    </div>
+  <p><b>What it checks:</b> Also validates target values on their own: maturity_date: not_null; payment_amount: not_null; payment_frequency: not_null.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-CONTRIB-001">
+  <div class="cardhead"><span class="ruleid">RULE-CONTRIB-001</span>
+    <span class="chip type">count_balance</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-015">
+      FM-015</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: contributions &rarr; contributions</span>
+    </div>
+  <p><b>What it checks:</b> Totals both sides and requires exact equality: sum of amount per plan_id, money_type_code. A variance at a coarse level automatically attaches the finer-level breakdown, so you can see which group moved.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-LEN-001">
+  <div class="cardhead"><span class="ruleid">RULE-LEN-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#d97e06">MEDIUM</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-016">
+      FM-016</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Also validates target values on their own: first_name: max_length; last_name: max_length; address_1: max_length; address_2: max_length; city: max_length.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-CHAR-001">
+  <div class="cardhead"><span class="ruleid">RULE-CHAR-001</span>
+    <span class="chip type">encoding_check</span>
+    <span class="sev" style="background:#64748b">LOW</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-016">
+      FM-016</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Scans first_name, last_name for characters outside the allowed set (<code>custom-set</code>) and for mojibake signatures (the Ã/Â/&#65533; artifacts of a wrong-codepage decode) even when characters are technically representable.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-DATEVAL-001">
+  <div class="cardhead"><span class="ruleid">RULE-DATEVAL-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#d97e06">MEDIUM</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-017">
+      FM-017</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Also validates target values on their own: dob: max today; term_date: gte_field hire_date.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux--RULE-NEG-001">
+  <div class="cardhead"><span class="ruleid">RULE-NEG-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux--FM-018">
+      FM-018</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; balances</span>
+    </div>
+  <p><b>What it checks:</b> Also validates target values on their own: balance: min 0.00.</p>
+</div>
+</section>
+<section id="catalog-omni-zos-to-omni-linux-restore">
+  <h2>omni-zos-to-omni-linux-restore <span class="chip">v1.0.0</span>
+    <span class="chip ghost">6 failure modes &middot;
+    12 rules</span></h2>
+  <p class="lead">The backup/restore path: same product on both sides, so a clean restore is value-identical and every rule runs at tolerance zero. Restore-specific modes FM-101..FM-106 cover custom-code drift, UDF loss, off-label usage, required-field regression, truncation, and the tolerance-zero net. See docs/Omni_to_Omni_Restore_Strategy.md.</p>
+  <h3>Failure modes (in priority order)</h3>
+  
+<div class="card" id="omni-zos-to-omni-linux-restore--FM-101">
+  <div class="cardhead"><span class="fmid">FM-101</span>
+    <h4>Custom code / script value drift</h4>
+    <span class="chip">CALCULATION</span></div>
+  <div class="scorerow">probability <b>0.70</b> &times;
+    impact <b>0.90</b> = <span class="bar"><i style="width:63%"></i></span> <b>0.63</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: VESTING, LOAN</span></div>
+  <p>The mainframe ran client-modified COBOL or Omni scripting whose outputs restore intact, but the vanilla Linux software recomputes those values by the stock formula. Recomputing derived values with the stock formula and comparing exposes every place custom logic existed - without reading a line of the source code.</p>
+  <p><b>Example defect:</b> Source vesting shows 0.80 vested at 4.5 service years on a GRADED6 schedule; the stock schedule computes 0.60 - a custom rounding routine on the mainframe produced the extra 0.20.</p>
+  <p><b>How to correct it:</b> Identify the custom routine behind each drifted value; decide per finding whether to port it to the target or adopt the stock computation, and get client sign-off on the authoritative value before cutover.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux-restore--RULE-RST-VEST-001">RULE-RST-VEST-001</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--FM-106">
+  <div class="cardhead"><span class="fmid">FM-106</span>
+    <h4>Field value drift at tolerance zero</h4>
+    <span class="chip">BALANCING</span></div>
+  <div class="scorerow">probability <b>0.65</b> &times;
+    impact <b>0.85</b> = <span class="bar"><i style="width:55%"></i></span> <b>0.5525</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: BALANCE, LOAN, PARTICIPANT</span></div>
+  <p>Same product on both sides means a clean restore is value-identical. Every field compares at tolerance 0.00 - any difference at all, money or text, is a finding. This is the catch-all net under the targeted modes.</p>
+  <p><b>Example defect:</b> An outstanding loan balance 25.00 lower on the target; a participant surname respelled.</p>
+  <p><b>How to correct it:</b> Trace each drifted value to its restore step; correct via maintenance transactions or re-restore, and record the authoritative side in the exception register.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux-restore--RULE-RST-DIFF-001">RULE-RST-DIFF-001</a><a class="xref" href="#omni-zos-to-omni-linux-restore--RULE-RST-DIFF-002">RULE-RST-DIFF-002</a><a class="xref" href="#omni-zos-to-omni-linux-restore--RULE-RST-DIFF-003">RULE-RST-DIFF-003</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--FM-102">
+  <div class="cardhead"><span class="fmid">FM-102</span>
+    <h4>UDF definition gap</h4>
+    <span class="chip">PLAN</span></div>
+  <div class="scorerow">probability <b>0.60</b> &times;
+    impact <b>0.85</b> = <span class="bar"><i style="width:51%"></i></span> <b>0.51</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: PLAN, PARTICIPANT, FORMAT</span></div>
+  <p>User-defined fields exist on the source but were never defined on the target: restored values arrive with no definition to live in and are silently dropped or orphaned. Definitions and values are extracted as datasets on both sides so the loss is countable.</p>
+  <p><b>Example defect:</b> UDF-07 &#x27;Union Code&#x27; is defined on the mainframe with 214 participant values; after restore the Linux side has no UDF-07 definition and zero values.</p>
+  <p><b>How to correct it:</b> Re-key the missing UDF definitions on the target (corrective maintenance card deck stamped from the Format Matrix layouts), re-apply the values, and re-run to prove the counts reconcile.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux-restore--RULE-RST-UDF-001">RULE-RST-UDF-001</a><a class="xref" href="#omni-zos-to-omni-linux-restore--RULE-RST-UDF-002">RULE-RST-UDF-002</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--FM-105">
+  <div class="cardhead"><span class="fmid">FM-105</span>
+    <h4>Restore truncation / record gaps</h4>
+    <span class="chip">BALANCING</span></div>
+  <div class="scorerow">probability <b>0.50</b> &times;
+    impact <b>0.95</b> = <span class="bar"><i style="width:48%"></i></span> <b>0.475</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: PARTICIPANT, LOAN, TRANSACTION</span></div>
+  <p>Whole records or record regions dropped or truncated by the restore. Counts reconcile per dataset per plan so a dropped region cannot hide inside a grand total.</p>
+  <p><b>Example defect:</b> Loan-payment history short by two rows for one plan after restore.</p>
+  <p><b>How to correct it:</b> Re-restore the affected region and escalate to the vendor with the exact record list from the drill-down; never hand-key missing history.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux-restore--RULE-RST-CNT-001">RULE-RST-CNT-001</a><a class="xref" href="#omni-zos-to-omni-linux-restore--RULE-RST-CNT-002">RULE-RST-CNT-002</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--FM-103">
+  <div class="cardhead"><span class="fmid">FM-103</span>
+    <h4>Off-label field usage</h4>
+    <span class="chip">FORMAT</span></div>
+  <div class="scorerow">probability <b>0.55</b> &times;
+    impact <b>0.70</b> = <span class="bar"><i style="width:38%"></i></span> <b>0.385</b>
+    <span class="chip ghost">origin: conversion experience</span>
+    <span class="chip ghost">domains: FORMAT, PARTICIPANT</span></div>
+  <p>Decades of operation hide data where the software never intended it: values in &#x27;Not Used&#x27; filler positions, letters in numeric Pictures, codes outside a field&#x27;s domain. The restore copies the bytes faithfully - and the new software misreads them by the book. Detection validates every position against the Format Matrix expectation model.</p>
+  <p><b>Example defect:</b> Branch code &#x27;BR-EAST&#x27; stored in participant filler positions 442-448; an SSN carrying a letter in a 9(9) Picture.</p>
+  <p><b>How to correct it:</b> Map each off-label usage to a proper UDF on the target, document the crosswalk with the client, and migrate the hidden values explicitly rather than letting the restore carry them blind.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux-restore--RULE-RST-FMT-001">RULE-RST-FMT-001</a><a class="xref" href="#omni-zos-to-omni-linux-restore--RULE-RST-FMT-002">RULE-RST-FMT-002</a></p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--FM-104">
+  <div class="cardhead"><span class="fmid">FM-104</span>
+    <h4>Required-field regression</h4>
+    <span class="chip">FORMAT</span></div>
+  <div class="scorerow">probability <b>0.45</b> &times;
+    impact <b>0.80</b> = <span class="bar"><i style="width:36%"></i></span> <b>0.36</b>
+    <span class="chip ghost">origin: validation methodology catalog</span>
+    <span class="chip ghost">domains: PARTICIPANT, LOAN, FORMAT</span></div>
+  <p>Fields the Format Matrix marks Required arriving blank after the restore - typically collateral damage of layout or version mismatches. Every Required position is asserted non-blank on the target.</p>
+  <p><b>Example defect:</b> Participant date-of-birth blank on the target for records that carried one on the mainframe.</p>
+  <p><b>How to correct it:</b> Corrective maintenance transactions repopulate the blanked fields from the source extract; if a whole region is affected, re-restore it and escalate the root cause to the vendor.</p>
+  <p><b>Detected by:</b> <a class="xref" href="#omni-zos-to-omni-linux-restore--RULE-RST-REQ-001">RULE-RST-REQ-001</a><a class="xref" href="#omni-zos-to-omni-linux-restore--RULE-RST-REQ-002">RULE-RST-REQ-002</a></p>
+</div>
+  <h3>Detection rules</h3>
+  
+<div class="card" id="omni-zos-to-omni-linux-restore--RULE-RST-VEST-001">
+  <div class="cardhead"><span class="ruleid">RULE-RST-VEST-001</span>
+    <span class="chip type">derived_recompute</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux-restore--FM-101">
+      FM-101</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: vesting &rarr; vesting</span>
+    </div>
+  <p><b>What it checks:</b> Recomputes <code>vested_pct</code> from its inputs using the engine's stock formula and compares the result to the stored <code>vested_pct</code> at tolerance 0.0000. Where the stored value disagrees with the stock computation, custom logic produced it - detected without reading any source code.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--RULE-RST-UDF-001">
+  <div class="cardhead"><span class="ruleid">RULE-RST-UDF-001</span>
+    <span class="chip type">referential</span>
+    <span class="sev" style="background:#b91c1c">CRITICAL</span>
+    <a class="xref" href="#omni-zos-to-omni-linux-restore--FM-102">
+      FM-102</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: udf_definitions &rarr; udf_definitions</span>
+    </div>
+  <p><b>What it checks:</b> Every <code>plan_id, udf_id</code> present on one side must exist on the other; orphans are reported in both directions (missing_in_target / unexpected_in_target).</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--RULE-RST-UDF-002">
+  <div class="cardhead"><span class="ruleid">RULE-RST-UDF-002</span>
+    <span class="chip type">count_balance</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux-restore--FM-102">
+      FM-102</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: udf_values &rarr; udf_values</span>
+    </div>
+  <p><b>What it checks:</b> Totals both sides and requires exact equality: row count per plan_id, udf_id. A variance at a coarse level automatically attaches the finer-level breakdown, so you can see which group moved.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--RULE-RST-FMT-001">
+  <div class="cardhead"><span class="ruleid">RULE-RST-FMT-001</span>
+    <span class="chip type">format_conformance</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux-restore--FM-103">
+      FM-103</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Validates the target dataset against the Format Matrix expectation model - filler_442_448: must be BLANK (a &#x27;Not Used&#x27; position - any data is off-label usage). Pictures are COBOL: X(n) is text up to n chars; 9(n) is digits only; S9(n)V99 is a signed number with two implied decimal places.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--RULE-RST-FMT-002">
+  <div class="cardhead"><span class="ruleid">RULE-RST-FMT-002</span>
+    <span class="chip type">format_conformance</span>
+    <span class="sev" style="background:#d97e06">MEDIUM</span>
+    <a class="xref" href="#omni-zos-to-omni-linux-restore--FM-103">
+      FM-103</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Validates the target dataset against the Format Matrix expectation model - ssn: must fit Picture 9(9) | state: must fit Picture X(2) | status: must be one of ACTIVE, TERMINATED, SUSPENDED, DECEASED. Pictures are COBOL: X(n) is text up to n chars; 9(n) is digits only; S9(n)V99 is a signed number with two implied decimal places.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--RULE-RST-REQ-001">
+  <div class="cardhead"><span class="ruleid">RULE-RST-REQ-001</span>
+    <span class="chip type">format_conformance</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux-restore--FM-104">
+      FM-104</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Validates the target dataset against the Format Matrix expectation model - dob: required (blank = finding) | status: required (blank = finding). Pictures are COBOL: X(n) is text up to n chars; 9(n) is digits only; S9(n)V99 is a signed number with two implied decimal places.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--RULE-RST-REQ-002">
+  <div class="cardhead"><span class="ruleid">RULE-RST-REQ-002</span>
+    <span class="chip type">format_conformance</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux-restore--FM-104">
+      FM-104</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: &mdash; &rarr; loans</span>
+    </div>
+  <p><b>What it checks:</b> Validates the target dataset against the Format Matrix expectation model - origination_date: required (blank = finding) | origination_amount: required (blank = finding); must fit Picture 9(7)V99. Pictures are COBOL: X(n) is text up to n chars; 9(n) is digits only; S9(n)V99 is a signed number with two implied decimal places.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--RULE-RST-CNT-001">
+  <div class="cardhead"><span class="ruleid">RULE-RST-CNT-001</span>
+    <span class="chip type">count_balance</span>
+    <span class="sev" style="background:#b91c1c">CRITICAL</span>
+    <a class="xref" href="#omni-zos-to-omni-linux-restore--FM-105">
+      FM-105</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: participants &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Totals both sides and requires exact equality: row count per plan_id. A variance at a coarse level automatically attaches the finer-level breakdown, so you can see which group moved.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--RULE-RST-CNT-002">
+  <div class="cardhead"><span class="ruleid">RULE-RST-CNT-002</span>
+    <span class="chip type">count_balance</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux-restore--FM-105">
+      FM-105</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: loan_payments &rarr; loan_payments</span>
+    </div>
+  <p><b>What it checks:</b> Totals both sides and requires exact equality: row count per plan_id. A variance at a coarse level automatically attaches the finer-level breakdown, so you can see which group moved.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--RULE-RST-DIFF-001">
+  <div class="cardhead"><span class="ruleid">RULE-RST-DIFF-001</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#b91c1c">CRITICAL</span>
+    <a class="xref" href="#omni-zos-to-omni-linux-restore--FM-106">
+      FM-106</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: balances &rarr; balances</span>
+    </div>
+  <p><b>What it checks:</b> Matches source and target rows on <code>plan_id, participant_id, money_type_code, investment_code</code> and compares balance (tolerance 0.00), units (tolerance 0.00) field by field. A value on one side and blank on the other always counts as a mismatch.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--RULE-RST-DIFF-002">
+  <div class="cardhead"><span class="ruleid">RULE-RST-DIFF-002</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#ea580c">HIGH</span>
+    <a class="xref" href="#omni-zos-to-omni-linux-restore--FM-106">
+      FM-106</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: loans &rarr; loans</span>
+    </div>
+  <p><b>What it checks:</b> Matches source and target rows on <code>plan_id, participant_id, loan_id</code> and compares outstanding_balance (tolerance 0.00), payment_amount (tolerance 0.00) field by field. A value on one side and blank on the other always counts as a mismatch.</p>
+</div>
+<div class="card" id="omni-zos-to-omni-linux-restore--RULE-RST-DIFF-003">
+  <div class="cardhead"><span class="ruleid">RULE-RST-DIFF-003</span>
+    <span class="chip type">field_compare</span>
+    <span class="sev" style="background:#d97e06">MEDIUM</span>
+    <a class="xref" href="#omni-zos-to-omni-linux-restore--FM-106">
+      FM-106</a></div>
+  <div class="scorerow"><span class="chip ghost">datasets: participants &rarr; participants</span>
+    </div>
+  <p><b>What it checks:</b> Matches source and target rows on <code>plan_id, participant_id</code> and compares last_name, first_name, dob field by field. A value on one side and blank on the other always counts as a mismatch.</p>
+</div>
+</section>
+
+<section id="cli">
+  <h2>CLI reference</h2>
+  <p class="lead">Every command is also reachable through the dashboard and
+  the REST API. Prefix with <code>uv run</code> (or use
+  start-dashboard.ps1 for the UI).</p>
+  <div class="card"><div class="cardhead"><code class="cmd">fingerprint validate &lt;file&gt;</code></div><p>Validate a fingerprint JSON against the schemas; pathed errors on refusal (exit 3).</p></div><div class="card"><div class="cardhead"><code class="cmd">fingerprint pairs</code></div><p>List every platform pair in the store with version, status, mode and rule counts.</p></div><div class="card"><div class="cardhead"><code class="cmd">fingerprint suite --pair &lt;id&gt;</code></div><p>Print the prioritized suite without running.</p></div><div class="card"><div class="cardhead"><code class="cmd">fingerprint run --pair &lt;id&gt; --source-dir D1 --target-dir D2 [--layout-dir L]</code></div><p>Execute a conversion run; writes findings.json/html, reconciliation reports, and drill-down CSVs under data/runs/&lt;run-id&gt;.</p></div><div class="card"><div class="cardhead"><code class="cmd">fingerprint findings &lt;run&gt; / show &lt;finding&gt;</code></div><p>List a run&#x27;s findings in priority order; drill into one finding&#x27;s records.</p></div><div class="card"><div class="cardhead"><code class="cmd">fingerprint report &lt;run&gt; [--recon plan|participant|loan|contribution|quality|all]</code></div><p>Render the self-contained HTML reports.</p></div><div class="card"><div class="cardhead"><code class="cmd">fingerprint review &lt;finding&gt; --decision confirmed|false_positive</code></div><p>Adjudicate a finding - this is what moves probabilities.</p></div><div class="card"><div class="cardhead"><code class="cmd">fingerprint assign / comment / resolve / close</code></div><p>The exception workflow: set an owner, note progress, mark remediated (note required), close with evidence (re-run reference).</p></div><div class="card"><div class="cardhead"><code class="cmd">fingerprint exceptions &lt;run&gt;</code></div><p>The exception register - every non-false-positive finding tracked to closure.</p></div><div class="card"><div class="cardhead"><code class="cmd">fingerprint history --pair &lt;id&gt; / publish --pair &lt;id&gt; --bump patch|minor</code></div><p>See probability timelines; freeze the draft as the next version.</p></div><div class="card"><div class="cardhead"><code class="cmd">fingerprint diff --pair &lt;id&gt; --from A --to B</code></div><p>What changed between two fingerprint versions.</p></div><div class="card"><div class="cardhead"><code class="cmd">fingerprint author-mode --pair &lt;id&gt; ...</code></div><p>Add a newly-discovered failure mode to the draft (human authoring - how tribal knowledge gets banked).</p></div><div class="card"><div class="cardhead"><code class="cmd">fingerprint signoff &lt;run&gt; [--narrative ... --approved-by ...]</code></div><p>Assemble the certification zip for a designated final run.</p></div><div class="card"><div class="cardhead"><code class="cmd">fingerprint compile-matrix &lt;xlsx&gt; --out DIR [--decks]</code></div><p>Compile the Omni Format Matrix into card layouts and COBOL extract-deck skeletons.</p></div>
+</section>
+
+<section id="provenance">
+  <h2>Where the specs come from</h2>
+  <p class="lead">Nothing on this page is invented by the application. Every
+  number and definition traces to a source:</p>
+  <p>The authoritative document is the <b>MAPTIVA Migration Fingerprint
+  Solution Specification v1.0</b> (chapters cited below as
+  &ldquo;spec Ch. n&rdquo;), supported by the CLI specification
+  (CLI_SPEC.md) and the background conversion-practice documents in
+  docs/.</p>
+  <div class="card"><div class="cardhead"><h4>Failure modes FM-001..FM-008 (z/OS pair)</h4></div><p>Real conversion experience - the recurring defects documented in &#x27;Retirement Recordkeeping Conversion Issues and Resolutions&#x27; (loan carry-over, vesting mapping, custom fields...), codified per spec Chapter 6.2.</p><p class="src">Source: docs/ background documents; spec Ch. 6.2</p></div><div class="card"><div class="cardhead"><h4>Failure modes FM-009..FM-018 (z/OS pair)</h4></div><p>The standard conversion validation methodology&#x27;s report catalog, productized into executable rules per spec Chapter 6.3.</p><p class="src">Source: spec Ch. 6.3</p></div><div class="card"><div class="cardhead"><h4>Failure modes FM-101..FM-106 (restore pair)</h4></div><p>The Omni-to-Omni backup/restore strategy: gaps a vendor restore cannot see (custom code drift, UDF loss, off-label usage, truncation).</p><p class="src">Source: docs/Omni_to_Omni_Restore_Strategy.md</p></div><div class="card"><div class="cardhead"><h4>Probabilities and impacts</h4></div><p>Seeded by the conversion team&#x27;s judgment per mode, then TUNED BY EVIDENCE: every confirmed finding raises a probability, every false positive lowers it (learning loop, spec Ch. 14.2). Impact is human judgment and is never auto-adjusted.</p><p class="src">Source: fingerprint JSONs; spec Ch. 14</p></div><div class="card"><div class="cardhead"><h4>Severities</h4></div><p>Assigned per detection rule by the fingerprint author, using the scale documented in the Severity section. Stored in the fingerprint JSON, editable via author-mode and versioned like everything else.</p><p class="src">Source: fingerprint JSONs; spec Ch. 5.4</p></div><div class="card"><div class="cardhead"><h4>Rule semantics (the seven types)</h4></div><p>Spec Chapter 11 defines each type&#x27;s contract; the executors implement them deterministically (Decimal money, no clock, no randomness).</p><p class="src">Source: spec Ch. 11; src/rules/</p></div><div class="card"><div class="cardhead"><h4>Suite ordering</h4></div><p>Spec Chapter 12.2: probability x impact descending; ties by severity, then failure-mode id.</p><p class="src">Source: spec Ch. 12.2; src/fingerprint/prioritize.py</p></div><div class="card"><div class="cardhead"><h4>Format expectations (restore pair)</h4></div><p>The Omni Format Matrix workbook - 15 processes, 53 card layouts, 710 field definitions with COBOL Pictures and Required flags - compiled into machine-readable layouts by the compile-matrix command.</p><p class="src">Source: docs/Omni_Format_Matrix_Complete.xlsx; data/layouts/omni-restore/</p></div><div class="card"><div class="cardhead"><h4>This runbook&#x27;s catalog</h4></div><p>Generated directly from the published fingerprint JSONs by tools/build_runbook.py - the numbers on this page are the numbers the engine runs. Regenerate after any publish.</p><p class="src">Source: data/fingerprints/*/*/fingerprint.json</p></div>
+</section>
+
+<section id="glossary">
+  <h2>Glossary</h2>
+  <div class="card"><div class="cardhead"><h4>Platform pair</h4></div><p>A directional source-to-target combination (Omni z/OS to Omni Linux). Direction matters: A-to-B fails differently than B-to-A. Each pair-and-method gets its own fingerprint.</p></div><div class="card"><div class="cardhead"><h4>Fingerprint</h4></div><p>A versioned JSON library of the failure modes one platform pair is known to produce, each bound to executable detection rules. It is data, not code - the engine only knows the seven generic rule types.</p></div><div class="card"><div class="cardhead"><h4>Failure mode (FM)</h4></div><p>One named, codified defect pattern - e.g. &#x27;Loan balance carry-over&#x27;. Carries a probability (how often this pair produces it), an impact (how much it hurts), the detection rules that catch it, a remediation playbook, and history counters.</p></div><div class="card"><div class="cardhead"><h4>Detection rule (RULE)</h4></div><p>One executable check bound to a failure mode. Seven types exist (see Rule types). Rules bind to canonical datasets, never platform-specific file formats.</p></div><div class="card"><div class="cardhead"><h4>Canonical dataset</h4></div><p>The platform-neutral vocabulary: plans, participants, balances, contributions, loans, loan_payments, vesting, transactions, prices, udf_definitions, udf_values. Adapters translate each platform&#x27;s extracts into these; rules never see platform names.</p></div><div class="card"><div class="cardhead"><h4>Prioritized suite</h4></div><p>All enabled rules of a fingerprint ordered by their failure mode&#x27;s probability x impact, descending. Frozen as an immutable snapshot with every run, so the ordering is auditable.</p></div><div class="card"><div class="cardhead"><h4>Conversion run</h4></div><p>One execution of the suite over a source extract directory and a target extract directory. Produces the findings report, reconciliation reports, and drill-down CSVs.</p></div><div class="card"><div class="cardhead"><h4>Finding</h4></div><p>One rule tripping: which failure mode, which rule, severity, how many records, sample records inline (up to 25), a full drill-down CSV, and the remediation text from the failure mode.</p></div><div class="card"><div class="cardhead"><h4>Dataset gate (REQ-021)</h4></div><p>Before any rule runs, every dataset required by an enabled rule must be registered on both sides. Missing extracts refuse the whole run loudly - rules are never silently skipped.</p></div><div class="card"><div class="cardhead"><h4>Learning loop</h4></div><p>Analyst reviews write back into the fingerprint: confirmations raise a mode&#x27;s probability, false positives lower it (see the math section). Publishing mints a new immutable version.</p></div><div class="card"><div class="cardhead"><h4>Draft / publish</h4></div><p>Reviews accumulate in a draft; publishing freezes it as the next semantic version. Past runs stay pinned to the version they executed against - history never rewrites.</p></div><div class="card"><div class="cardhead"><h4>Exception register</h4></div><p>Every finding not marked false positive, tracked with owner, status, opened/closed dates, and resolution evidence. Feeds the sign-off package and the under-0.1%-unresolved metric.</p></div><div class="card"><div class="cardhead"><h4>Sign-off package</h4></div><p>The client deliverable zip: certification page with success metrics vs targets, findings report, five reconciliation reports, the exception register with closure evidence, and the audit extract - with per-file SHA-256 hashes in a manifest.</p></div><div class="card"><div class="cardhead"><h4>Determinism (REQ-009)</h4></div><p>Same extracts + same fingerprint version + same run id = byte-identical findings. No clock, randomness, or dictionary-order dependence anywhere in rules or reports. This is what makes results auditable.</p></div><div class="card"><div class="cardhead"><h4>Tolerance zero</h4></div><p>The restore-path standard: same product on both sides means any difference at all - one cent, one character - is a finding.</p></div><div class="card"><div class="cardhead"><h4>Manifest (REQ-032)</h4></div><p>For seeded test pairs, the exact expected finding counts, derived from the planted defects BEFORE first execution. The engine must match it exactly - every defect found, nothing else flagged.</p></div><div class="card"><div class="cardhead"><h4>LayoutSpec</h4></div><p>A JSON description of a fixed-width record: field positions, lengths, types, implied decimals, packed fields. Drives EBCDIC ingest and is what the Format Matrix compiles into.</p></div><div class="card"><div class="cardhead"><h4>UDF</h4></div><p>User-Defined Field - a client&#x27;s custom field beyond the stock data model. A restore drops values whose definitions were never created on the target; the udf_definitions/udf_values datasets make that loss countable.</p></div>
+</section>
+
+</main>
+</div>
+<footer>Generated from the live fingerprint store by tools/build_runbook.py
+&middot; 3 pairs &middot; 40 failure modes &middot;
+54 rules &middot; regenerate after any publish</footer>
+
+<script>
+(function () {
+  const q = document.getElementById('q');
+  const count = document.getElementById('qcount');
+  const cards = Array.from(document.querySelectorAll('.card'));
+  const sections = Array.from(document.querySelectorAll('section'));
+
+  function clearMarks(root) {
+    root.querySelectorAll('mark').forEach(m => {
+      m.replaceWith(document.createTextNode(m.textContent));
+    });
+    root.normalize();
+  }
+
+  function markMatches(root, needle) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const targets = [];
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      if (node.parentElement.closest('script,style')) continue;
+      const at = node.textContent.toLowerCase().indexOf(needle);
+      if (at >= 0) targets.push([node, at]);
+    }
+    targets.forEach(([node, at]) => {
+      const range = document.createRange();
+      range.setStart(node, at);
+      range.setEnd(node, at + needle.length);
+      const mark = document.createElement('mark');
+      try { range.surroundContents(mark); } catch (err) {}
+    });
+  }
+
+  function search() {
+    const needle = q.value.trim().toLowerCase();
+    cards.forEach(card => clearMarks(card));
+    if (!needle) {
+      cards.forEach(c => { c.classList.remove('hidden', 'hit'); });
+      sections.forEach(s => s.classList.remove('hidden'));
+      count.textContent = '';
+      return;
+    }
+    let hits = 0;
+    cards.forEach(card => {
+      const match = card.textContent.toLowerCase().includes(needle);
+      card.classList.toggle('hidden', !match);
+      card.classList.toggle('hit', match);
+      if (match) { hits++; markMatches(card, needle); }
+    });
+    sections.forEach(section => {
+      const visible = section.querySelectorAll('.card:not(.hidden)').length;
+      const hasCards = section.querySelectorAll('.card').length > 0;
+      section.classList.toggle('hidden', hasCards && visible === 0);
+    });
+    count.textContent = hits + ' matching entr' + (hits === 1 ? 'y' : 'ies');
+  }
+
+  let timer = null;
+  q.addEventListener('input', () => {
+    clearTimeout(timer); timer = setTimeout(search, 120);
+  });
+})();
+</script>
+</body>
+</html>

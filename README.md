@@ -35,6 +35,7 @@ Session rules for Claude Code: `CLAUDE.md`.
 | Phase 4.2 | AI Orchestration Layer (Ch. 8/27) with local stub provider; `explain` CLI/API/UI | ✅ done |
 | Phase 4.3 | Sign-off package (§13.4): certification + metrics vs §2.6 targets + closure evidence, zip + manifest | ✅ done |
 | Phase 4.4 | Omni→Omni restore use case: `compile-matrix` (Format Matrix → card layouts + COBOL decks), `format_conformance` rule type, UDF datasets, restore fingerprint + sample pairs | ✅ done |
+| Phase 4.5 | Technical runbook at `/runbook` (📖 in the dashboard): searchable plain-English reference for every mode/rule/score, generated from the live store by `tools/build_runbook.py` | ✅ done |
 
 ## Setup
 

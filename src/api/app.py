@@ -84,6 +84,7 @@ from src.runner.run import DEFAULT_RUNS_DIR, DatasetGateError, run as run_conver
 
 API_VERSION = "0.1.0"
 UI_INDEX = Path(__file__).resolve().parents[2] / "ui" / "index.html"
+RUNBOOK = Path(__file__).resolve().parents[2] / "docs" / "runbook.html"
 
 
 # --- error envelope (§18.5) -----------------------------------------------------
@@ -206,6 +207,16 @@ def create_app(
         if not UI_INDEX.is_file():
             raise NotFoundError(f"dashboard not found at {UI_INDEX}")
         return FileResponse(UI_INDEX, media_type="text/html")
+
+    @app.get("/runbook", include_in_schema=False)
+    def runbook():
+        """The generated technical runbook (tools/build_runbook.py) —
+        searchable plain-English reference for every mode, rule, and score."""
+        if not RUNBOOK.is_file():
+            raise NotFoundError(
+                f"runbook not found at {RUNBOOK}; generate it with "
+                f"python -m tools.build_runbook")
+        return FileResponse(RUNBOOK, media_type="text/html")
 
     # --- platform pairs & fingerprints (UC-01) ---------------------------------
 
